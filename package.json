@@ -11,7 +11,8 @@
     "lint": "eslint *.js",
     "test": "yarn lint",
     "start": "parcel index.html",
-    "build": "parcel build --public-url . index.html"
+    "build": "parcel build --public-url https://jackytck.github.io/lod-image-viewer index.html",
+    "deploy": "gh-pages -d dist"
   },
   "author": "Jacky Tang",
   "license": "MIT",
@@ -23,6 +24,7 @@
     "eslint-plugin-node": "^8.0.0",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
+    "gh-pages": "^2.0.1",
     "parcel-bundler": "^1.10.3"
   },
   "dependencies": {
