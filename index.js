@@ -1,6 +1,11 @@
 import 'ol/ol.css'
 
 import {
+  FullScreen,
+  OverviewMap,
+  defaults as defaultControls
+} from 'ol/control'
+import {
   Map,
   View
 } from 'ol'
@@ -37,6 +42,10 @@ const map = new Map({
       })
     })
   ],
+  controls: defaultControls().extend([
+    new FullScreen(),
+    new OverviewMap()
+  ]),
   view: new View({
     center: [0, 0],
     zoom: fitZoom,
