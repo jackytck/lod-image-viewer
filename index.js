@@ -8,8 +8,8 @@ import {
 import TileLayer from 'ol/layer/Tile'
 import XYZ from 'ol/source/XYZ'
 
-const u = new URL(window.location.href);
-const t = u.searchParams.get("url")
+const u = new URL(window.location.href)
+const t = u.searchParams.get('url')
 const url = `${t}/{z}/{x}/{y}.jpg`
 
 const map = new Map({
@@ -19,7 +19,7 @@ const map = new Map({
       source: new XYZ({
         url,
         wrapX: false
-      }),
+      })
     })
   ],
   view: new View({
@@ -27,3 +27,5 @@ const map = new Map({
     zoom: 0
   })
 })
+
+map.render()
