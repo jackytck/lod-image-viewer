@@ -1,15 +1,25 @@
 import 'ol/ol.css'
 
-import {Map, View} from 'ol'
+import {
+  Map,
+  View
+} from 'ol'
 
-import OSM from 'ol/source/OSM'
 import TileLayer from 'ol/layer/Tile'
+import XYZ from 'ol/source/XYZ'
+
+const u = new URL(window.location.href);
+const t = u.searchParams.get("url")
+const url = `${t}/{z}/{x}/{y}.jpg`
 
 const map = new Map({
   target: 'map',
   layers: [
     new TileLayer({
-      source: new OSM()
+      source: new XYZ({
+        url,
+        wrapX: false
+      }),
     })
   ],
   view: new View({
