@@ -177,370 +177,7 @@ module.exports = reloadCSS;
         module.hot.dispose(reloadCSS);
         module.hot.accept(reloadCSS);
       
-},{"_css_loader":"node_modules/parcel-bundler/src/builtins/css-loader.js"}],"node_modules/ol/array.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.binarySearch = binarySearch;
-exports.numberSafeCompareFunction = numberSafeCompareFunction;
-exports.includes = includes;
-exports.linearFindNearest = linearFindNearest;
-exports.reverseSubArray = reverseSubArray;
-exports.extend = extend;
-exports.remove = remove;
-exports.find = find;
-exports.equals = equals;
-exports.stableSort = stableSort;
-exports.findIndex = findIndex;
-exports.isSorted = isSorted;
-
-/**
- * @module ol/array
- */
-
-/**
- * Performs a binary search on the provided sorted list and returns the index of the item if found. If it can't be found it'll return -1.
- * https://github.com/darkskyapp/binary-search
- *
- * @param {Array<*>} haystack Items to search through.
- * @param {*} needle The item to look for.
- * @param {Function=} opt_comparator Comparator function.
- * @return {number} The index of the item if found, -1 if not.
- */
-function binarySearch(haystack, needle, opt_comparator) {
-  var mid, cmp;
-  var comparator = opt_comparator || numberSafeCompareFunction;
-  var low = 0;
-  var high = haystack.length;
-  var found = false;
-
-  while (low < high) {
-    /* Note that "(low + high) >>> 1" may overflow, and results in a typecast
-     * to double (which gives the wrong results). */
-    mid = low + (high - low >> 1);
-    cmp = +comparator(haystack[mid], needle);
-
-    if (cmp < 0.0) {
-      /* Too low. */
-      low = mid + 1;
-    } else {
-      /* Key found or too high */
-      high = mid;
-      found = !cmp;
-    }
-  }
-  /* Key not found. */
-
-
-  return found ? low : ~low;
-}
-/**
- * Compare function for array sort that is safe for numbers.
- * @param {*} a The first object to be compared.
- * @param {*} b The second object to be compared.
- * @return {number} A negative number, zero, or a positive number as the first
- *     argument is less than, equal to, or greater than the second.
- */
-
-
-function numberSafeCompareFunction(a, b) {
-  return a > b ? 1 : a < b ? -1 : 0;
-}
-/**
- * Whether the array contains the given object.
- * @param {Array<*>} arr The array to test for the presence of the element.
- * @param {*} obj The object for which to test.
- * @return {boolean} The object is in the array.
- */
-
-
-function includes(arr, obj) {
-  return arr.indexOf(obj) >= 0;
-}
-/**
- * @param {Array<number>} arr Array.
- * @param {number} target Target.
- * @param {number} direction 0 means return the nearest, > 0
- *    means return the largest nearest, < 0 means return the
- *    smallest nearest.
- * @return {number} Index.
- */
-
-
-function linearFindNearest(arr, target, direction) {
-  var n = arr.length;
-
-  if (arr[0] <= target) {
-    return 0;
-  } else if (target <= arr[n - 1]) {
-    return n - 1;
-  } else {
-    var i;
-
-    if (direction > 0) {
-      for (i = 1; i < n; ++i) {
-        if (arr[i] < target) {
-          return i - 1;
-        }
-      }
-    } else if (direction < 0) {
-      for (i = 1; i < n; ++i) {
-        if (arr[i] <= target) {
-          return i;
-        }
-      }
-    } else {
-      for (i = 1; i < n; ++i) {
-        if (arr[i] == target) {
-          return i;
-        } else if (arr[i] < target) {
-          if (arr[i - 1] - target < target - arr[i]) {
-            return i - 1;
-          } else {
-            return i;
-          }
-        }
-      }
-    }
-
-    return n - 1;
-  }
-}
-/**
- * @param {Array<*>} arr Array.
- * @param {number} begin Begin index.
- * @param {number} end End index.
- */
-
-
-function reverseSubArray(arr, begin, end) {
-  while (begin < end) {
-    var tmp = arr[begin];
-    arr[begin] = arr[end];
-    arr[end] = tmp;
-    ++begin;
-    --end;
-  }
-}
-/**
- * @param {Array<VALUE>} arr The array to modify.
- * @param {!Array<VALUE>|VALUE} data The elements or arrays of elements to add to arr.
- * @template VALUE
- */
-
-
-function extend(arr, data) {
-  var extension = Array.isArray(data) ? data : [data];
-  var length = extension.length;
-
-  for (var i = 0; i < length; i++) {
-    arr[arr.length] = extension[i];
-  }
-}
-/**
- * @param {Array<VALUE>} arr The array to modify.
- * @param {VALUE} obj The element to remove.
- * @template VALUE
- * @return {boolean} If the element was removed.
- */
-
-
-function remove(arr, obj) {
-  var i = arr.indexOf(obj);
-  var found = i > -1;
-
-  if (found) {
-    arr.splice(i, 1);
-  }
-
-  return found;
-}
-/**
- * @param {Array<VALUE>} arr The array to search in.
- * @param {function(VALUE, number, ?) : boolean} func The function to compare.
- * @template VALUE
- * @return {VALUE|null} The element found or null.
- */
-
-
-function find(arr, func) {
-  var length = arr.length >>> 0;
-  var value;
-
-  for (var i = 0; i < length; i++) {
-    value = arr[i];
-
-    if (func(value, i, arr)) {
-      return value;
-    }
-  }
-
-  return null;
-}
-/**
- * @param {Array|Uint8ClampedArray} arr1 The first array to compare.
- * @param {Array|Uint8ClampedArray} arr2 The second array to compare.
- * @return {boolean} Whether the two arrays are equal.
- */
-
-
-function equals(arr1, arr2) {
-  var len1 = arr1.length;
-
-  if (len1 !== arr2.length) {
-    return false;
-  }
-
-  for (var i = 0; i < len1; i++) {
-    if (arr1[i] !== arr2[i]) {
-      return false;
-    }
-  }
-
-  return true;
-}
-/**
- * Sort the passed array such that the relative order of equal elements is preverved.
- * See https://en.wikipedia.org/wiki/Sorting_algorithm#Stability for details.
- * @param {Array<*>} arr The array to sort (modifies original).
- * @param {!function(*, *): number} compareFnc Comparison function.
- * @api
- */
-
-
-function stableSort(arr, compareFnc) {
-  var length = arr.length;
-  var tmp = Array(arr.length);
-  var i;
-
-  for (i = 0; i < length; i++) {
-    tmp[i] = {
-      index: i,
-      value: arr[i]
-    };
-  }
-
-  tmp.sort(function (a, b) {
-    return compareFnc(a.value, b.value) || a.index - b.index;
-  });
-
-  for (i = 0; i < arr.length; i++) {
-    arr[i] = tmp[i].value;
-  }
-}
-/**
- * @param {Array<*>} arr The array to search in.
- * @param {Function} func Comparison function.
- * @return {number} Return index.
- */
-
-
-function findIndex(arr, func) {
-  var index;
-  var found = !arr.every(function (el, idx) {
-    index = idx;
-    return !func(el, idx, arr);
-  });
-  return found ? index : -1;
-}
-/**
- * @param {Array<*>} arr The array to test.
- * @param {Function=} opt_func Comparison function.
- * @param {boolean=} opt_strict Strictly sorted (default false).
- * @return {boolean} Return index.
- */
-
-
-function isSorted(arr, opt_func, opt_strict) {
-  var compare = opt_func || numberSafeCompareFunction;
-  return arr.every(function (currentVal, index) {
-    if (index === 0) {
-      return true;
-    }
-
-    var res = compare(arr[index - 1], currentVal);
-    return !(res > 0 || opt_strict && res === 0);
-  });
-}
-},{}],"node_modules/ol/functions.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.TRUE = TRUE;
-exports.FALSE = FALSE;
-exports.VOID = VOID;
-
-/**
- * @module ol/functions
- */
-
-/**
- * Always returns true.
- * @returns {boolean} true.
- */
-function TRUE() {
-  return true;
-}
-/**
- * Always returns false.
- * @returns {boolean} false.
- */
-
-
-function FALSE() {
-  return false;
-}
-/**
- * A reusable function, used e.g. as a default for callbacks.
- *
- * @return {void} Nothing.
- */
-
-
-function VOID() {}
-},{}],"node_modules/ol/MapEventType.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/MapEventType
- */
-
-/**
- * @enum {string}
- */
-var _default = {
-  /**
-   * Triggered after a map frame is rendered.
-   * @event module:ol/MapEvent~MapEvent#postrender
-   * @api
-   */
-  POSTRENDER: 'postrender',
-
-  /**
-   * Triggered when the map starts moving.
-   * @event module:ol/MapEvent~MapEvent#movestart
-   * @api
-   */
-  MOVESTART: 'movestart',
-
-  /**
-   * Triggered after the map is moved.
-   * @event module:ol/MapEvent~MapEvent#moveend
-   * @api
-   */
-  MOVEEND: 'moveend'
-};
-exports.default = _default;
-},{}],"node_modules/ol/util.js":[function(require,module,exports) {
+},{"_css_loader":"node_modules/parcel-bundler/src/builtins/css-loader.js"}],"node_modules/ol/util.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -625,6 +262,90 @@ function getUid(obj) {
 
 var VERSION = '5.3.0';
 exports.VERSION = VERSION;
+},{}],"node_modules/ol/AssertionError.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _util = require("./util.js");
+
+/**
+ * @module ol/AssertionError
+ */
+
+/**
+ * Error object thrown when an assertion failed. This is an ECMA-262 Error,
+ * extended with a `code` property.
+ * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error.
+ */
+var AssertionError =
+/*@__PURE__*/
+function (Error) {
+  function AssertionError(code) {
+    var path = _util.VERSION === 'latest' ? _util.VERSION : 'v' + _util.VERSION.split('-')[0];
+    var message = 'Assertion failed. See https://openlayers.org/en/' + path + '/doc/errors/#' + code + ' for details.';
+    Error.call(this, message);
+    /**
+     * Error code. The meaning of the code can be found on
+     * https://openlayers.org/en/latest/doc/errors/ (replace `latest` with
+     * the version found in the OpenLayers script's header comment if a version
+     * other than the latest is used).
+     * @type {number}
+     * @api
+     */
+
+    this.code = code;
+    /**
+     * @type {string}
+     */
+
+    this.name = 'AssertionError'; // Re-assign message, see https://github.com/Rich-Harris/buble/issues/40
+
+    this.message = message;
+  }
+
+  if (Error) AssertionError.__proto__ = Error;
+  AssertionError.prototype = Object.create(Error && Error.prototype);
+  AssertionError.prototype.constructor = AssertionError;
+  return AssertionError;
+}(Error);
+
+var _default = AssertionError;
+exports.default = _default;
+},{"./util.js":"node_modules/ol/util.js"}],"node_modules/ol/CollectionEventType.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/CollectionEventType
+ */
+
+/**
+ * @enum {string}
+ */
+var _default = {
+  /**
+   * Triggered when an item is added to the collection.
+   * @event module:ol/Collection.CollectionEvent#add
+   * @api
+   */
+  ADD: 'add',
+
+  /**
+   * Triggered when an item is removed from the collection.
+   * @event module:ol/Collection.CollectionEvent#remove
+   * @api
+   */
+  REMOVE: 'remove'
+};
+exports.default = _default;
 },{}],"node_modules/ol/ObjectEventType.js":[function(require,module,exports) {
 "use strict";
 
@@ -1096,6 +817,44 @@ Disposable.prototype.disposeInternal = function disposeInternal() {};
 
 var _default = Disposable;
 exports.default = _default;
+},{}],"node_modules/ol/functions.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.TRUE = TRUE;
+exports.FALSE = FALSE;
+exports.VOID = VOID;
+
+/**
+ * @module ol/functions
+ */
+
+/**
+ * Always returns true.
+ * @returns {boolean} true.
+ */
+function TRUE() {
+  return true;
+}
+/**
+ * Always returns false.
+ * @returns {boolean} false.
+ */
+
+
+function FALSE() {
+  return false;
+}
+/**
+ * A reusable function, used e.g. as a default for callbacks.
+ *
+ * @return {void} Nothing.
+ */
+
+
+function VOID() {}
 },{}],"node_modules/ol/events/Event.js":[function(require,module,exports) {
 "use strict";
 
@@ -1841,460 +1600,328 @@ function getChangeEventType(key) {
 
 var _default = BaseObject;
 exports.default = _default;
-},{"./util.js":"node_modules/ol/util.js","./ObjectEventType.js":"node_modules/ol/ObjectEventType.js","./Observable.js":"node_modules/ol/Observable.js","./events/Event.js":"node_modules/ol/events/Event.js","./obj.js":"node_modules/ol/obj.js"}],"node_modules/ol/dom.js":[function(require,module,exports) {
+},{"./util.js":"node_modules/ol/util.js","./ObjectEventType.js":"node_modules/ol/ObjectEventType.js","./Observable.js":"node_modules/ol/Observable.js","./events/Event.js":"node_modules/ol/events/Event.js","./obj.js":"node_modules/ol/obj.js"}],"node_modules/ol/Collection.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createCanvasContext2D = createCanvasContext2D;
-exports.outerWidth = outerWidth;
-exports.outerHeight = outerHeight;
-exports.replaceNode = replaceNode;
-exports.removeNode = removeNode;
-exports.removeChildren = removeChildren;
+exports.default = exports.CollectionEvent = void 0;
 
-/**
- * @module ol/dom
- */
+var _AssertionError = _interopRequireDefault(require("./AssertionError.js"));
 
-/**
- * Create an html canvas element and returns its 2d context.
- * @param {number=} opt_width Canvas width.
- * @param {number=} opt_height Canvas height.
- * @return {CanvasRenderingContext2D} The context.
- */
-function createCanvasContext2D(opt_width, opt_height) {
-  var canvas =
-  /** @type {HTMLCanvasElement} */
-  document.createElement('canvas');
+var _CollectionEventType = _interopRequireDefault(require("./CollectionEventType.js"));
 
-  if (opt_width) {
-    canvas.width = opt_width;
-  }
+var _Object = _interopRequireDefault(require("./Object.js"));
 
-  if (opt_height) {
-    canvas.height = opt_height;
-  }
-
-  return (
-    /** @type {CanvasRenderingContext2D} */
-    canvas.getContext('2d')
-  );
-}
-/**
- * Get the current computed width for the given element including margin,
- * padding and border.
- * Equivalent to jQuery's `$(el).outerWidth(true)`.
- * @param {!HTMLElement} element Element.
- * @return {number} The width.
- */
-
-
-function outerWidth(element) {
-  var width = element.offsetWidth;
-  var style = getComputedStyle(element);
-  width += parseInt(style.marginLeft, 10) + parseInt(style.marginRight, 10);
-  return width;
-}
-/**
- * Get the current computed height for the given element including margin,
- * padding and border.
- * Equivalent to jQuery's `$(el).outerHeight(true)`.
- * @param {!HTMLElement} element Element.
- * @return {number} The height.
- */
-
-
-function outerHeight(element) {
-  var height = element.offsetHeight;
-  var style = getComputedStyle(element);
-  height += parseInt(style.marginTop, 10) + parseInt(style.marginBottom, 10);
-  return height;
-}
-/**
- * @param {Node} newNode Node to replace old node
- * @param {Node} oldNode The node to be replaced
- */
-
-
-function replaceNode(newNode, oldNode) {
-  var parent = oldNode.parentNode;
-
-  if (parent) {
-    parent.replaceChild(newNode, oldNode);
-  }
-}
-/**
- * @param {Node} node The node to remove.
- * @returns {Node} The node that was removed or null.
- */
-
-
-function removeNode(node) {
-  return node && node.parentNode ? node.parentNode.removeChild(node) : null;
-}
-/**
- * @param {Node} node The node to remove the children from.
- */
-
-
-function removeChildren(node) {
-  while (node.lastChild) {
-    node.removeChild(node.lastChild);
-  }
-}
-},{}],"node_modules/ol/control/Control.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _functions = require("../functions.js");
-
-var _MapEventType = _interopRequireDefault(require("../MapEventType.js"));
-
-var _Object = _interopRequireDefault(require("../Object.js"));
-
-var _dom = require("../dom.js");
-
-var _events = require("../events.js");
+var _Event = _interopRequireDefault(require("./events/Event.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
- * @module ol/control/Control
- */
-
-/**
- * @typedef {Object} Options
- * @property {HTMLElement} [element] The element is the control's
- * container element. This only needs to be specified if you're developing
- * a custom control.
- * @property {function(import("../MapEvent.js").default)} [render] Function called when
- * the control should be re-rendered. This is called in a `requestAnimationFrame`
- * callback.
- * @property {HTMLElement|string} [target] Specify a target if you want
- * the control to be rendered outside of the map's viewport.
- */
-
-/**
- * @classdesc
- * A control is a visible widget with a DOM element in a fixed position on the
- * screen. They can involve user input (buttons), or be informational only;
- * the position is determined using CSS. By default these are placed in the
- * container with CSS class name `ol-overlaycontainer-stopevent`, but can use
- * any outside DOM element.
- *
- * This is the base class for controls. You can use it for simple custom
- * controls by creating the element with listeners, creating an instance:
- * ```js
- * var myControl = new Control({element: myElement});
- * ```
- * and then adding this to the map.
- *
- * The main advantage of having this as a control rather than a simple separate
- * DOM element is that preventing propagation is handled for you. Controls
- * will also be objects in a {@link module:ol/Collection~Collection}, so you can use their methods.
- *
- * You can also extend this base for your own control class. See
- * examples/custom-controls for an example of how to do this.
- *
- * @api
- */
-var Control =
-/*@__PURE__*/
-function (BaseObject) {
-  function Control(options) {
-    BaseObject.call(this);
-    /**
-     * @protected
-     * @type {HTMLElement}
-     */
-
-    this.element = options.element ? options.element : null;
-    /**
-     * @private
-     * @type {HTMLElement}
-     */
-
-    this.target_ = null;
-    /**
-     * @private
-     * @type {import("../PluggableMap.js").default}
-     */
-
-    this.map_ = null;
-    /**
-     * @protected
-     * @type {!Array<import("../events.js").EventsKey>}
-     */
-
-    this.listenerKeys = [];
-    /**
-     * @type {function(import("../MapEvent.js").default)}
-     */
-
-    this.render = options.render ? options.render : _functions.VOID;
-
-    if (options.target) {
-      this.setTarget(options.target);
-    }
-  }
-
-  if (BaseObject) Control.__proto__ = BaseObject;
-  Control.prototype = Object.create(BaseObject && BaseObject.prototype);
-  Control.prototype.constructor = Control;
-  /**
-   * @inheritDoc
-   */
-
-  Control.prototype.disposeInternal = function disposeInternal() {
-    (0, _dom.removeNode)(this.element);
-    BaseObject.prototype.disposeInternal.call(this);
-  };
-  /**
-   * Get the map associated with this control.
-   * @return {import("../PluggableMap.js").default} Map.
-   * @api
-   */
-
-
-  Control.prototype.getMap = function getMap() {
-    return this.map_;
-  };
-  /**
-   * Remove the control from its current map and attach it to the new map.
-   * Subclasses may set up event handlers to get notified about changes to
-   * the map here.
-   * @param {import("../PluggableMap.js").default} map Map.
-   * @api
-   */
-
-
-  Control.prototype.setMap = function setMap(map) {
-    if (this.map_) {
-      (0, _dom.removeNode)(this.element);
-    }
-
-    for (var i = 0, ii = this.listenerKeys.length; i < ii; ++i) {
-      (0, _events.unlistenByKey)(this.listenerKeys[i]);
-    }
-
-    this.listenerKeys.length = 0;
-    this.map_ = map;
-
-    if (this.map_) {
-      var target = this.target_ ? this.target_ : map.getOverlayContainerStopEvent();
-      target.appendChild(this.element);
-
-      if (this.render !== _functions.VOID) {
-        this.listenerKeys.push((0, _events.listen)(map, _MapEventType.default.POSTRENDER, this.render, this));
-      }
-
-      map.render();
-    }
-  };
-  /**
-   * This function is used to set a target element for the control. It has no
-   * effect if it is called after the control has been added to the map (i.e.
-   * after `setMap` is called on the control). If no `target` is set in the
-   * options passed to the control constructor and if `setTarget` is not called
-   * then the control is added to the map's overlay container.
-   * @param {HTMLElement|string} target Target.
-   * @api
-   */
-
-
-  Control.prototype.setTarget = function setTarget(target) {
-    this.target_ = typeof target === 'string' ? document.getElementById(target) : target;
-  };
-
-  return Control;
-}(_Object.default);
-
-var _default = Control;
-exports.default = _default;
-},{"../functions.js":"node_modules/ol/functions.js","../MapEventType.js":"node_modules/ol/MapEventType.js","../Object.js":"node_modules/ol/Object.js","../dom.js":"node_modules/ol/dom.js","../events.js":"node_modules/ol/events.js"}],"node_modules/ol/css.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getFontFamilies = exports.CLASS_COLLAPSED = exports.CLASS_CONTROL = exports.CLASS_UNSUPPORTED = exports.CLASS_UNSELECTABLE = exports.CLASS_SELECTABLE = exports.CLASS_HIDDEN = void 0;
-
-/**
- * @module ol/css
- */
-
-/**
- * The CSS class for hidden feature.
- *
- * @const
- * @type {string}
- */
-var CLASS_HIDDEN = 'ol-hidden';
-/**
- * The CSS class that we'll give the DOM elements to have them selectable.
- *
- * @const
- * @type {string}
- */
-
-exports.CLASS_HIDDEN = CLASS_HIDDEN;
-var CLASS_SELECTABLE = 'ol-selectable';
-/**
- * The CSS class that we'll give the DOM elements to have them unselectable.
- *
- * @const
- * @type {string}
- */
-
-exports.CLASS_SELECTABLE = CLASS_SELECTABLE;
-var CLASS_UNSELECTABLE = 'ol-unselectable';
-/**
- * The CSS class for unsupported feature.
- *
- * @const
- * @type {string}
- */
-
-exports.CLASS_UNSELECTABLE = CLASS_UNSELECTABLE;
-var CLASS_UNSUPPORTED = 'ol-unsupported';
-/**
- * The CSS class for controls.
- *
- * @const
- * @type {string}
- */
-
-exports.CLASS_UNSUPPORTED = CLASS_UNSUPPORTED;
-var CLASS_CONTROL = 'ol-control';
-/**
- * The CSS class that we'll give the DOM elements that are collapsed, i.e.
- * to those elements which usually can be expanded.
- *
- * @const
- * @type {string}
- */
-
-exports.CLASS_CONTROL = CLASS_CONTROL;
-var CLASS_COLLAPSED = 'ol-collapsed';
-/**
- * Get the list of font families from a font spec.  Note that this doesn't work
- * for font families that have commas in them.
- * @param {string} The CSS font property.
- * @return {Object<string>} The font families (or null if the input spec is invalid).
- */
-
-exports.CLASS_COLLAPSED = CLASS_COLLAPSED;
-
-var getFontFamilies = function () {
-  var style;
-  var cache = {};
-  return function (font) {
-    if (!style) {
-      style = document.createElement('div').style;
-    }
-
-    if (!(font in cache)) {
-      style.font = font;
-      var family = style.fontFamily;
-      style.font = '';
-
-      if (!family) {
-        return null;
-      }
-
-      cache[font] = family.split(/,\s?/);
-    }
-
-    return cache[font];
-  };
-}();
-
-exports.getFontFamilies = getFontFamilies;
-},{}],"node_modules/ol/layer/Property.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/layer/Property
+ * @module ol/Collection
  */
 
 /**
  * @enum {string}
+ * @private
  */
-var _default = {
-  OPACITY: 'opacity',
-  VISIBLE: 'visible',
-  EXTENT: 'extent',
-  Z_INDEX: 'zIndex',
-  MAX_RESOLUTION: 'maxResolution',
-  MIN_RESOLUTION: 'minResolution',
-  SOURCE: 'source'
+var Property = {
+  LENGTH: 'length'
 };
-exports.default = _default;
-},{}],"node_modules/ol/AssertionError.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _util = require("./util.js");
-
 /**
- * @module ol/AssertionError
+ * @classdesc
+ * Events emitted by {@link module:ol/Collection~Collection} instances are instances of this
+ * type.
  */
 
-/**
- * Error object thrown when an assertion failed. This is an ECMA-262 Error,
- * extended with a `code` property.
- * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error.
- */
-var AssertionError =
+var CollectionEvent =
 /*@__PURE__*/
-function (Error) {
-  function AssertionError(code) {
-    var path = _util.VERSION === 'latest' ? _util.VERSION : 'v' + _util.VERSION.split('-')[0];
-    var message = 'Assertion failed. See https://openlayers.org/en/' + path + '/doc/errors/#' + code + ' for details.';
-    Error.call(this, message);
+function (Event) {
+  function CollectionEvent(type, opt_element) {
+    Event.call(this, type);
     /**
-     * Error code. The meaning of the code can be found on
-     * https://openlayers.org/en/latest/doc/errors/ (replace `latest` with
-     * the version found in the OpenLayers script's header comment if a version
-     * other than the latest is used).
-     * @type {number}
+     * The element that is added to or removed from the collection.
+     * @type {*}
      * @api
      */
 
-    this.code = code;
-    /**
-     * @type {string}
-     */
-
-    this.name = 'AssertionError'; // Re-assign message, see https://github.com/Rich-Harris/buble/issues/40
-
-    this.message = message;
+    this.element = opt_element;
   }
 
-  if (Error) AssertionError.__proto__ = Error;
-  AssertionError.prototype = Object.create(Error && Error.prototype);
-  AssertionError.prototype.constructor = AssertionError;
-  return AssertionError;
-}(Error);
+  if (Event) CollectionEvent.__proto__ = Event;
+  CollectionEvent.prototype = Object.create(Event && Event.prototype);
+  CollectionEvent.prototype.constructor = CollectionEvent;
+  return CollectionEvent;
+}(_Event.default);
+/**
+ * @typedef {Object} Options
+ * @property {boolean} [unique=false] Disallow the same item from being added to
+ * the collection twice.
+ */
 
-var _default = AssertionError;
+/**
+ * @classdesc
+ * An expanded version of standard JS Array, adding convenience methods for
+ * manipulation. Add and remove changes to the Collection trigger a Collection
+ * event. Note that this does not cover changes to the objects _within_ the
+ * Collection; they trigger events on the appropriate object, not on the
+ * Collection as a whole.
+ *
+ * @fires CollectionEvent
+ *
+ * @template T
+ * @api
+ */
+
+
+exports.CollectionEvent = CollectionEvent;
+
+var Collection =
+/*@__PURE__*/
+function (BaseObject) {
+  function Collection(opt_array, opt_options) {
+    BaseObject.call(this);
+    var options = opt_options || {};
+    /**
+     * @private
+     * @type {boolean}
+     */
+
+    this.unique_ = !!options.unique;
+    /**
+     * @private
+     * @type {!Array<T>}
+     */
+
+    this.array_ = opt_array ? opt_array : [];
+
+    if (this.unique_) {
+      for (var i = 0, ii = this.array_.length; i < ii; ++i) {
+        this.assertUnique_(this.array_[i], i);
+      }
+    }
+
+    this.updateLength_();
+  }
+
+  if (BaseObject) Collection.__proto__ = BaseObject;
+  Collection.prototype = Object.create(BaseObject && BaseObject.prototype);
+  Collection.prototype.constructor = Collection;
+  /**
+   * Remove all elements from the collection.
+   * @api
+   */
+
+  Collection.prototype.clear = function clear() {
+    while (this.getLength() > 0) {
+      this.pop();
+    }
+  };
+  /**
+   * Add elements to the collection.  This pushes each item in the provided array
+   * to the end of the collection.
+   * @param {!Array<T>} arr Array.
+   * @return {Collection<T>} This collection.
+   * @api
+   */
+
+
+  Collection.prototype.extend = function extend(arr) {
+    for (var i = 0, ii = arr.length; i < ii; ++i) {
+      this.push(arr[i]);
+    }
+
+    return this;
+  };
+  /**
+   * Iterate over each element, calling the provided callback.
+   * @param {function(T, number, Array<T>): *} f The function to call
+   *     for every element. This function takes 3 arguments (the element, the
+   *     index and the array). The return value is ignored.
+   * @api
+   */
+
+
+  Collection.prototype.forEach = function forEach(f) {
+    var array = this.array_;
+
+    for (var i = 0, ii = array.length; i < ii; ++i) {
+      f(array[i], i, array);
+    }
+  };
+  /**
+   * Get a reference to the underlying Array object. Warning: if the array
+   * is mutated, no events will be dispatched by the collection, and the
+   * collection's "length" property won't be in sync with the actual length
+   * of the array.
+   * @return {!Array<T>} Array.
+   * @api
+   */
+
+
+  Collection.prototype.getArray = function getArray() {
+    return this.array_;
+  };
+  /**
+   * Get the element at the provided index.
+   * @param {number} index Index.
+   * @return {T} Element.
+   * @api
+   */
+
+
+  Collection.prototype.item = function item(index) {
+    return this.array_[index];
+  };
+  /**
+   * Get the length of this collection.
+   * @return {number} The length of the array.
+   * @observable
+   * @api
+   */
+
+
+  Collection.prototype.getLength = function getLength() {
+    return this.get(Property.LENGTH);
+  };
+  /**
+   * Insert an element at the provided index.
+   * @param {number} index Index.
+   * @param {T} elem Element.
+   * @api
+   */
+
+
+  Collection.prototype.insertAt = function insertAt(index, elem) {
+    if (this.unique_) {
+      this.assertUnique_(elem);
+    }
+
+    this.array_.splice(index, 0, elem);
+    this.updateLength_();
+    this.dispatchEvent(new CollectionEvent(_CollectionEventType.default.ADD, elem));
+  };
+  /**
+   * Remove the last element of the collection and return it.
+   * Return `undefined` if the collection is empty.
+   * @return {T|undefined} Element.
+   * @api
+   */
+
+
+  Collection.prototype.pop = function pop() {
+    return this.removeAt(this.getLength() - 1);
+  };
+  /**
+   * Insert the provided element at the end of the collection.
+   * @param {T} elem Element.
+   * @return {number} New length of the collection.
+   * @api
+   */
+
+
+  Collection.prototype.push = function push(elem) {
+    if (this.unique_) {
+      this.assertUnique_(elem);
+    }
+
+    var n = this.getLength();
+    this.insertAt(n, elem);
+    return this.getLength();
+  };
+  /**
+   * Remove the first occurrence of an element from the collection.
+   * @param {T} elem Element.
+   * @return {T|undefined} The removed element or undefined if none found.
+   * @api
+   */
+
+
+  Collection.prototype.remove = function remove(elem) {
+    var arr = this.array_;
+
+    for (var i = 0, ii = arr.length; i < ii; ++i) {
+      if (arr[i] === elem) {
+        return this.removeAt(i);
+      }
+    }
+
+    return undefined;
+  };
+  /**
+   * Remove the element at the provided index and return it.
+   * Return `undefined` if the collection does not contain this index.
+   * @param {number} index Index.
+   * @return {T|undefined} Value.
+   * @api
+   */
+
+
+  Collection.prototype.removeAt = function removeAt(index) {
+    var prev = this.array_[index];
+    this.array_.splice(index, 1);
+    this.updateLength_();
+    this.dispatchEvent(new CollectionEvent(_CollectionEventType.default.REMOVE, prev));
+    return prev;
+  };
+  /**
+   * Set the element at the provided index.
+   * @param {number} index Index.
+   * @param {T} elem Element.
+   * @api
+   */
+
+
+  Collection.prototype.setAt = function setAt(index, elem) {
+    var n = this.getLength();
+
+    if (index < n) {
+      if (this.unique_) {
+        this.assertUnique_(elem, index);
+      }
+
+      var prev = this.array_[index];
+      this.array_[index] = elem;
+      this.dispatchEvent(new CollectionEvent(_CollectionEventType.default.REMOVE, prev));
+      this.dispatchEvent(new CollectionEvent(_CollectionEventType.default.ADD, elem));
+    } else {
+      for (var j = n; j < index; ++j) {
+        this.insertAt(j, undefined);
+      }
+
+      this.insertAt(index, elem);
+    }
+  };
+  /**
+   * @private
+   */
+
+
+  Collection.prototype.updateLength_ = function updateLength_() {
+    this.set(Property.LENGTH, this.array_.length);
+  };
+  /**
+   * @private
+   * @param {T} elem Element.
+   * @param {number=} opt_except Optional index to ignore.
+   */
+
+
+  Collection.prototype.assertUnique_ = function assertUnique_(elem, opt_except) {
+    for (var i = 0, ii = this.array_.length; i < ii; ++i) {
+      if (this.array_[i] === elem && i !== opt_except) {
+        throw new _AssertionError.default(58);
+      }
+    }
+  };
+
+  return Collection;
+}(_Object.default);
+
+var _default = Collection;
 exports.default = _default;
-},{"./util.js":"node_modules/ol/util.js"}],"node_modules/ol/asserts.js":[function(require,module,exports) {
+},{"./AssertionError.js":"node_modules/ol/AssertionError.js","./CollectionEventType.js":"node_modules/ol/CollectionEventType.js","./Object.js":"node_modules/ol/Object.js","./events/Event.js":"node_modules/ol/events/Event.js"}],"node_modules/ol/asserts.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2319,1900 +1946,641 @@ function assert(assertion, errorCode) {
     throw new _AssertionError.default(errorCode);
   }
 }
-},{"./AssertionError.js":"node_modules/ol/AssertionError.js"}],"node_modules/ol/math.js":[function(require,module,exports) {
+},{"./AssertionError.js":"node_modules/ol/AssertionError.js"}],"node_modules/ol/Feature.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.clamp = clamp;
-exports.roundUpToPowerOfTwo = roundUpToPowerOfTwo;
-exports.squaredSegmentDistance = squaredSegmentDistance;
-exports.squaredDistance = squaredDistance;
-exports.solveLinearSystem = solveLinearSystem;
-exports.toDegrees = toDegrees;
-exports.toRadians = toRadians;
-exports.modulo = modulo;
-exports.lerp = lerp;
-exports.cosh = void 0;
+exports.createStyleFunction = createStyleFunction;
+exports.default = void 0;
 
 var _asserts = require("./asserts.js");
 
-/**
- * @module ol/math
- */
+var _events = require("./events.js");
 
-/**
- * Takes a number and clamps it to within the provided bounds.
- * @param {number} value The input number.
- * @param {number} min The minimum value to return.
- * @param {number} max The maximum value to return.
- * @return {number} The input number if it is within bounds, or the nearest
- *     number within the bounds.
- */
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-}
-/**
- * Return the hyperbolic cosine of a given number. The method will use the
- * native `Math.cosh` function if it is available, otherwise the hyperbolic
- * cosine will be calculated via the reference implementation of the Mozilla
- * developer network.
- *
- * @param {number} x X.
- * @return {number} Hyperbolic cosine of x.
- */
+var _EventType = _interopRequireDefault(require("./events/EventType.js"));
 
+var _Object = _interopRequireWildcard(require("./Object.js"));
 
-var cosh = function () {
-  // Wrapped in a iife, to save the overhead of checking for the native
-  // implementation on every invocation.
-  var cosh;
-
-  if ('cosh' in Math) {
-    // The environment supports the native Math.cosh function, use it…
-    cosh = Math.cosh;
-  } else {
-    // … else, use the reference implementation of MDN:
-    cosh = function (x) {
-      var y =
-      /** @type {Math} */
-      Math.exp(x);
-      return (y + 1 / y) / 2;
-    };
-  }
-
-  return cosh;
-}();
-/**
- * @param {number} x X.
- * @return {number} The smallest power of two greater than or equal to x.
- */
-
-
-exports.cosh = cosh;
-
-function roundUpToPowerOfTwo(x) {
-  (0, _asserts.assert)(0 < x, 29); // `x` must be greater than `0`
-
-  return Math.pow(2, Math.ceil(Math.log(x) / Math.LN2));
-}
-/**
- * Returns the square of the closest distance between the point (x, y) and the
- * line segment (x1, y1) to (x2, y2).
- * @param {number} x X.
- * @param {number} y Y.
- * @param {number} x1 X1.
- * @param {number} y1 Y1.
- * @param {number} x2 X2.
- * @param {number} y2 Y2.
- * @return {number} Squared distance.
- */
-
-
-function squaredSegmentDistance(x, y, x1, y1, x2, y2) {
-  var dx = x2 - x1;
-  var dy = y2 - y1;
-
-  if (dx !== 0 || dy !== 0) {
-    var t = ((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy);
-
-    if (t > 1) {
-      x1 = x2;
-      y1 = y2;
-    } else if (t > 0) {
-      x1 += dx * t;
-      y1 += dy * t;
-    }
-  }
-
-  return squaredDistance(x, y, x1, y1);
-}
-/**
- * Returns the square of the distance between the points (x1, y1) and (x2, y2).
- * @param {number} x1 X1.
- * @param {number} y1 Y1.
- * @param {number} x2 X2.
- * @param {number} y2 Y2.
- * @return {number} Squared distance.
- */
-
-
-function squaredDistance(x1, y1, x2, y2) {
-  var dx = x2 - x1;
-  var dy = y2 - y1;
-  return dx * dx + dy * dy;
-}
-/**
- * Solves system of linear equations using Gaussian elimination method.
- *
- * @param {Array<Array<number>>} mat Augmented matrix (n x n + 1 column)
- *                                     in row-major order.
- * @return {Array<number>} The resulting vector.
- */
-
-
-function solveLinearSystem(mat) {
-  var n = mat.length;
-
-  for (var i = 0; i < n; i++) {
-    // Find max in the i-th column (ignoring i - 1 first rows)
-    var maxRow = i;
-    var maxEl = Math.abs(mat[i][i]);
-
-    for (var r = i + 1; r < n; r++) {
-      var absValue = Math.abs(mat[r][i]);
-
-      if (absValue > maxEl) {
-        maxEl = absValue;
-        maxRow = r;
-      }
-    }
-
-    if (maxEl === 0) {
-      return null; // matrix is singular
-    } // Swap max row with i-th (current) row
-
-
-    var tmp = mat[maxRow];
-    mat[maxRow] = mat[i];
-    mat[i] = tmp; // Subtract the i-th row to make all the remaining rows 0 in the i-th column
-
-    for (var j = i + 1; j < n; j++) {
-      var coef = -mat[j][i] / mat[i][i];
-
-      for (var k = i; k < n + 1; k++) {
-        if (i == k) {
-          mat[j][k] = 0;
-        } else {
-          mat[j][k] += coef * mat[i][k];
-        }
-      }
-    }
-  } // Solve Ax=b for upper triangular matrix A (mat)
-
-
-  var x = new Array(n);
-
-  for (var l = n - 1; l >= 0; l--) {
-    x[l] = mat[l][n] / mat[l][l];
-
-    for (var m = l - 1; m >= 0; m--) {
-      mat[m][n] -= mat[m][l] * x[l];
-    }
-  }
-
-  return x;
-}
-/**
- * Converts radians to to degrees.
- *
- * @param {number} angleInRadians Angle in radians.
- * @return {number} Angle in degrees.
- */
-
-
-function toDegrees(angleInRadians) {
-  return angleInRadians * 180 / Math.PI;
-}
-/**
- * Converts degrees to radians.
- *
- * @param {number} angleInDegrees Angle in degrees.
- * @return {number} Angle in radians.
- */
-
-
-function toRadians(angleInDegrees) {
-  return angleInDegrees * Math.PI / 180;
-}
-/**
- * Returns the modulo of a / b, depending on the sign of b.
- *
- * @param {number} a Dividend.
- * @param {number} b Divisor.
- * @return {number} Modulo.
- */
-
-
-function modulo(a, b) {
-  var r = a % b;
-  return r * b < 0 ? r + b : r;
-}
-/**
- * Calculates the linearly interpolated value of x between a and b.
- *
- * @param {number} a Number
- * @param {number} b Number
- * @param {number} x Value to be interpolated.
- * @return {number} Interpolated value.
- */
-
-
-function lerp(a, b, x) {
-  return a + x * (b - a);
-}
-},{"./asserts.js":"node_modules/ol/asserts.js"}],"node_modules/ol/layer/Base.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _util = require("../util.js");
-
-var _Object = _interopRequireDefault(require("../Object.js"));
-
-var _Property = _interopRequireDefault(require("./Property.js"));
-
-var _math = require("../math.js");
-
-var _obj = require("../obj.js");
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
- * @module ol/layer/Base
+ * @module ol/Feature
  */
 
 /**
- * @typedef {Object} Options
- * @property {number} [opacity=1] Opacity (0, 1).
- * @property {boolean} [visible=true] Visibility.
- * @property {import("../extent.js").Extent} [extent] The bounding extent for layer rendering.  The layer will not be
- * rendered outside of this extent.
- * @property {number} [zIndex] The z-index for layer rendering.  At rendering time, the layers
- * will be ordered, first by Z-index and then by position. When `undefined`, a `zIndex` of 0 is assumed
- * for layers that are added to the map's `layers` collection, or `Infinity` when the layer's `setMap()`
- * method was used.
- * @property {number} [minResolution] The minimum resolution (inclusive) at which this layer will be
- * visible.
- * @property {number} [maxResolution] The maximum resolution (exclusive) below which this layer will
- * be visible.
+ * @typedef {typeof Feature|typeof import("./render/Feature.js").default} FeatureClass
+ */
+
+/**
+ * @typedef {Feature|import("./render/Feature.js").default} FeatureLike
  */
 
 /**
  * @classdesc
- * Abstract base class; normally only used for creating subclasses and not
- * instantiated in apps.
- * Note that with {@link module:ol/layer/Base} and all its subclasses, any property set in
- * the options is set as a {@link module:ol/Object} property on the layer object, so
- * is observable, and has get/set accessors.
+ * A vector object for geographic features with a geometry and other
+ * attribute properties, similar to the features in vector file formats like
+ * GeoJSON.
+ *
+ * Features can be styled individually with `setStyle`; otherwise they use the
+ * style of their vector layer.
+ *
+ * Note that attribute properties are set as {@link module:ol/Object} properties on
+ * the feature object, so they are observable, and have get/set accessors.
+ *
+ * Typically, a feature has a single geometry property. You can set the
+ * geometry using the `setGeometry` method and get it with `getGeometry`.
+ * It is possible to store more than one geometry on a feature using attribute
+ * properties. By default, the geometry used for rendering is identified by
+ * the property name `geometry`. If you want to use another geometry property
+ * for rendering, use the `setGeometryName` method to change the attribute
+ * property associated with the geometry for the feature.  For example:
+ *
+ * ```js
+ *
+ * import Feature from 'ol/Feature';
+ * import Polygon from 'ol/geom/Polygon';
+ * import Point from 'ol/geom/Point';
+ *
+ * var feature = new Feature({
+ *   geometry: new Polygon(polyCoords),
+ *   labelPoint: new Point(labelCoords),
+ *   name: 'My Polygon'
+ * });
+ *
+ * // get the polygon geometry
+ * var poly = feature.getGeometry();
+ *
+ * // Render the feature as a point using the coordinates from labelPoint
+ * feature.setGeometryName('labelPoint');
+ *
+ * // get the point geometry
+ * var point = feature.getGeometry();
+ * ```
  *
  * @api
  */
-var BaseLayer =
+var Feature =
 /*@__PURE__*/
 function (BaseObject) {
-  function BaseLayer(options) {
+  function Feature(opt_geometryOrProperties) {
     BaseObject.call(this);
     /**
-     * @type {Object<string, *>}
-     */
-
-    var properties = (0, _obj.assign)({}, options);
-    properties[_Property.default.OPACITY] = options.opacity !== undefined ? options.opacity : 1;
-    properties[_Property.default.VISIBLE] = options.visible !== undefined ? options.visible : true;
-    properties[_Property.default.Z_INDEX] = options.zIndex;
-    properties[_Property.default.MAX_RESOLUTION] = options.maxResolution !== undefined ? options.maxResolution : Infinity;
-    properties[_Property.default.MIN_RESOLUTION] = options.minResolution !== undefined ? options.minResolution : 0;
-    this.setProperties(properties);
-    /**
-     * @type {import("./Layer.js").State}
      * @private
+     * @type {number|string|undefined}
      */
 
-    this.state_ = null;
+    this.id_ = undefined;
     /**
-     * The layer type.
-     * @type {import("../LayerType.js").default}
-     * @protected;
-     */
-
-    this.type;
-  }
-
-  if (BaseObject) BaseLayer.__proto__ = BaseObject;
-  BaseLayer.prototype = Object.create(BaseObject && BaseObject.prototype);
-  BaseLayer.prototype.constructor = BaseLayer;
-  /**
-   * Get the layer type (used when creating a layer renderer).
-   * @return {import("../LayerType.js").default} The layer type.
-   */
-
-  BaseLayer.prototype.getType = function getType() {
-    return this.type;
-  };
-  /**
-   * @return {import("./Layer.js").State} Layer state.
-   */
-
-
-  BaseLayer.prototype.getLayerState = function getLayerState() {
-    /** @type {import("./Layer.js").State} */
-    var state = this.state_ ||
-    /** @type {?} */
-    {
-      layer: this,
-      managed: true
-    };
-    state.opacity = (0, _math.clamp)(this.getOpacity(), 0, 1);
-    state.sourceState = this.getSourceState();
-    state.visible = this.getVisible();
-    state.extent = this.getExtent();
-    state.zIndex = this.getZIndex() || 0;
-    state.maxResolution = this.getMaxResolution();
-    state.minResolution = Math.max(this.getMinResolution(), 0);
-    this.state_ = state;
-    return state;
-  };
-  /**
-   * @abstract
-   * @param {Array<import("./Layer.js").default>=} opt_array Array of layers (to be
-   *     modified in place).
-   * @return {Array<import("./Layer.js").default>} Array of layers.
-   */
-
-
-  BaseLayer.prototype.getLayersArray = function getLayersArray(opt_array) {
-    return (0, _util.abstract)();
-  };
-  /**
-   * @abstract
-   * @param {Array<import("./Layer.js").State>=} opt_states Optional list of layer
-   *     states (to be modified in place).
-   * @return {Array<import("./Layer.js").State>} List of layer states.
-   */
-
-
-  BaseLayer.prototype.getLayerStatesArray = function getLayerStatesArray(opt_states) {
-    return (0, _util.abstract)();
-  };
-  /**
-   * Return the {@link module:ol/extent~Extent extent} of the layer or `undefined` if it
-   * will be visible regardless of extent.
-   * @return {import("../extent.js").Extent|undefined} The layer extent.
-   * @observable
-   * @api
-   */
-
-
-  BaseLayer.prototype.getExtent = function getExtent() {
-    return (
-      /** @type {import("../extent.js").Extent|undefined} */
-      this.get(_Property.default.EXTENT)
-    );
-  };
-  /**
-   * Return the maximum resolution of the layer.
-   * @return {number} The maximum resolution of the layer.
-   * @observable
-   * @api
-   */
-
-
-  BaseLayer.prototype.getMaxResolution = function getMaxResolution() {
-    return (
-      /** @type {number} */
-      this.get(_Property.default.MAX_RESOLUTION)
-    );
-  };
-  /**
-   * Return the minimum resolution of the layer.
-   * @return {number} The minimum resolution of the layer.
-   * @observable
-   * @api
-   */
-
-
-  BaseLayer.prototype.getMinResolution = function getMinResolution() {
-    return (
-      /** @type {number} */
-      this.get(_Property.default.MIN_RESOLUTION)
-    );
-  };
-  /**
-   * Return the opacity of the layer (between 0 and 1).
-   * @return {number} The opacity of the layer.
-   * @observable
-   * @api
-   */
-
-
-  BaseLayer.prototype.getOpacity = function getOpacity() {
-    return (
-      /** @type {number} */
-      this.get(_Property.default.OPACITY)
-    );
-  };
-  /**
-   * @abstract
-   * @return {import("../source/State.js").default} Source state.
-   */
-
-
-  BaseLayer.prototype.getSourceState = function getSourceState() {
-    return (0, _util.abstract)();
-  };
-  /**
-   * Return the visibility of the layer (`true` or `false`).
-   * @return {boolean} The visibility of the layer.
-   * @observable
-   * @api
-   */
-
-
-  BaseLayer.prototype.getVisible = function getVisible() {
-    return (
-      /** @type {boolean} */
-      this.get(_Property.default.VISIBLE)
-    );
-  };
-  /**
-   * Return the Z-index of the layer, which is used to order layers before
-   * rendering. The default Z-index is 0.
-   * @return {number} The Z-index of the layer.
-   * @observable
-   * @api
-   */
-
-
-  BaseLayer.prototype.getZIndex = function getZIndex() {
-    return (
-      /** @type {number} */
-      this.get(_Property.default.Z_INDEX)
-    );
-  };
-  /**
-   * Set the extent at which the layer is visible.  If `undefined`, the layer
-   * will be visible at all extents.
-   * @param {import("../extent.js").Extent|undefined} extent The extent of the layer.
-   * @observable
-   * @api
-   */
-
-
-  BaseLayer.prototype.setExtent = function setExtent(extent) {
-    this.set(_Property.default.EXTENT, extent);
-  };
-  /**
-   * Set the maximum resolution at which the layer is visible.
-   * @param {number} maxResolution The maximum resolution of the layer.
-   * @observable
-   * @api
-   */
-
-
-  BaseLayer.prototype.setMaxResolution = function setMaxResolution(maxResolution) {
-    this.set(_Property.default.MAX_RESOLUTION, maxResolution);
-  };
-  /**
-   * Set the minimum resolution at which the layer is visible.
-   * @param {number} minResolution The minimum resolution of the layer.
-   * @observable
-   * @api
-   */
-
-
-  BaseLayer.prototype.setMinResolution = function setMinResolution(minResolution) {
-    this.set(_Property.default.MIN_RESOLUTION, minResolution);
-  };
-  /**
-   * Set the opacity of the layer, allowed values range from 0 to 1.
-   * @param {number} opacity The opacity of the layer.
-   * @observable
-   * @api
-   */
-
-
-  BaseLayer.prototype.setOpacity = function setOpacity(opacity) {
-    this.set(_Property.default.OPACITY, opacity);
-  };
-  /**
-   * Set the visibility of the layer (`true` or `false`).
-   * @param {boolean} visible The visibility of the layer.
-   * @observable
-   * @api
-   */
-
-
-  BaseLayer.prototype.setVisible = function setVisible(visible) {
-    this.set(_Property.default.VISIBLE, visible);
-  };
-  /**
-   * Set Z-index of the layer, which is used to order layers before rendering.
-   * The default Z-index is 0.
-   * @param {number} zindex The z-index of the layer.
-   * @observable
-   * @api
-   */
-
-
-  BaseLayer.prototype.setZIndex = function setZIndex(zindex) {
-    this.set(_Property.default.Z_INDEX, zindex);
-  };
-
-  return BaseLayer;
-}(_Object.default);
-
-var _default = BaseLayer;
-exports.default = _default;
-},{"../util.js":"node_modules/ol/util.js","../Object.js":"node_modules/ol/Object.js","./Property.js":"node_modules/ol/layer/Property.js","../math.js":"node_modules/ol/math.js","../obj.js":"node_modules/ol/obj.js"}],"node_modules/ol/render/EventType.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/render/EventType
- */
-
-/**
- * @enum {string}
- */
-var _default = {
-  /**
-   * @event module:ol/render/Event~RenderEvent#postcompose
-   * @api
-   */
-  POSTCOMPOSE: 'postcompose',
-
-  /**
-   * @event module:ol/render/Event~RenderEvent#precompose
-   * @api
-   */
-  PRECOMPOSE: 'precompose',
-
-  /**
-   * @event module:ol/render/Event~RenderEvent#render
-   * @api
-   */
-  RENDER: 'render',
-
-  /**
-   * Triggered when rendering is complete, i.e. all sources and tiles have
-   * finished loading for the current viewport, and all tiles are faded in.
-   * @event module:ol/render/Event~RenderEvent#rendercomplete
-   * @api
-   */
-  RENDERCOMPLETE: 'rendercomplete'
-};
-exports.default = _default;
-},{}],"node_modules/ol/source/State.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/source/State
- */
-
-/**
- * @enum {string}
- * State of the source, one of 'undefined', 'loading', 'ready' or 'error'.
- */
-var _default = {
-  UNDEFINED: 'undefined',
-  LOADING: 'loading',
-  READY: 'ready',
-  ERROR: 'error'
-};
-exports.default = _default;
-},{}],"node_modules/ol/layer/Layer.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.visibleAtResolution = visibleAtResolution;
-exports.default = void 0;
-
-var _events = require("../events.js");
-
-var _EventType = _interopRequireDefault(require("../events/EventType.js"));
-
-var _util = require("../util.js");
-
-var _Object = require("../Object.js");
-
-var _Base = _interopRequireDefault(require("./Base.js"));
-
-var _Property = _interopRequireDefault(require("./Property.js"));
-
-var _obj = require("../obj.js");
-
-var _EventType2 = _interopRequireDefault(require("../render/EventType.js"));
-
-var _State = _interopRequireDefault(require("../source/State.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/layer/Layer
- */
-
-/**
- * @typedef {Object} Options
- * @property {number} [opacity=1] Opacity (0, 1).
- * @property {boolean} [visible=true] Visibility.
- * @property {import("../extent.js").Extent} [extent] The bounding extent for layer rendering.  The layer will not be
- * rendered outside of this extent.
- * @property {number} [zIndex] The z-index for layer rendering.  At rendering time, the layers
- * will be ordered, first by Z-index and then by position. When `undefined`, a `zIndex` of 0 is assumed
- * for layers that are added to the map's `layers` collection, or `Infinity` when the layer's `setMap()`
- * method was used.
- * @property {number} [minResolution] The minimum resolution (inclusive) at which this layer will be
- * visible.
- * @property {number} [maxResolution] The maximum resolution (exclusive) below which this layer will
- * be visible.
- * @property {import("../source/Source.js").default} [source] Source for this layer.  If not provided to the constructor,
- * the source can be set by calling {@link module:ol/layer/Layer#setSource layer.setSource(source)} after
- * construction.
- * @property {import("../PluggableMap.js").default} [map] Map.
- */
-
-/**
- * @typedef {Object} State
- * @property {import("./Base.js").default} layer
- * @property {number} opacity
- * @property {SourceState} sourceState
- * @property {boolean} visible
- * @property {boolean} managed
- * @property {import("../extent.js").Extent} [extent]
- * @property {number} zIndex
- * @property {number} maxResolution
- * @property {number} minResolution
- */
-
-/**
- * @classdesc
- * Abstract base class; normally only used for creating subclasses and not
- * instantiated in apps.
- * A visual representation of raster or vector map data.
- * Layers group together those properties that pertain to how the data is to be
- * displayed, irrespective of the source of that data.
- *
- * Layers are usually added to a map with {@link module:ol/Map#addLayer}. Components
- * like {@link module:ol/interaction/Select~Select} use unmanaged layers
- * internally. These unmanaged layers are associated with the map using
- * {@link module:ol/layer/Layer~Layer#setMap} instead.
- *
- * A generic `change` event is fired when the state of the source changes.
- *
- * @fires import("../render/Event.js").RenderEvent
- */
-var Layer =
-/*@__PURE__*/
-function (BaseLayer) {
-  function Layer(options) {
-    var baseOptions = (0, _obj.assign)({}, options);
-    delete baseOptions.source;
-    BaseLayer.call(this, baseOptions);
-    /**
-     * @private
-     * @type {?import("../events.js").EventsKey}
-     */
-
-    this.mapPrecomposeKey_ = null;
-    /**
-     * @private
-     * @type {?import("../events.js").EventsKey}
-     */
-
-    this.mapRenderKey_ = null;
-    /**
-     * @private
-     * @type {?import("../events.js").EventsKey}
-     */
-
-    this.sourceChangeKey_ = null;
-
-    if (options.map) {
-      this.setMap(options.map);
-    }
-
-    (0, _events.listen)(this, (0, _Object.getChangeEventType)(_Property.default.SOURCE), this.handleSourcePropertyChange_, this);
-    var source = options.source ? options.source : null;
-    this.setSource(source);
-  }
-
-  if (BaseLayer) Layer.__proto__ = BaseLayer;
-  Layer.prototype = Object.create(BaseLayer && BaseLayer.prototype);
-  Layer.prototype.constructor = Layer;
-  /**
-   * @inheritDoc
-   */
-
-  Layer.prototype.getLayersArray = function getLayersArray(opt_array) {
-    var array = opt_array ? opt_array : [];
-    array.push(this);
-    return array;
-  };
-  /**
-   * @inheritDoc
-   */
-
-
-  Layer.prototype.getLayerStatesArray = function getLayerStatesArray(opt_states) {
-    var states = opt_states ? opt_states : [];
-    states.push(this.getLayerState());
-    return states;
-  };
-  /**
-   * Get the layer source.
-   * @return {import("../source/Source.js").default} The layer source (or `null` if not yet set).
-   * @observable
-   * @api
-   */
-
-
-  Layer.prototype.getSource = function getSource() {
-    var source = this.get(_Property.default.SOURCE);
-    return (
-      /** @type {import("../source/Source.js").default} */
-      source || null
-    );
-  };
-  /**
-    * @inheritDoc
-    */
-
-
-  Layer.prototype.getSourceState = function getSourceState() {
-    var source = this.getSource();
-    return !source ? _State.default.UNDEFINED : source.getState();
-  };
-  /**
-   * @private
-   */
-
-
-  Layer.prototype.handleSourceChange_ = function handleSourceChange_() {
-    this.changed();
-  };
-  /**
-   * @private
-   */
-
-
-  Layer.prototype.handleSourcePropertyChange_ = function handleSourcePropertyChange_() {
-    if (this.sourceChangeKey_) {
-      (0, _events.unlistenByKey)(this.sourceChangeKey_);
-      this.sourceChangeKey_ = null;
-    }
-
-    var source = this.getSource();
-
-    if (source) {
-      this.sourceChangeKey_ = (0, _events.listen)(source, _EventType.default.CHANGE, this.handleSourceChange_, this);
-    }
-
-    this.changed();
-  };
-  /**
-   * Sets the layer to be rendered on top of other layers on a map. The map will
-   * not manage this layer in its layers collection, and the callback in
-   * {@link module:ol/Map#forEachLayerAtPixel} will receive `null` as layer. This
-   * is useful for temporary layers. To remove an unmanaged layer from the map,
-   * use `#setMap(null)`.
-   *
-   * To add the layer to a map and have it managed by the map, use
-   * {@link module:ol/Map#addLayer} instead.
-   * @param {import("../PluggableMap.js").default} map Map.
-   * @api
-   */
-
-
-  Layer.prototype.setMap = function setMap(map) {
-    if (this.mapPrecomposeKey_) {
-      (0, _events.unlistenByKey)(this.mapPrecomposeKey_);
-      this.mapPrecomposeKey_ = null;
-    }
-
-    if (!map) {
-      this.changed();
-    }
-
-    if (this.mapRenderKey_) {
-      (0, _events.unlistenByKey)(this.mapRenderKey_);
-      this.mapRenderKey_ = null;
-    }
-
-    if (map) {
-      this.mapPrecomposeKey_ = (0, _events.listen)(map, _EventType2.default.PRECOMPOSE, function (evt) {
-        var renderEvent =
-        /** @type {import("../render/Event.js").default} */
-        evt;
-        var layerState = this.getLayerState();
-        layerState.managed = false;
-
-        if (this.getZIndex() === undefined) {
-          layerState.zIndex = Infinity;
-        }
-
-        renderEvent.frameState.layerStatesArray.push(layerState);
-        renderEvent.frameState.layerStates[(0, _util.getUid)(this)] = layerState;
-      }, this);
-      this.mapRenderKey_ = (0, _events.listen)(this, _EventType.default.CHANGE, map.render, map);
-      this.changed();
-    }
-  };
-  /**
-   * Set the layer source.
-   * @param {import("../source/Source.js").default} source The layer source.
-   * @observable
-   * @api
-   */
-
-
-  Layer.prototype.setSource = function setSource(source) {
-    this.set(_Property.default.SOURCE, source);
-  };
-
-  return Layer;
-}(_Base.default);
-/**
- * Return `true` if the layer is visible, and if the passed resolution is
- * between the layer's minResolution and maxResolution. The comparison is
- * inclusive for `minResolution` and exclusive for `maxResolution`.
- * @param {State} layerState Layer state.
- * @param {number} resolution Resolution.
- * @return {boolean} The layer is visible at the given resolution.
- */
-
-
-function visibleAtResolution(layerState, resolution) {
-  return layerState.visible && resolution >= layerState.minResolution && resolution < layerState.maxResolution;
-}
-
-var _default = Layer;
-exports.default = _default;
-},{"../events.js":"node_modules/ol/events.js","../events/EventType.js":"node_modules/ol/events/EventType.js","../util.js":"node_modules/ol/util.js","../Object.js":"node_modules/ol/Object.js","./Base.js":"node_modules/ol/layer/Base.js","./Property.js":"node_modules/ol/layer/Property.js","../obj.js":"node_modules/ol/obj.js","../render/EventType.js":"node_modules/ol/render/EventType.js","../source/State.js":"node_modules/ol/source/State.js"}],"node_modules/ol/control/Attribution.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.render = render;
-exports.default = void 0;
-
-var _array = require("../array.js");
-
-var _Control = _interopRequireDefault(require("./Control.js"));
-
-var _css = require("../css.js");
-
-var _dom = require("../dom.js");
-
-var _events = require("../events.js");
-
-var _EventType = _interopRequireDefault(require("../events/EventType.js"));
-
-var _Layer = require("../layer/Layer.js");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/control/Attribution
- */
-
-/**
- * @typedef {Object} Options
- * @property {string} [className='ol-attribution'] CSS class name.
- * @property {HTMLElement|string} [target] Specify a target if you
- * want the control to be rendered outside of the map's
- * viewport.
- * @property {boolean} [collapsible] Specify if attributions can
- * be collapsed. If not specified, sources control this behavior with their
- * `attributionsCollapsible` setting.
- * @property {boolean} [collapsed=true] Specify if attributions should
- * be collapsed at startup.
- * @property {string} [tipLabel='Attributions'] Text label to use for the button tip.
- * @property {string} [label='i'] Text label to use for the
- * collapsed attributions button.
- * Instead of text, also an element (e.g. a `span` element) can be used.
- * @property {string|HTMLElement} [collapseLabel='»'] Text label to use
- * for the expanded attributions button.
- * Instead of text, also an element (e.g. a `span` element) can be used.
- * @property {function(import("../MapEvent.js").default)} [render] Function called when
- * the control should be re-rendered. This is called in a `requestAnimationFrame`
- * callback.
- */
-
-/**
- * @classdesc
- * Control to show all the attributions associated with the layer sources
- * in the map. This control is one of the default controls included in maps.
- * By default it will show in the bottom right portion of the map, but this can
- * be changed by using a css selector for `.ol-attribution`.
- *
- * @api
- */
-var Attribution =
-/*@__PURE__*/
-function (Control) {
-  function Attribution(opt_options) {
-    var options = opt_options ? opt_options : {};
-    Control.call(this, {
-      element: document.createElement('div'),
-      render: options.render || render,
-      target: options.target
-    });
-    /**
-     * @private
-     * @type {HTMLElement}
-     */
-
-    this.ulElement_ = document.createElement('ul');
-    /**
-     * @private
-     * @type {boolean}
-     */
-
-    this.collapsed_ = options.collapsed !== undefined ? options.collapsed : true;
-    /**
-     * @private
-     * @type {boolean}
-     */
-
-    this.overrideCollapsible_ = options.collapsible !== undefined;
-    /**
-     * @private
-     * @type {boolean}
-     */
-
-    this.collapsible_ = options.collapsible !== undefined ? options.collapsible : true;
-
-    if (!this.collapsible_) {
-      this.collapsed_ = false;
-    }
-
-    var className = options.className !== undefined ? options.className : 'ol-attribution';
-    var tipLabel = options.tipLabel !== undefined ? options.tipLabel : 'Attributions';
-    var collapseLabel = options.collapseLabel !== undefined ? options.collapseLabel : '\u00BB';
-
-    if (typeof collapseLabel === 'string') {
-      /**
-       * @private
-       * @type {HTMLElement}
-       */
-      this.collapseLabel_ = document.createElement('span');
-      this.collapseLabel_.textContent = collapseLabel;
-    } else {
-      this.collapseLabel_ = collapseLabel;
-    }
-
-    var label = options.label !== undefined ? options.label : 'i';
-
-    if (typeof label === 'string') {
-      /**
-       * @private
-       * @type {HTMLElement}
-       */
-      this.label_ = document.createElement('span');
-      this.label_.textContent = label;
-    } else {
-      this.label_ = label;
-    }
-
-    var activeLabel = this.collapsible_ && !this.collapsed_ ? this.collapseLabel_ : this.label_;
-    var button = document.createElement('button');
-    button.setAttribute('type', 'button');
-    button.title = tipLabel;
-    button.appendChild(activeLabel);
-    (0, _events.listen)(button, _EventType.default.CLICK, this.handleClick_, this);
-    var cssClasses = className + ' ' + _css.CLASS_UNSELECTABLE + ' ' + _css.CLASS_CONTROL + (this.collapsed_ && this.collapsible_ ? ' ' + _css.CLASS_COLLAPSED : '') + (this.collapsible_ ? '' : ' ol-uncollapsible');
-    var element = this.element;
-    element.className = cssClasses;
-    element.appendChild(this.ulElement_);
-    element.appendChild(button);
-    /**
-     * A list of currently rendered resolutions.
-     * @type {Array<string>}
-     * @private
-     */
-
-    this.renderedAttributions_ = [];
-    /**
-     * @private
-     * @type {boolean}
-     */
-
-    this.renderedVisible_ = true;
-  }
-
-  if (Control) Attribution.__proto__ = Control;
-  Attribution.prototype = Object.create(Control && Control.prototype);
-  Attribution.prototype.constructor = Attribution;
-  /**
-   * Collect a list of visible attributions and set the collapsible state.
-   * @param {import("../PluggableMap.js").FrameState} frameState Frame state.
-   * @return {Array<string>} Attributions.
-   * @private
-   */
-
-  Attribution.prototype.collectSourceAttributions_ = function collectSourceAttributions_(frameState) {
-    /**
-     * Used to determine if an attribution already exists.
-     * @type {!Object<string, boolean>}
-     */
-    var lookup = {};
-    /**
-     * A list of visible attributions.
-     * @type {Array<string>}
-     */
-
-    var visibleAttributions = [];
-    var layerStatesArray = frameState.layerStatesArray;
-    var resolution = frameState.viewState.resolution;
-
-    for (var i = 0, ii = layerStatesArray.length; i < ii; ++i) {
-      var layerState = layerStatesArray[i];
-
-      if (!(0, _Layer.visibleAtResolution)(layerState, resolution)) {
-        continue;
-      }
-
-      var source =
-      /** @type {import("../layer/Layer.js").default} */
-      layerState.layer.getSource();
-
-      if (!source) {
-        continue;
-      }
-
-      var attributionGetter = source.getAttributions();
-
-      if (!attributionGetter) {
-        continue;
-      }
-
-      var attributions = attributionGetter(frameState);
-
-      if (!attributions) {
-        continue;
-      }
-
-      if (!this.overrideCollapsible_ && source.getAttributionsCollapsible() === false) {
-        this.setCollapsible(false);
-      }
-
-      if (Array.isArray(attributions)) {
-        for (var j = 0, jj = attributions.length; j < jj; ++j) {
-          if (!(attributions[j] in lookup)) {
-            visibleAttributions.push(attributions[j]);
-            lookup[attributions[j]] = true;
-          }
-        }
-      } else {
-        if (!(attributions in lookup)) {
-          visibleAttributions.push(attributions);
-          lookup[attributions] = true;
-        }
-      }
-    }
-
-    return visibleAttributions;
-  };
-  /**
-   * @private
-   * @param {?import("../PluggableMap.js").FrameState} frameState Frame state.
-   */
-
-
-  Attribution.prototype.updateElement_ = function updateElement_(frameState) {
-    if (!frameState) {
-      if (this.renderedVisible_) {
-        this.element.style.display = 'none';
-        this.renderedVisible_ = false;
-      }
-
-      return;
-    }
-
-    var attributions = this.collectSourceAttributions_(frameState);
-    var visible = attributions.length > 0;
-
-    if (this.renderedVisible_ != visible) {
-      this.element.style.display = visible ? '' : 'none';
-      this.renderedVisible_ = visible;
-    }
-
-    if ((0, _array.equals)(attributions, this.renderedAttributions_)) {
-      return;
-    }
-
-    (0, _dom.removeChildren)(this.ulElement_); // append the attributions
-
-    for (var i = 0, ii = attributions.length; i < ii; ++i) {
-      var element = document.createElement('li');
-      element.innerHTML = attributions[i];
-      this.ulElement_.appendChild(element);
-    }
-
-    this.renderedAttributions_ = attributions;
-  };
-  /**
-   * @param {MouseEvent} event The event to handle
-   * @private
-   */
-
-
-  Attribution.prototype.handleClick_ = function handleClick_(event) {
-    event.preventDefault();
-    this.handleToggle_();
-  };
-  /**
-   * @private
-   */
-
-
-  Attribution.prototype.handleToggle_ = function handleToggle_() {
-    this.element.classList.toggle(_css.CLASS_COLLAPSED);
-
-    if (this.collapsed_) {
-      (0, _dom.replaceNode)(this.collapseLabel_, this.label_);
-    } else {
-      (0, _dom.replaceNode)(this.label_, this.collapseLabel_);
-    }
-
-    this.collapsed_ = !this.collapsed_;
-  };
-  /**
-   * Return `true` if the attribution is collapsible, `false` otherwise.
-   * @return {boolean} True if the widget is collapsible.
-   * @api
-   */
-
-
-  Attribution.prototype.getCollapsible = function getCollapsible() {
-    return this.collapsible_;
-  };
-  /**
-   * Set whether the attribution should be collapsible.
-   * @param {boolean} collapsible True if the widget is collapsible.
-   * @api
-   */
-
-
-  Attribution.prototype.setCollapsible = function setCollapsible(collapsible) {
-    if (this.collapsible_ === collapsible) {
-      return;
-    }
-
-    this.collapsible_ = collapsible;
-    this.element.classList.toggle('ol-uncollapsible');
-
-    if (!collapsible && this.collapsed_) {
-      this.handleToggle_();
-    }
-  };
-  /**
-   * Collapse or expand the attribution according to the passed parameter. Will
-   * not do anything if the attribution isn't collapsible or if the current
-   * collapsed state is already the one requested.
-   * @param {boolean} collapsed True if the widget is collapsed.
-   * @api
-   */
-
-
-  Attribution.prototype.setCollapsed = function setCollapsed(collapsed) {
-    if (!this.collapsible_ || this.collapsed_ === collapsed) {
-      return;
-    }
-
-    this.handleToggle_();
-  };
-  /**
-   * Return `true` when the attribution is currently collapsed or `false`
-   * otherwise.
-   * @return {boolean} True if the widget is collapsed.
-   * @api
-   */
-
-
-  Attribution.prototype.getCollapsed = function getCollapsed() {
-    return this.collapsed_;
-  };
-
-  return Attribution;
-}(_Control.default);
-/**
- * Update the attribution element.
- * @param {import("../MapEvent.js").default} mapEvent Map event.
- * @this {Attribution}
- * @api
- */
-
-
-function render(mapEvent) {
-  this.updateElement_(mapEvent.frameState);
-}
-
-var _default = Attribution;
-exports.default = _default;
-},{"../array.js":"node_modules/ol/array.js","./Control.js":"node_modules/ol/control/Control.js","../css.js":"node_modules/ol/css.js","../dom.js":"node_modules/ol/dom.js","../events.js":"node_modules/ol/events.js","../events/EventType.js":"node_modules/ol/events/EventType.js","../layer/Layer.js":"node_modules/ol/layer/Layer.js"}],"node_modules/ol/control/FullScreen.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _Control = _interopRequireDefault(require("./Control.js"));
-
-var _css = require("../css.js");
-
-var _dom = require("../dom.js");
-
-var _events = require("../events.js");
-
-var _EventType = _interopRequireDefault(require("../events/EventType.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/control/FullScreen
- */
-
-/**
- * @return {string} Change type.
- */
-var getChangeType = function () {
-  var changeType;
-  return function () {
-    if (!changeType) {
-      var body = document.body;
-
-      if (body.webkitRequestFullscreen) {
-        changeType = 'webkitfullscreenchange';
-      } else if (body.mozRequestFullScreen) {
-        changeType = 'mozfullscreenchange';
-      } else if (body.msRequestFullscreen) {
-        changeType = 'MSFullscreenChange';
-      } else if (body.requestFullscreen) {
-        changeType = 'fullscreenchange';
-      }
-    }
-
-    return changeType;
-  };
-}();
-/**
- * @typedef {Object} Options
- * @property {string} [className='ol-full-screen'] CSS class name.
- * @property {string|Text} [label='\u2922'] Text label to use for the button.
- * Instead of text, also an element (e.g. a `span` element) can be used.
- * @property {string|Text} [labelActive='\u00d7'] Text label to use for the
- * button when full-screen is active.
- * Instead of text, also an element (e.g. a `span` element) can be used.
- * @property {string} [tipLabel='Toggle full-screen'] Text label to use for the button tip.
- * @property {boolean} [keys=false] Full keyboard access.
- * @property {HTMLElement|string} [target] Specify a target if you want the
- * control to be rendered outside of the map's viewport.
- * @property {HTMLElement|string} [source] The element to be displayed
- * fullscreen. When not provided, the element containing the map viewport will
- * be displayed fullscreen.
- */
-
-/**
- * @classdesc
- * Provides a button that when clicked fills up the full screen with the map.
- * The full screen source element is by default the element containing the map viewport unless
- * overridden by providing the `source` option. In which case, the dom
- * element introduced using this parameter will be displayed in full screen.
- *
- * When in full screen mode, a close button is shown to exit full screen mode.
- * The [Fullscreen API](http://www.w3.org/TR/fullscreen/) is used to
- * toggle the map in full screen mode.
- *
- * @api
- */
-
-
-var FullScreen =
-/*@__PURE__*/
-function (Control) {
-  function FullScreen(opt_options) {
-    var options = opt_options ? opt_options : {};
-    Control.call(this, {
-      element: document.createElement('div'),
-      target: options.target
-    });
-    /**
-     * @private
      * @type {string}
+     * @private
      */
 
-    this.cssClassName_ = options.className !== undefined ? options.className : 'ol-full-screen';
-    var label = options.label !== undefined ? options.label : '\u2922';
+    this.geometryName_ = 'geometry';
+    /**
+     * User provided style.
+     * @private
+     * @type {import("./style/Style.js").StyleLike}
+     */
+
+    this.style_ = null;
     /**
      * @private
-     * @type {Text}
+     * @type {import("./style/Style.js").StyleFunction|undefined}
      */
 
-    this.labelNode_ = typeof label === 'string' ? document.createTextNode(label) : label;
-    var labelActive = options.labelActive !== undefined ? options.labelActive : '\u00d7';
+    this.styleFunction_ = undefined;
     /**
      * @private
-     * @type {Text}
+     * @type {?import("./events.js").EventsKey}
      */
 
-    this.labelActiveNode_ = typeof labelActive === 'string' ? document.createTextNode(labelActive) : labelActive;
-    /**
-     * @private
-     * @type {HTMLElement}
-     */
+    this.geometryChangeKey_ = null;
+    (0, _events.listen)(this, (0, _Object.getChangeEventType)(this.geometryName_), this.handleGeometryChanged_, this);
 
-    this.button_ = document.createElement('button');
-    var tipLabel = options.tipLabel ? options.tipLabel : 'Toggle full-screen';
-    this.setClassName_(this.button_, isFullScreen());
-    this.button_.setAttribute('type', 'button');
-    this.button_.title = tipLabel;
-    this.button_.appendChild(this.labelNode_);
-    (0, _events.listen)(this.button_, _EventType.default.CLICK, this.handleClick_, this);
-    var cssClasses = this.cssClassName_ + ' ' + _css.CLASS_UNSELECTABLE + ' ' + _css.CLASS_CONTROL + ' ' + (!isFullScreenSupported() ? _css.CLASS_UNSUPPORTED : '');
-    var element = this.element;
-    element.className = cssClasses;
-    element.appendChild(this.button_);
-    /**
-     * @private
-     * @type {boolean}
-     */
-
-    this.keys_ = options.keys !== undefined ? options.keys : false;
-    /**
-     * @private
-     * @type {HTMLElement|string|undefined}
-     */
-
-    this.source_ = options.source;
+    if (opt_geometryOrProperties) {
+      if (typeof
+      /** @type {?} */
+      opt_geometryOrProperties.getSimplifiedGeometry === 'function') {
+        var geometry =
+        /** @type {import("./geom/Geometry.js").default} */
+        opt_geometryOrProperties;
+        this.setGeometry(geometry);
+      } else {
+        /** @type {Object<string, *>} */
+        var properties = opt_geometryOrProperties;
+        this.setProperties(properties);
+      }
+    }
   }
 
-  if (Control) FullScreen.__proto__ = Control;
-  FullScreen.prototype = Object.create(Control && Control.prototype);
-  FullScreen.prototype.constructor = FullScreen;
+  if (BaseObject) Feature.__proto__ = BaseObject;
+  Feature.prototype = Object.create(BaseObject && BaseObject.prototype);
+  Feature.prototype.constructor = Feature;
   /**
-   * @param {MouseEvent} event The event to handle
-   * @private
+   * Clone this feature. If the original feature has a geometry it
+   * is also cloned. The feature id is not set in the clone.
+   * @return {Feature} The clone.
+   * @api
    */
 
-  FullScreen.prototype.handleClick_ = function handleClick_(event) {
-    event.preventDefault();
-    this.handleFullScreen_();
+  Feature.prototype.clone = function clone() {
+    var clone = new Feature(this.getProperties());
+    clone.setGeometryName(this.getGeometryName());
+    var geometry = this.getGeometry();
+
+    if (geometry) {
+      clone.setGeometry(geometry.clone());
+    }
+
+    var style = this.getStyle();
+
+    if (style) {
+      clone.setStyle(style);
+    }
+
+    return clone;
   };
   /**
-   * @private
-   */
-
-
-  FullScreen.prototype.handleFullScreen_ = function handleFullScreen_() {
-    if (!isFullScreenSupported()) {
-      return;
-    }
-
-    var map = this.getMap();
-
-    if (!map) {
-      return;
-    }
-
-    if (isFullScreen()) {
-      exitFullScreen();
-    } else {
-      var element;
-
-      if (this.source_) {
-        element = typeof this.source_ === 'string' ? document.getElementById(this.source_) : this.source_;
-      } else {
-        element = map.getTargetElement();
-      }
-
-      if (this.keys_) {
-        requestFullScreenWithKeys(element);
-      } else {
-        requestFullScreen(element);
-      }
-    }
-  };
-  /**
-   * @private
+   * Get the feature's default geometry.  A feature may have any number of named
+   * geometries.  The "default" geometry (the one that is rendered by default) is
+   * set when calling {@link module:ol/Feature~Feature#setGeometry}.
+   * @return {import("./geom/Geometry.js").default|undefined} The default geometry for the feature.
+   * @api
+   * @observable
    */
 
 
-  FullScreen.prototype.handleFullScreenChange_ = function handleFullScreenChange_() {
-    var map = this.getMap();
-
-    if (isFullScreen()) {
-      this.setClassName_(this.button_, true);
-      (0, _dom.replaceNode)(this.labelActiveNode_, this.labelNode_);
-    } else {
-      this.setClassName_(this.button_, false);
-      (0, _dom.replaceNode)(this.labelNode_, this.labelActiveNode_);
-    }
-
-    if (map) {
-      map.updateSize();
-    }
+  Feature.prototype.getGeometry = function getGeometry() {
+    return (
+      /** @type {import("./geom/Geometry.js").default|undefined} */
+      this.get(this.geometryName_)
+    );
   };
   /**
-   * @param {HTMLElement} element Target element
-   * @param {boolean} fullscreen True if fullscreen class name should be active
-   * @private
-   */
-
-
-  FullScreen.prototype.setClassName_ = function setClassName_(element, fullscreen) {
-    var activeClassName = this.cssClassName_ + '-true';
-    var inactiveClassName = this.cssClassName_ + '-false';
-    var nextClassName = fullscreen ? activeClassName : inactiveClassName;
-    element.classList.remove(activeClassName);
-    element.classList.remove(inactiveClassName);
-    element.classList.add(nextClassName);
-  };
-  /**
-   * @inheritDoc
+   * Get the feature identifier.  This is a stable identifier for the feature and
+   * is either set when reading data from a remote source or set explicitly by
+   * calling {@link module:ol/Feature~Feature#setId}.
+   * @return {number|string|undefined} Id.
    * @api
    */
 
 
-  FullScreen.prototype.setMap = function setMap(map) {
-    Control.prototype.setMap.call(this, map);
+  Feature.prototype.getId = function getId() {
+    return this.id_;
+  };
+  /**
+   * Get the name of the feature's default geometry.  By default, the default
+   * geometry is named `geometry`.
+   * @return {string} Get the property name associated with the default geometry
+   *     for this feature.
+   * @api
+   */
 
-    if (map) {
-      this.listenerKeys.push((0, _events.listen)(document, getChangeType(), this.handleFullScreenChange_, this));
+
+  Feature.prototype.getGeometryName = function getGeometryName() {
+    return this.geometryName_;
+  };
+  /**
+   * Get the feature's style. Will return what was provided to the
+   * {@link module:ol/Feature~Feature#setStyle} method.
+   * @return {import("./style/Style.js").StyleLike} The feature style.
+   * @api
+   */
+
+
+  Feature.prototype.getStyle = function getStyle() {
+    return this.style_;
+  };
+  /**
+   * Get the feature's style function.
+   * @return {import("./style/Style.js").StyleFunction|undefined} Return a function
+   * representing the current style of this feature.
+   * @api
+   */
+
+
+  Feature.prototype.getStyleFunction = function getStyleFunction() {
+    return this.styleFunction_;
+  };
+  /**
+   * @private
+   */
+
+
+  Feature.prototype.handleGeometryChange_ = function handleGeometryChange_() {
+    this.changed();
+  };
+  /**
+   * @private
+   */
+
+
+  Feature.prototype.handleGeometryChanged_ = function handleGeometryChanged_() {
+    if (this.geometryChangeKey_) {
+      (0, _events.unlistenByKey)(this.geometryChangeKey_);
+      this.geometryChangeKey_ = null;
     }
+
+    var geometry = this.getGeometry();
+
+    if (geometry) {
+      this.geometryChangeKey_ = (0, _events.listen)(geometry, _EventType.default.CHANGE, this.handleGeometryChange_, this);
+    }
+
+    this.changed();
+  };
+  /**
+   * Set the default geometry for the feature.  This will update the property
+   * with the name returned by {@link module:ol/Feature~Feature#getGeometryName}.
+   * @param {import("./geom/Geometry.js").default|undefined} geometry The new geometry.
+   * @api
+   * @observable
+   */
+
+
+  Feature.prototype.setGeometry = function setGeometry(geometry) {
+    this.set(this.geometryName_, geometry);
+  };
+  /**
+   * Set the style for the feature.  This can be a single style object, an array
+   * of styles, or a function that takes a resolution and returns an array of
+   * styles. If it is `null` the feature has no style (a `null` style).
+   * @param {import("./style/Style.js").StyleLike} style Style for this feature.
+   * @api
+   * @fires module:ol/events/Event~Event#event:change
+   */
+
+
+  Feature.prototype.setStyle = function setStyle(style) {
+    this.style_ = style;
+    this.styleFunction_ = !style ? undefined : createStyleFunction(style);
+    this.changed();
+  };
+  /**
+   * Set the feature id.  The feature id is considered stable and may be used when
+   * requesting features or comparing identifiers returned from a remote source.
+   * The feature id can be used with the
+   * {@link module:ol/source/Vector~VectorSource#getFeatureById} method.
+   * @param {number|string|undefined} id The feature id.
+   * @api
+   * @fires module:ol/events/Event~Event#event:change
+   */
+
+
+  Feature.prototype.setId = function setId(id) {
+    this.id_ = id;
+    this.changed();
+  };
+  /**
+   * Set the property name to be used when getting the feature's default geometry.
+   * When calling {@link module:ol/Feature~Feature#getGeometry}, the value of the property with
+   * this name will be returned.
+   * @param {string} name The property name of the default geometry.
+   * @api
+   */
+
+
+  Feature.prototype.setGeometryName = function setGeometryName(name) {
+    (0, _events.unlisten)(this, (0, _Object.getChangeEventType)(this.geometryName_), this.handleGeometryChanged_, this);
+    this.geometryName_ = name;
+    (0, _events.listen)(this, (0, _Object.getChangeEventType)(this.geometryName_), this.handleGeometryChanged_, this);
+    this.handleGeometryChanged_();
   };
 
-  return FullScreen;
-}(_Control.default);
+  return Feature;
+}(_Object.default);
 /**
- * @return {boolean} Fullscreen is supported by the current platform.
+ * Convert the provided object into a feature style function.  Functions passed
+ * through unchanged.  Arrays of Style or single style objects wrapped
+ * in a new feature style function.
+ * @param {!import("./style/Style.js").StyleFunction|!Array<import("./style/Style.js").default>|!import("./style/Style.js").default} obj
+ *     A feature style function, a single style, or an array of styles.
+ * @return {import("./style/Style.js").StyleFunction} A style function.
  */
 
 
-function isFullScreenSupported() {
-  var body = document.body;
-  return !!(body.webkitRequestFullscreen || body.mozRequestFullScreen && document.mozFullScreenEnabled || body.msRequestFullscreen && document.msFullscreenEnabled || body.requestFullscreen && document.fullscreenEnabled);
-}
-/**
- * @return {boolean} Element is currently in fullscreen.
- */
-
-
-function isFullScreen() {
-  return !!(document.webkitIsFullScreen || document.mozFullScreen || document.msFullscreenElement || document.fullscreenElement);
-}
-/**
- * Request to fullscreen an element.
- * @param {HTMLElement} element Element to request fullscreen
- */
-
-
-function requestFullScreen(element) {
-  if (element.requestFullscreen) {
-    element.requestFullscreen();
-  } else if (element.msRequestFullscreen) {
-    element.msRequestFullscreen();
-  } else if (element.mozRequestFullScreen) {
-    element.mozRequestFullScreen();
-  } else if (element.webkitRequestFullscreen) {
-    element.webkitRequestFullscreen();
-  }
-}
-/**
- * Request to fullscreen an element with keyboard input.
- * @param {HTMLElement} element Element to request fullscreen
- */
-
-
-function requestFullScreenWithKeys(element) {
-  if (element.mozRequestFullScreenWithKeys) {
-    element.mozRequestFullScreenWithKeys();
-  } else if (element.webkitRequestFullscreen) {
-    element.webkitRequestFullscreen();
+function createStyleFunction(obj) {
+  if (typeof obj === 'function') {
+    return obj;
   } else {
-    requestFullScreen(element);
+    /**
+     * @type {Array<import("./style/Style.js").default>}
+     */
+    var styles;
+
+    if (Array.isArray(obj)) {
+      styles = obj;
+    } else {
+      (0, _asserts.assert)(typeof
+      /** @type {?} */
+      obj.getZIndex === 'function', 41); // Expected an `import("./style/Style.js").Style` or an array of `import("./style/Style.js").Style`
+
+      var style =
+      /** @type {import("./style/Style.js").default} */
+      obj;
+      styles = [style];
+    }
+
+    return function () {
+      return styles;
+    };
   }
 }
-/**
- * Exit fullscreen.
- */
 
-
-function exitFullScreen() {
-  if (document.exitFullscreen) {
-    document.exitFullscreen();
-  } else if (document.msExitFullscreen) {
-    document.msExitFullscreen();
-  } else if (document.mozCancelFullScreen) {
-    document.mozCancelFullScreen();
-  } else if (document.webkitExitFullscreen) {
-    document.webkitExitFullscreen();
-  }
-}
-
-var _default = FullScreen;
+var _default = Feature;
 exports.default = _default;
-},{"./Control.js":"node_modules/ol/control/Control.js","../css.js":"node_modules/ol/css.js","../dom.js":"node_modules/ol/dom.js","../events.js":"node_modules/ol/events.js","../events/EventType.js":"node_modules/ol/events/EventType.js"}],"node_modules/ol/geom/GeometryType.js":[function(require,module,exports) {
+},{"./asserts.js":"node_modules/ol/asserts.js","./events.js":"node_modules/ol/events.js","./events/EventType.js":"node_modules/ol/events/EventType.js","./Object.js":"node_modules/ol/Object.js"}],"node_modules/ol/array.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports.binarySearch = binarySearch;
+exports.numberSafeCompareFunction = numberSafeCompareFunction;
+exports.includes = includes;
+exports.linearFindNearest = linearFindNearest;
+exports.reverseSubArray = reverseSubArray;
+exports.extend = extend;
+exports.remove = remove;
+exports.find = find;
+exports.equals = equals;
+exports.stableSort = stableSort;
+exports.findIndex = findIndex;
+exports.isSorted = isSorted;
 
 /**
- * @module ol/geom/GeometryType
+ * @module ol/array
  */
 
 /**
- * The geometry type. One of `'Point'`, `'LineString'`, `'LinearRing'`,
- * `'Polygon'`, `'MultiPoint'`, `'MultiLineString'`, `'MultiPolygon'`,
- * `'GeometryCollection'`, `'Circle'`.
- * @enum {string}
+ * Performs a binary search on the provided sorted list and returns the index of the item if found. If it can't be found it'll return -1.
+ * https://github.com/darkskyapp/binary-search
+ *
+ * @param {Array<*>} haystack Items to search through.
+ * @param {*} needle The item to look for.
+ * @param {Function=} opt_comparator Comparator function.
+ * @return {number} The index of the item if found, -1 if not.
  */
-var _default = {
-  POINT: 'Point',
-  LINE_STRING: 'LineString',
-  LINEAR_RING: 'LinearRing',
-  POLYGON: 'Polygon',
-  MULTI_POINT: 'MultiPoint',
-  MULTI_LINE_STRING: 'MultiLineString',
-  MULTI_POLYGON: 'MultiPolygon',
-  GEOMETRY_COLLECTION: 'GeometryCollection',
-  CIRCLE: 'Circle'
-};
-exports.default = _default;
-},{}],"node_modules/ol/sphere.js":[function(require,module,exports) {
-"use strict";
+function binarySearch(haystack, needle, opt_comparator) {
+  var mid, cmp;
+  var comparator = opt_comparator || numberSafeCompareFunction;
+  var low = 0;
+  var high = haystack.length;
+  var found = false;
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getDistance = getDistance;
-exports.getLength = getLength;
-exports.getArea = getArea;
-exports.offset = offset;
-exports.DEFAULT_RADIUS = void 0;
+  while (low < high) {
+    /* Note that "(low + high) >>> 1" may overflow, and results in a typecast
+     * to double (which gives the wrong results). */
+    mid = low + (high - low >> 1);
+    cmp = +comparator(haystack[mid], needle);
 
-var _math = require("./math.js");
+    if (cmp < 0.0) {
+      /* Too low. */
+      low = mid + 1;
+    } else {
+      /* Key found or too high */
+      high = mid;
+      found = !cmp;
+    }
+  }
+  /* Key not found. */
 
-var _GeometryType = _interopRequireDefault(require("./geom/GeometryType.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @license
- * Latitude/longitude spherical geodesy formulae taken from
- * http://www.movable-type.co.uk/scripts/latlong.html
- * Licensed under CC-BY-3.0.
- */
-
-/**
- * @module ol/sphere
- */
-
-/**
- * Object literal with options for the {@link getLength} or {@link getArea}
- * functions.
- * @typedef {Object} SphereMetricOptions
- * @property {import("./proj.js").ProjectionLike} [projection='EPSG:3857']
- * Projection of the  geometry.  By default, the geometry is assumed to be in
- * Web Mercator.
- * @property {number} [radius=6371008.8] Sphere radius.  By default, the radius of the
- * earth is used (Clarke 1866 Authalic Sphere).
- */
-
-/**
- * The mean Earth radius (1/3 * (2a + b)) for the WGS84 ellipsoid.
- * https://en.wikipedia.org/wiki/Earth_radius#Mean_radius
- * @type {number}
- */
-var DEFAULT_RADIUS = 6371008.8;
-/**
- * Get the great circle distance (in meters) between two geographic coordinates.
- * @param {Array} c1 Starting coordinate.
- * @param {Array} c2 Ending coordinate.
- * @param {number=} opt_radius The sphere radius to use.  Defaults to the Earth's
- *     mean radius using the WGS84 ellipsoid.
- * @return {number} The great circle distance between the points (in meters).
- * @api
- */
-
-exports.DEFAULT_RADIUS = DEFAULT_RADIUS;
-
-function getDistance(c1, c2, opt_radius) {
-  var radius = opt_radius || DEFAULT_RADIUS;
-  var lat1 = (0, _math.toRadians)(c1[1]);
-  var lat2 = (0, _math.toRadians)(c2[1]);
-  var deltaLatBy2 = (lat2 - lat1) / 2;
-  var deltaLonBy2 = (0, _math.toRadians)(c2[0] - c1[0]) / 2;
-  var a = Math.sin(deltaLatBy2) * Math.sin(deltaLatBy2) + Math.sin(deltaLonBy2) * Math.sin(deltaLonBy2) * Math.cos(lat1) * Math.cos(lat2);
-  return 2 * radius * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return found ? low : ~low;
 }
 /**
- * Get the cumulative great circle length of linestring coordinates (geographic).
- * @param {Array} coordinates Linestring coordinates.
- * @param {number} radius The sphere radius to use.
- * @return {number} The length (in meters).
+ * Compare function for array sort that is safe for numbers.
+ * @param {*} a The first object to be compared.
+ * @param {*} b The second object to be compared.
+ * @return {number} A negative number, zero, or a positive number as the first
+ *     argument is less than, equal to, or greater than the second.
  */
 
 
-function getLengthInternal(coordinates, radius) {
-  var length = 0;
-
-  for (var i = 0, ii = coordinates.length; i < ii - 1; ++i) {
-    length += getDistance(coordinates[i], coordinates[i + 1], radius);
-  }
-
-  return length;
+function numberSafeCompareFunction(a, b) {
+  return a > b ? 1 : a < b ? -1 : 0;
 }
 /**
- * Get the spherical length of a geometry.  This length is the sum of the
- * great circle distances between coordinates.  For polygons, the length is
- * the sum of all rings.  For points, the length is zero.  For multi-part
- * geometries, the length is the sum of the length of each part.
- * @param {import("./geom/Geometry.js").default} geometry A geometry.
- * @param {SphereMetricOptions=} opt_options Options for the
- * length calculation.  By default, geometries are assumed to be in 'EPSG:3857'.
- * You can change this by providing a `projection` option.
- * @return {number} The spherical length (in meters).
- * @api
+ * Whether the array contains the given object.
+ * @param {Array<*>} arr The array to test for the presence of the element.
+ * @param {*} obj The object for which to test.
+ * @return {boolean} The object is in the array.
  */
 
 
-function getLength(geometry, opt_options) {
-  var options = opt_options || {};
-  var radius = options.radius || DEFAULT_RADIUS;
-  var projection = options.projection || 'EPSG:3857';
-  var type = geometry.getType();
+function includes(arr, obj) {
+  return arr.indexOf(obj) >= 0;
+}
+/**
+ * @param {Array<number>} arr Array.
+ * @param {number} target Target.
+ * @param {number} direction 0 means return the nearest, > 0
+ *    means return the largest nearest, < 0 means return the
+ *    smallest nearest.
+ * @return {number} Index.
+ */
 
-  if (type !== _GeometryType.default.GEOMETRY_COLLECTION) {
-    geometry = geometry.clone().transform(projection, 'EPSG:4326');
-  }
 
-  var length = 0;
-  var coordinates, coords, i, ii, j, jj;
+function linearFindNearest(arr, target, direction) {
+  var n = arr.length;
 
-  switch (type) {
-    case _GeometryType.default.POINT:
-    case _GeometryType.default.MULTI_POINT:
-      {
-        break;
-      }
+  if (arr[0] <= target) {
+    return 0;
+  } else if (target <= arr[n - 1]) {
+    return n - 1;
+  } else {
+    var i;
 
-    case _GeometryType.default.LINE_STRING:
-    case _GeometryType.default.LINEAR_RING:
-      {
-        coordinates =
-        /** @type {import("./geom/SimpleGeometry.js").default} */
-        geometry.getCoordinates();
-        length = getLengthInternal(coordinates, radius);
-        break;
-      }
-
-    case _GeometryType.default.MULTI_LINE_STRING:
-    case _GeometryType.default.POLYGON:
-      {
-        coordinates =
-        /** @type {import("./geom/SimpleGeometry.js").default} */
-        geometry.getCoordinates();
-
-        for (i = 0, ii = coordinates.length; i < ii; ++i) {
-          length += getLengthInternal(coordinates[i], radius);
+    if (direction > 0) {
+      for (i = 1; i < n; ++i) {
+        if (arr[i] < target) {
+          return i - 1;
         }
-
-        break;
       }
-
-    case _GeometryType.default.MULTI_POLYGON:
-      {
-        coordinates =
-        /** @type {import("./geom/SimpleGeometry.js").default} */
-        geometry.getCoordinates();
-
-        for (i = 0, ii = coordinates.length; i < ii; ++i) {
-          coords = coordinates[i];
-
-          for (j = 0, jj = coords.length; j < jj; ++j) {
-            length += getLengthInternal(coords[j], radius);
+    } else if (direction < 0) {
+      for (i = 1; i < n; ++i) {
+        if (arr[i] <= target) {
+          return i;
+        }
+      }
+    } else {
+      for (i = 1; i < n; ++i) {
+        if (arr[i] == target) {
+          return i;
+        } else if (arr[i] < target) {
+          if (arr[i - 1] - target < target - arr[i]) {
+            return i - 1;
+          } else {
+            return i;
           }
         }
-
-        break;
       }
+    }
 
-    case _GeometryType.default.GEOMETRY_COLLECTION:
-      {
-        var geometries =
-        /** @type {import("./geom/GeometryCollection.js").default} */
-        geometry.getGeometries();
-
-        for (i = 0, ii = geometries.length; i < ii; ++i) {
-          length += getLength(geometries[i], opt_options);
-        }
-
-        break;
-      }
-
-    default:
-      {
-        throw new Error('Unsupported geometry type: ' + type);
-      }
+    return n - 1;
   }
-
-  return length;
 }
 /**
- * Returns the spherical area for a list of coordinates.
- *
- * [Reference](https://trs-new.jpl.nasa.gov/handle/2014/40409)
- * Robert. G. Chamberlain and William H. Duquette, "Some Algorithms for
- * Polygons on a Sphere", JPL Publication 07-03, Jet Propulsion
- * Laboratory, Pasadena, CA, June 2007
- *
- * @param {Array<import("./coordinate.js").Coordinate>} coordinates List of coordinates of a linear
- * ring. If the ring is oriented clockwise, the area will be positive,
- * otherwise it will be negative.
- * @param {number} radius The sphere radius.
- * @return {number} Area (in square meters).
+ * @param {Array<*>} arr Array.
+ * @param {number} begin Begin index.
+ * @param {number} end End index.
  */
 
 
-function getAreaInternal(coordinates, radius) {
-  var area = 0;
-  var len = coordinates.length;
-  var x1 = coordinates[len - 1][0];
-  var y1 = coordinates[len - 1][1];
-
-  for (var i = 0; i < len; i++) {
-    var x2 = coordinates[i][0];
-    var y2 = coordinates[i][1];
-    area += (0, _math.toRadians)(x2 - x1) * (2 + Math.sin((0, _math.toRadians)(y1)) + Math.sin((0, _math.toRadians)(y2)));
-    x1 = x2;
-    y1 = y2;
+function reverseSubArray(arr, begin, end) {
+  while (begin < end) {
+    var tmp = arr[begin];
+    arr[begin] = arr[end];
+    arr[end] = tmp;
+    ++begin;
+    --end;
   }
-
-  return area * radius * radius / 2.0;
 }
 /**
- * Get the spherical area of a geometry.  This is the area (in meters) assuming
- * that polygon edges are segments of great circles on a sphere.
- * @param {import("./geom/Geometry.js").default} geometry A geometry.
- * @param {SphereMetricOptions=} opt_options Options for the area
- *     calculation.  By default, geometries are assumed to be in 'EPSG:3857'.
- *     You can change this by providing a `projection` option.
- * @return {number} The spherical area (in square meters).
+ * @param {Array<VALUE>} arr The array to modify.
+ * @param {!Array<VALUE>|VALUE} data The elements or arrays of elements to add to arr.
+ * @template VALUE
+ */
+
+
+function extend(arr, data) {
+  var extension = Array.isArray(data) ? data : [data];
+  var length = extension.length;
+
+  for (var i = 0; i < length; i++) {
+    arr[arr.length] = extension[i];
+  }
+}
+/**
+ * @param {Array<VALUE>} arr The array to modify.
+ * @param {VALUE} obj The element to remove.
+ * @template VALUE
+ * @return {boolean} If the element was removed.
+ */
+
+
+function remove(arr, obj) {
+  var i = arr.indexOf(obj);
+  var found = i > -1;
+
+  if (found) {
+    arr.splice(i, 1);
+  }
+
+  return found;
+}
+/**
+ * @param {Array<VALUE>} arr The array to search in.
+ * @param {function(VALUE, number, ?) : boolean} func The function to compare.
+ * @template VALUE
+ * @return {VALUE|null} The element found or null.
+ */
+
+
+function find(arr, func) {
+  var length = arr.length >>> 0;
+  var value;
+
+  for (var i = 0; i < length; i++) {
+    value = arr[i];
+
+    if (func(value, i, arr)) {
+      return value;
+    }
+  }
+
+  return null;
+}
+/**
+ * @param {Array|Uint8ClampedArray} arr1 The first array to compare.
+ * @param {Array|Uint8ClampedArray} arr2 The second array to compare.
+ * @return {boolean} Whether the two arrays are equal.
+ */
+
+
+function equals(arr1, arr2) {
+  var len1 = arr1.length;
+
+  if (len1 !== arr2.length) {
+    return false;
+  }
+
+  for (var i = 0; i < len1; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+/**
+ * Sort the passed array such that the relative order of equal elements is preverved.
+ * See https://en.wikipedia.org/wiki/Sorting_algorithm#Stability for details.
+ * @param {Array<*>} arr The array to sort (modifies original).
+ * @param {!function(*, *): number} compareFnc Comparison function.
  * @api
  */
 
 
-function getArea(geometry, opt_options) {
-  var options = opt_options || {};
-  var radius = options.radius || DEFAULT_RADIUS;
-  var projection = options.projection || 'EPSG:3857';
-  var type = geometry.getType();
+function stableSort(arr, compareFnc) {
+  var length = arr.length;
+  var tmp = Array(arr.length);
+  var i;
 
-  if (type !== _GeometryType.default.GEOMETRY_COLLECTION) {
-    geometry = geometry.clone().transform(projection, 'EPSG:4326');
+  for (i = 0; i < length; i++) {
+    tmp[i] = {
+      index: i,
+      value: arr[i]
+    };
   }
 
-  var area = 0;
-  var coordinates, coords, i, ii, j, jj;
+  tmp.sort(function (a, b) {
+    return compareFnc(a.value, b.value) || a.index - b.index;
+  });
 
-  switch (type) {
-    case _GeometryType.default.POINT:
-    case _GeometryType.default.MULTI_POINT:
-    case _GeometryType.default.LINE_STRING:
-    case _GeometryType.default.MULTI_LINE_STRING:
-    case _GeometryType.default.LINEAR_RING:
-      {
-        break;
-      }
-
-    case _GeometryType.default.POLYGON:
-      {
-        coordinates =
-        /** @type {import("./geom/Polygon.js").default} */
-        geometry.getCoordinates();
-        area = Math.abs(getAreaInternal(coordinates[0], radius));
-
-        for (i = 1, ii = coordinates.length; i < ii; ++i) {
-          area -= Math.abs(getAreaInternal(coordinates[i], radius));
-        }
-
-        break;
-      }
-
-    case _GeometryType.default.MULTI_POLYGON:
-      {
-        coordinates =
-        /** @type {import("./geom/SimpleGeometry.js").default} */
-        geometry.getCoordinates();
-
-        for (i = 0, ii = coordinates.length; i < ii; ++i) {
-          coords = coordinates[i];
-          area += Math.abs(getAreaInternal(coords[0], radius));
-
-          for (j = 1, jj = coords.length; j < jj; ++j) {
-            area -= Math.abs(getAreaInternal(coords[j], radius));
-          }
-        }
-
-        break;
-      }
-
-    case _GeometryType.default.GEOMETRY_COLLECTION:
-      {
-        var geometries =
-        /** @type {import("./geom/GeometryCollection.js").default} */
-        geometry.getGeometries();
-
-        for (i = 0, ii = geometries.length; i < ii; ++i) {
-          area += getArea(geometries[i], opt_options);
-        }
-
-        break;
-      }
-
-    default:
-      {
-        throw new Error('Unsupported geometry type: ' + type);
-      }
+  for (i = 0; i < arr.length; i++) {
+    arr[i] = tmp[i].value;
   }
-
-  return area;
 }
 /**
- * Returns the coordinate at the given distance and bearing from `c1`.
- *
- * @param {import("./coordinate.js").Coordinate} c1 The origin point (`[lon, lat]` in degrees).
- * @param {number} distance The great-circle distance between the origin
- *     point and the target point.
- * @param {number} bearing The bearing (in radians).
- * @param {number=} opt_radius The sphere radius to use.  Defaults to the Earth's
- *     mean radius using the WGS84 ellipsoid.
- * @return {import("./coordinate.js").Coordinate} The target point.
+ * @param {Array<*>} arr The array to search in.
+ * @param {Function} func Comparison function.
+ * @return {number} Return index.
  */
 
 
-function offset(c1, distance, bearing, opt_radius) {
-  var radius = opt_radius || DEFAULT_RADIUS;
-  var lat1 = (0, _math.toRadians)(c1[1]);
-  var lon1 = (0, _math.toRadians)(c1[0]);
-  var dByR = distance / radius;
-  var lat = Math.asin(Math.sin(lat1) * Math.cos(dByR) + Math.cos(lat1) * Math.sin(dByR) * Math.cos(bearing));
-  var lon = lon1 + Math.atan2(Math.sin(bearing) * Math.sin(dByR) * Math.cos(lat1), Math.cos(dByR) - Math.sin(lat1) * Math.sin(lat));
-  return [(0, _math.toDegrees)(lon), (0, _math.toDegrees)(lat)];
+function findIndex(arr, func) {
+  var index;
+  var found = !arr.every(function (el, idx) {
+    index = idx;
+    return !func(el, idx, arr);
+  });
+  return found ? index : -1;
 }
-},{"./math.js":"node_modules/ol/math.js","./geom/GeometryType.js":"node_modules/ol/geom/GeometryType.js"}],"node_modules/ol/extent/Corner.js":[function(require,module,exports) {
+/**
+ * @param {Array<*>} arr The array to test.
+ * @param {Function=} opt_func Comparison function.
+ * @param {boolean=} opt_strict Strictly sorted (default false).
+ * @return {boolean} Return index.
+ */
+
+
+function isSorted(arr, opt_func, opt_strict) {
+  var compare = opt_func || numberSafeCompareFunction;
+  return arr.every(function (currentVal, index) {
+    if (index === 0) {
+      return true;
+    }
+
+    var res = compare(arr[index - 1], currentVal);
+    return !(res > 0 || opt_strict && res === 0);
+  });
+}
+},{}],"node_modules/ol/extent/Corner.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5129,7 +3497,763 @@ function applyTransform(extent, transformFn, opt_extent) {
   var ys = [coordinates[1], coordinates[3], coordinates[5], coordinates[7]];
   return _boundingExtentXYs(xs, ys, opt_extent);
 }
-},{"./asserts.js":"node_modules/ol/asserts.js","./extent/Corner.js":"node_modules/ol/extent/Corner.js","./extent/Relationship.js":"node_modules/ol/extent/Relationship.js"}],"node_modules/ol/proj/Units.js":[function(require,module,exports) {
+},{"./asserts.js":"node_modules/ol/asserts.js","./extent/Corner.js":"node_modules/ol/extent/Corner.js","./extent/Relationship.js":"node_modules/ol/extent/Relationship.js"}],"node_modules/ol/geom/GeometryLayout.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/geom/GeometryLayout
+ */
+
+/**
+ * The coordinate layout for geometries, indicating whether a 3rd or 4th z ('Z')
+ * or measure ('M') coordinate is available. Supported values are `'XY'`,
+ * `'XYZ'`, `'XYM'`, `'XYZM'`.
+ * @enum {string}
+ */
+var _default = {
+  XY: 'XY',
+  XYZ: 'XYZ',
+  XYM: 'XYM',
+  XYZM: 'XYZM'
+};
+exports.default = _default;
+},{}],"node_modules/ol/geom/GeometryType.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/geom/GeometryType
+ */
+
+/**
+ * The geometry type. One of `'Point'`, `'LineString'`, `'LinearRing'`,
+ * `'Polygon'`, `'MultiPoint'`, `'MultiLineString'`, `'MultiPolygon'`,
+ * `'GeometryCollection'`, `'Circle'`.
+ * @enum {string}
+ */
+var _default = {
+  POINT: 'Point',
+  LINE_STRING: 'LineString',
+  LINEAR_RING: 'LinearRing',
+  POLYGON: 'Polygon',
+  MULTI_POINT: 'MultiPoint',
+  MULTI_LINE_STRING: 'MultiLineString',
+  MULTI_POLYGON: 'MultiPolygon',
+  GEOMETRY_COLLECTION: 'GeometryCollection',
+  CIRCLE: 'Circle'
+};
+exports.default = _default;
+},{}],"node_modules/ol/geom/flat/transform.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.transform2D = transform2D;
+exports.rotate = rotate;
+exports.scale = scale;
+exports.translate = translate;
+
+/**
+ * @module ol/geom/flat/transform
+ */
+
+/**
+ * @param {Array<number>} flatCoordinates Flat coordinates.
+ * @param {number} offset Offset.
+ * @param {number} end End.
+ * @param {number} stride Stride.
+ * @param {import("../../transform.js").Transform} transform Transform.
+ * @param {Array<number>=} opt_dest Destination.
+ * @return {Array<number>} Transformed coordinates.
+ */
+function transform2D(flatCoordinates, offset, end, stride, transform, opt_dest) {
+  var dest = opt_dest ? opt_dest : [];
+  var i = 0;
+
+  for (var j = offset; j < end; j += stride) {
+    var x = flatCoordinates[j];
+    var y = flatCoordinates[j + 1];
+    dest[i++] = transform[0] * x + transform[2] * y + transform[4];
+    dest[i++] = transform[1] * x + transform[3] * y + transform[5];
+  }
+
+  if (opt_dest && dest.length != i) {
+    dest.length = i;
+  }
+
+  return dest;
+}
+/**
+ * @param {Array<number>} flatCoordinates Flat coordinates.
+ * @param {number} offset Offset.
+ * @param {number} end End.
+ * @param {number} stride Stride.
+ * @param {number} angle Angle.
+ * @param {Array<number>} anchor Rotation anchor point.
+ * @param {Array<number>=} opt_dest Destination.
+ * @return {Array<number>} Transformed coordinates.
+ */
+
+
+function rotate(flatCoordinates, offset, end, stride, angle, anchor, opt_dest) {
+  var dest = opt_dest ? opt_dest : [];
+  var cos = Math.cos(angle);
+  var sin = Math.sin(angle);
+  var anchorX = anchor[0];
+  var anchorY = anchor[1];
+  var i = 0;
+
+  for (var j = offset; j < end; j += stride) {
+    var deltaX = flatCoordinates[j] - anchorX;
+    var deltaY = flatCoordinates[j + 1] - anchorY;
+    dest[i++] = anchorX + deltaX * cos - deltaY * sin;
+    dest[i++] = anchorY + deltaX * sin + deltaY * cos;
+
+    for (var k = j + 2; k < j + stride; ++k) {
+      dest[i++] = flatCoordinates[k];
+    }
+  }
+
+  if (opt_dest && dest.length != i) {
+    dest.length = i;
+  }
+
+  return dest;
+}
+/**
+ * Scale the coordinates.
+ * @param {Array<number>} flatCoordinates Flat coordinates.
+ * @param {number} offset Offset.
+ * @param {number} end End.
+ * @param {number} stride Stride.
+ * @param {number} sx Scale factor in the x-direction.
+ * @param {number} sy Scale factor in the y-direction.
+ * @param {Array<number>} anchor Scale anchor point.
+ * @param {Array<number>=} opt_dest Destination.
+ * @return {Array<number>} Transformed coordinates.
+ */
+
+
+function scale(flatCoordinates, offset, end, stride, sx, sy, anchor, opt_dest) {
+  var dest = opt_dest ? opt_dest : [];
+  var anchorX = anchor[0];
+  var anchorY = anchor[1];
+  var i = 0;
+
+  for (var j = offset; j < end; j += stride) {
+    var deltaX = flatCoordinates[j] - anchorX;
+    var deltaY = flatCoordinates[j + 1] - anchorY;
+    dest[i++] = anchorX + sx * deltaX;
+    dest[i++] = anchorY + sy * deltaY;
+
+    for (var k = j + 2; k < j + stride; ++k) {
+      dest[i++] = flatCoordinates[k];
+    }
+  }
+
+  if (opt_dest && dest.length != i) {
+    dest.length = i;
+  }
+
+  return dest;
+}
+/**
+ * @param {Array<number>} flatCoordinates Flat coordinates.
+ * @param {number} offset Offset.
+ * @param {number} end End.
+ * @param {number} stride Stride.
+ * @param {number} deltaX Delta X.
+ * @param {number} deltaY Delta Y.
+ * @param {Array<number>=} opt_dest Destination.
+ * @return {Array<number>} Transformed coordinates.
+ */
+
+
+function translate(flatCoordinates, offset, end, stride, deltaX, deltaY, opt_dest) {
+  var dest = opt_dest ? opt_dest : [];
+  var i = 0;
+
+  for (var j = offset; j < end; j += stride) {
+    dest[i++] = flatCoordinates[j] + deltaX;
+    dest[i++] = flatCoordinates[j + 1] + deltaY;
+
+    for (var k = j + 2; k < j + stride; ++k) {
+      dest[i++] = flatCoordinates[k];
+    }
+  }
+
+  if (opt_dest && dest.length != i) {
+    dest.length = i;
+  }
+
+  return dest;
+}
+},{}],"node_modules/ol/math.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.clamp = clamp;
+exports.roundUpToPowerOfTwo = roundUpToPowerOfTwo;
+exports.squaredSegmentDistance = squaredSegmentDistance;
+exports.squaredDistance = squaredDistance;
+exports.solveLinearSystem = solveLinearSystem;
+exports.toDegrees = toDegrees;
+exports.toRadians = toRadians;
+exports.modulo = modulo;
+exports.lerp = lerp;
+exports.cosh = void 0;
+
+var _asserts = require("./asserts.js");
+
+/**
+ * @module ol/math
+ */
+
+/**
+ * Takes a number and clamps it to within the provided bounds.
+ * @param {number} value The input number.
+ * @param {number} min The minimum value to return.
+ * @param {number} max The maximum value to return.
+ * @return {number} The input number if it is within bounds, or the nearest
+ *     number within the bounds.
+ */
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+/**
+ * Return the hyperbolic cosine of a given number. The method will use the
+ * native `Math.cosh` function if it is available, otherwise the hyperbolic
+ * cosine will be calculated via the reference implementation of the Mozilla
+ * developer network.
+ *
+ * @param {number} x X.
+ * @return {number} Hyperbolic cosine of x.
+ */
+
+
+var cosh = function () {
+  // Wrapped in a iife, to save the overhead of checking for the native
+  // implementation on every invocation.
+  var cosh;
+
+  if ('cosh' in Math) {
+    // The environment supports the native Math.cosh function, use it…
+    cosh = Math.cosh;
+  } else {
+    // … else, use the reference implementation of MDN:
+    cosh = function (x) {
+      var y =
+      /** @type {Math} */
+      Math.exp(x);
+      return (y + 1 / y) / 2;
+    };
+  }
+
+  return cosh;
+}();
+/**
+ * @param {number} x X.
+ * @return {number} The smallest power of two greater than or equal to x.
+ */
+
+
+exports.cosh = cosh;
+
+function roundUpToPowerOfTwo(x) {
+  (0, _asserts.assert)(0 < x, 29); // `x` must be greater than `0`
+
+  return Math.pow(2, Math.ceil(Math.log(x) / Math.LN2));
+}
+/**
+ * Returns the square of the closest distance between the point (x, y) and the
+ * line segment (x1, y1) to (x2, y2).
+ * @param {number} x X.
+ * @param {number} y Y.
+ * @param {number} x1 X1.
+ * @param {number} y1 Y1.
+ * @param {number} x2 X2.
+ * @param {number} y2 Y2.
+ * @return {number} Squared distance.
+ */
+
+
+function squaredSegmentDistance(x, y, x1, y1, x2, y2) {
+  var dx = x2 - x1;
+  var dy = y2 - y1;
+
+  if (dx !== 0 || dy !== 0) {
+    var t = ((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy);
+
+    if (t > 1) {
+      x1 = x2;
+      y1 = y2;
+    } else if (t > 0) {
+      x1 += dx * t;
+      y1 += dy * t;
+    }
+  }
+
+  return squaredDistance(x, y, x1, y1);
+}
+/**
+ * Returns the square of the distance between the points (x1, y1) and (x2, y2).
+ * @param {number} x1 X1.
+ * @param {number} y1 Y1.
+ * @param {number} x2 X2.
+ * @param {number} y2 Y2.
+ * @return {number} Squared distance.
+ */
+
+
+function squaredDistance(x1, y1, x2, y2) {
+  var dx = x2 - x1;
+  var dy = y2 - y1;
+  return dx * dx + dy * dy;
+}
+/**
+ * Solves system of linear equations using Gaussian elimination method.
+ *
+ * @param {Array<Array<number>>} mat Augmented matrix (n x n + 1 column)
+ *                                     in row-major order.
+ * @return {Array<number>} The resulting vector.
+ */
+
+
+function solveLinearSystem(mat) {
+  var n = mat.length;
+
+  for (var i = 0; i < n; i++) {
+    // Find max in the i-th column (ignoring i - 1 first rows)
+    var maxRow = i;
+    var maxEl = Math.abs(mat[i][i]);
+
+    for (var r = i + 1; r < n; r++) {
+      var absValue = Math.abs(mat[r][i]);
+
+      if (absValue > maxEl) {
+        maxEl = absValue;
+        maxRow = r;
+      }
+    }
+
+    if (maxEl === 0) {
+      return null; // matrix is singular
+    } // Swap max row with i-th (current) row
+
+
+    var tmp = mat[maxRow];
+    mat[maxRow] = mat[i];
+    mat[i] = tmp; // Subtract the i-th row to make all the remaining rows 0 in the i-th column
+
+    for (var j = i + 1; j < n; j++) {
+      var coef = -mat[j][i] / mat[i][i];
+
+      for (var k = i; k < n + 1; k++) {
+        if (i == k) {
+          mat[j][k] = 0;
+        } else {
+          mat[j][k] += coef * mat[i][k];
+        }
+      }
+    }
+  } // Solve Ax=b for upper triangular matrix A (mat)
+
+
+  var x = new Array(n);
+
+  for (var l = n - 1; l >= 0; l--) {
+    x[l] = mat[l][n] / mat[l][l];
+
+    for (var m = l - 1; m >= 0; m--) {
+      mat[m][n] -= mat[m][l] * x[l];
+    }
+  }
+
+  return x;
+}
+/**
+ * Converts radians to to degrees.
+ *
+ * @param {number} angleInRadians Angle in radians.
+ * @return {number} Angle in degrees.
+ */
+
+
+function toDegrees(angleInRadians) {
+  return angleInRadians * 180 / Math.PI;
+}
+/**
+ * Converts degrees to radians.
+ *
+ * @param {number} angleInDegrees Angle in degrees.
+ * @return {number} Angle in radians.
+ */
+
+
+function toRadians(angleInDegrees) {
+  return angleInDegrees * Math.PI / 180;
+}
+/**
+ * Returns the modulo of a / b, depending on the sign of b.
+ *
+ * @param {number} a Dividend.
+ * @param {number} b Divisor.
+ * @return {number} Modulo.
+ */
+
+
+function modulo(a, b) {
+  var r = a % b;
+  return r * b < 0 ? r + b : r;
+}
+/**
+ * Calculates the linearly interpolated value of x between a and b.
+ *
+ * @param {number} a Number
+ * @param {number} b Number
+ * @param {number} x Value to be interpolated.
+ * @return {number} Interpolated value.
+ */
+
+
+function lerp(a, b, x) {
+  return a + x * (b - a);
+}
+},{"./asserts.js":"node_modules/ol/asserts.js"}],"node_modules/ol/sphere.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getDistance = getDistance;
+exports.getLength = getLength;
+exports.getArea = getArea;
+exports.offset = offset;
+exports.DEFAULT_RADIUS = void 0;
+
+var _math = require("./math.js");
+
+var _GeometryType = _interopRequireDefault(require("./geom/GeometryType.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @license
+ * Latitude/longitude spherical geodesy formulae taken from
+ * http://www.movable-type.co.uk/scripts/latlong.html
+ * Licensed under CC-BY-3.0.
+ */
+
+/**
+ * @module ol/sphere
+ */
+
+/**
+ * Object literal with options for the {@link getLength} or {@link getArea}
+ * functions.
+ * @typedef {Object} SphereMetricOptions
+ * @property {import("./proj.js").ProjectionLike} [projection='EPSG:3857']
+ * Projection of the  geometry.  By default, the geometry is assumed to be in
+ * Web Mercator.
+ * @property {number} [radius=6371008.8] Sphere radius.  By default, the radius of the
+ * earth is used (Clarke 1866 Authalic Sphere).
+ */
+
+/**
+ * The mean Earth radius (1/3 * (2a + b)) for the WGS84 ellipsoid.
+ * https://en.wikipedia.org/wiki/Earth_radius#Mean_radius
+ * @type {number}
+ */
+var DEFAULT_RADIUS = 6371008.8;
+/**
+ * Get the great circle distance (in meters) between two geographic coordinates.
+ * @param {Array} c1 Starting coordinate.
+ * @param {Array} c2 Ending coordinate.
+ * @param {number=} opt_radius The sphere radius to use.  Defaults to the Earth's
+ *     mean radius using the WGS84 ellipsoid.
+ * @return {number} The great circle distance between the points (in meters).
+ * @api
+ */
+
+exports.DEFAULT_RADIUS = DEFAULT_RADIUS;
+
+function getDistance(c1, c2, opt_radius) {
+  var radius = opt_radius || DEFAULT_RADIUS;
+  var lat1 = (0, _math.toRadians)(c1[1]);
+  var lat2 = (0, _math.toRadians)(c2[1]);
+  var deltaLatBy2 = (lat2 - lat1) / 2;
+  var deltaLonBy2 = (0, _math.toRadians)(c2[0] - c1[0]) / 2;
+  var a = Math.sin(deltaLatBy2) * Math.sin(deltaLatBy2) + Math.sin(deltaLonBy2) * Math.sin(deltaLonBy2) * Math.cos(lat1) * Math.cos(lat2);
+  return 2 * radius * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+/**
+ * Get the cumulative great circle length of linestring coordinates (geographic).
+ * @param {Array} coordinates Linestring coordinates.
+ * @param {number} radius The sphere radius to use.
+ * @return {number} The length (in meters).
+ */
+
+
+function getLengthInternal(coordinates, radius) {
+  var length = 0;
+
+  for (var i = 0, ii = coordinates.length; i < ii - 1; ++i) {
+    length += getDistance(coordinates[i], coordinates[i + 1], radius);
+  }
+
+  return length;
+}
+/**
+ * Get the spherical length of a geometry.  This length is the sum of the
+ * great circle distances between coordinates.  For polygons, the length is
+ * the sum of all rings.  For points, the length is zero.  For multi-part
+ * geometries, the length is the sum of the length of each part.
+ * @param {import("./geom/Geometry.js").default} geometry A geometry.
+ * @param {SphereMetricOptions=} opt_options Options for the
+ * length calculation.  By default, geometries are assumed to be in 'EPSG:3857'.
+ * You can change this by providing a `projection` option.
+ * @return {number} The spherical length (in meters).
+ * @api
+ */
+
+
+function getLength(geometry, opt_options) {
+  var options = opt_options || {};
+  var radius = options.radius || DEFAULT_RADIUS;
+  var projection = options.projection || 'EPSG:3857';
+  var type = geometry.getType();
+
+  if (type !== _GeometryType.default.GEOMETRY_COLLECTION) {
+    geometry = geometry.clone().transform(projection, 'EPSG:4326');
+  }
+
+  var length = 0;
+  var coordinates, coords, i, ii, j, jj;
+
+  switch (type) {
+    case _GeometryType.default.POINT:
+    case _GeometryType.default.MULTI_POINT:
+      {
+        break;
+      }
+
+    case _GeometryType.default.LINE_STRING:
+    case _GeometryType.default.LINEAR_RING:
+      {
+        coordinates =
+        /** @type {import("./geom/SimpleGeometry.js").default} */
+        geometry.getCoordinates();
+        length = getLengthInternal(coordinates, radius);
+        break;
+      }
+
+    case _GeometryType.default.MULTI_LINE_STRING:
+    case _GeometryType.default.POLYGON:
+      {
+        coordinates =
+        /** @type {import("./geom/SimpleGeometry.js").default} */
+        geometry.getCoordinates();
+
+        for (i = 0, ii = coordinates.length; i < ii; ++i) {
+          length += getLengthInternal(coordinates[i], radius);
+        }
+
+        break;
+      }
+
+    case _GeometryType.default.MULTI_POLYGON:
+      {
+        coordinates =
+        /** @type {import("./geom/SimpleGeometry.js").default} */
+        geometry.getCoordinates();
+
+        for (i = 0, ii = coordinates.length; i < ii; ++i) {
+          coords = coordinates[i];
+
+          for (j = 0, jj = coords.length; j < jj; ++j) {
+            length += getLengthInternal(coords[j], radius);
+          }
+        }
+
+        break;
+      }
+
+    case _GeometryType.default.GEOMETRY_COLLECTION:
+      {
+        var geometries =
+        /** @type {import("./geom/GeometryCollection.js").default} */
+        geometry.getGeometries();
+
+        for (i = 0, ii = geometries.length; i < ii; ++i) {
+          length += getLength(geometries[i], opt_options);
+        }
+
+        break;
+      }
+
+    default:
+      {
+        throw new Error('Unsupported geometry type: ' + type);
+      }
+  }
+
+  return length;
+}
+/**
+ * Returns the spherical area for a list of coordinates.
+ *
+ * [Reference](https://trs-new.jpl.nasa.gov/handle/2014/40409)
+ * Robert. G. Chamberlain and William H. Duquette, "Some Algorithms for
+ * Polygons on a Sphere", JPL Publication 07-03, Jet Propulsion
+ * Laboratory, Pasadena, CA, June 2007
+ *
+ * @param {Array<import("./coordinate.js").Coordinate>} coordinates List of coordinates of a linear
+ * ring. If the ring is oriented clockwise, the area will be positive,
+ * otherwise it will be negative.
+ * @param {number} radius The sphere radius.
+ * @return {number} Area (in square meters).
+ */
+
+
+function getAreaInternal(coordinates, radius) {
+  var area = 0;
+  var len = coordinates.length;
+  var x1 = coordinates[len - 1][0];
+  var y1 = coordinates[len - 1][1];
+
+  for (var i = 0; i < len; i++) {
+    var x2 = coordinates[i][0];
+    var y2 = coordinates[i][1];
+    area += (0, _math.toRadians)(x2 - x1) * (2 + Math.sin((0, _math.toRadians)(y1)) + Math.sin((0, _math.toRadians)(y2)));
+    x1 = x2;
+    y1 = y2;
+  }
+
+  return area * radius * radius / 2.0;
+}
+/**
+ * Get the spherical area of a geometry.  This is the area (in meters) assuming
+ * that polygon edges are segments of great circles on a sphere.
+ * @param {import("./geom/Geometry.js").default} geometry A geometry.
+ * @param {SphereMetricOptions=} opt_options Options for the area
+ *     calculation.  By default, geometries are assumed to be in 'EPSG:3857'.
+ *     You can change this by providing a `projection` option.
+ * @return {number} The spherical area (in square meters).
+ * @api
+ */
+
+
+function getArea(geometry, opt_options) {
+  var options = opt_options || {};
+  var radius = options.radius || DEFAULT_RADIUS;
+  var projection = options.projection || 'EPSG:3857';
+  var type = geometry.getType();
+
+  if (type !== _GeometryType.default.GEOMETRY_COLLECTION) {
+    geometry = geometry.clone().transform(projection, 'EPSG:4326');
+  }
+
+  var area = 0;
+  var coordinates, coords, i, ii, j, jj;
+
+  switch (type) {
+    case _GeometryType.default.POINT:
+    case _GeometryType.default.MULTI_POINT:
+    case _GeometryType.default.LINE_STRING:
+    case _GeometryType.default.MULTI_LINE_STRING:
+    case _GeometryType.default.LINEAR_RING:
+      {
+        break;
+      }
+
+    case _GeometryType.default.POLYGON:
+      {
+        coordinates =
+        /** @type {import("./geom/Polygon.js").default} */
+        geometry.getCoordinates();
+        area = Math.abs(getAreaInternal(coordinates[0], radius));
+
+        for (i = 1, ii = coordinates.length; i < ii; ++i) {
+          area -= Math.abs(getAreaInternal(coordinates[i], radius));
+        }
+
+        break;
+      }
+
+    case _GeometryType.default.MULTI_POLYGON:
+      {
+        coordinates =
+        /** @type {import("./geom/SimpleGeometry.js").default} */
+        geometry.getCoordinates();
+
+        for (i = 0, ii = coordinates.length; i < ii; ++i) {
+          coords = coordinates[i];
+          area += Math.abs(getAreaInternal(coords[0], radius));
+
+          for (j = 1, jj = coords.length; j < jj; ++j) {
+            area -= Math.abs(getAreaInternal(coords[j], radius));
+          }
+        }
+
+        break;
+      }
+
+    case _GeometryType.default.GEOMETRY_COLLECTION:
+      {
+        var geometries =
+        /** @type {import("./geom/GeometryCollection.js").default} */
+        geometry.getGeometries();
+
+        for (i = 0, ii = geometries.length; i < ii; ++i) {
+          area += getArea(geometries[i], opt_options);
+        }
+
+        break;
+      }
+
+    default:
+      {
+        throw new Error('Unsupported geometry type: ' + type);
+      }
+  }
+
+  return area;
+}
+/**
+ * Returns the coordinate at the given distance and bearing from `c1`.
+ *
+ * @param {import("./coordinate.js").Coordinate} c1 The origin point (`[lon, lat]` in degrees).
+ * @param {number} distance The great-circle distance between the origin
+ *     point and the target point.
+ * @param {number} bearing The bearing (in radians).
+ * @param {number=} opt_radius The sphere radius to use.  Defaults to the Earth's
+ *     mean radius using the WGS84 ellipsoid.
+ * @return {import("./coordinate.js").Coordinate} The target point.
+ */
+
+
+function offset(c1, distance, bearing, opt_radius) {
+  var radius = opt_radius || DEFAULT_RADIUS;
+  var lat1 = (0, _math.toRadians)(c1[1]);
+  var lon1 = (0, _math.toRadians)(c1[0]);
+  var dByR = distance / radius;
+  var lat = Math.asin(Math.sin(lat1) * Math.cos(dByR) + Math.cos(lat1) * Math.sin(dByR) * Math.cos(bearing));
+  var lon = lon1 + Math.atan2(Math.sin(bearing) * Math.sin(dByR) * Math.cos(lat1), Math.cos(dByR) - Math.sin(lat1) * Math.sin(lat));
+  return [(0, _math.toDegrees)(lon), (0, _math.toDegrees)(lat)];
+}
+},{"./math.js":"node_modules/ol/math.js","./geom/GeometryType.js":"node_modules/ol/geom/GeometryType.js"}],"node_modules/ol/proj/Units.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6408,5088 +5532,7 @@ function addCommon() {
 }
 
 addCommon();
-},{"./sphere.js":"node_modules/ol/sphere.js","./extent.js":"node_modules/ol/extent.js","./math.js":"node_modules/ol/math.js","./proj/epsg3857.js":"node_modules/ol/proj/epsg3857.js","./proj/epsg4326.js":"node_modules/ol/proj/epsg4326.js","./proj/Projection.js":"node_modules/ol/proj/Projection.js","./proj/Units.js":"node_modules/ol/proj/Units.js","./proj/projections.js":"node_modules/ol/proj/projections.js","./proj/transforms.js":"node_modules/ol/proj/transforms.js"}],"node_modules/ol/control/MousePosition.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.render = render;
-exports.default = void 0;
-
-var _events = require("../events.js");
-
-var _EventType = _interopRequireDefault(require("../events/EventType.js"));
-
-var _Object = require("../Object.js");
-
-var _Control = _interopRequireDefault(require("./Control.js"));
-
-var _proj = require("../proj.js");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/control/MousePosition
- */
-
-/**
- * @type {string}
- */
-var PROJECTION = 'projection';
-/**
- * @type {string}
- */
-
-var COORDINATE_FORMAT = 'coordinateFormat';
-/**
- * @typedef {Object} Options
- * @property {string} [className='ol-mouse-position'] CSS class name.
- * @property {import("../coordinate.js").CoordinateFormat} [coordinateFormat] Coordinate format.
- * @property {import("../proj.js").ProjectionLike} [projection] Projection. Default is the view projection.
- * @property {function(import("../MapEvent.js").default)} [render] Function called when the
- * control should be re-rendered. This is called in a `requestAnimationFrame`
- * callback.
- * @property {HTMLElement|string} [target] Specify a target if you want the
- * control to be rendered outside of the map's viewport.
- * @property {string} [undefinedHTML='&#160;'] Markup to show when coordinates are not
- * available (e.g. when the pointer leaves the map viewport).  By default, the last position
- * will be replaced with `'&#160;'` (`&nbsp;`) when the pointer leaves the viewport.  To
- * retain the last rendered position, set this option to something falsey (like an empty
- * string `''`).
- */
-
-/**
- * @classdesc
- * A control to show the 2D coordinates of the mouse cursor. By default, these
- * are in the view projection, but can be in any supported projection.
- * By default the control is shown in the top right corner of the map, but this
- * can be changed by using the css selector `.ol-mouse-position`.
- *
- * On touch devices, which usually do not have a mouse cursor, the coordinates
- * of the currently touched position are shown.
- *
- * @api
- */
-
-var MousePosition =
-/*@__PURE__*/
-function (Control) {
-  function MousePosition(opt_options) {
-    var options = opt_options ? opt_options : {};
-    var element = document.createElement('div');
-    element.className = options.className !== undefined ? options.className : 'ol-mouse-position';
-    Control.call(this, {
-      element: element,
-      render: options.render || render,
-      target: options.target
-    });
-    (0, _events.listen)(this, (0, _Object.getChangeEventType)(PROJECTION), this.handleProjectionChanged_, this);
-
-    if (options.coordinateFormat) {
-      this.setCoordinateFormat(options.coordinateFormat);
-    }
-
-    if (options.projection) {
-      this.setProjection(options.projection);
-    }
-    /**
-     * @private
-     * @type {string}
-     */
-
-
-    this.undefinedHTML_ = options.undefinedHTML !== undefined ? options.undefinedHTML : '&#160;';
-    /**
-     * @private
-     * @type {boolean}
-     */
-
-    this.renderOnMouseOut_ = !!this.undefinedHTML_;
-    /**
-     * @private
-     * @type {string}
-     */
-
-    this.renderedHTML_ = element.innerHTML;
-    /**
-     * @private
-     * @type {import("../proj/Projection.js").default}
-     */
-
-    this.mapProjection_ = null;
-    /**
-     * @private
-     * @type {?import("../proj.js").TransformFunction}
-     */
-
-    this.transform_ = null;
-    /**
-     * @private
-     * @type {import("../pixel.js").Pixel}
-     */
-
-    this.lastMouseMovePixel_ = null;
-  }
-
-  if (Control) MousePosition.__proto__ = Control;
-  MousePosition.prototype = Object.create(Control && Control.prototype);
-  MousePosition.prototype.constructor = MousePosition;
-  /**
-   * @private
-   */
-
-  MousePosition.prototype.handleProjectionChanged_ = function handleProjectionChanged_() {
-    this.transform_ = null;
-  };
-  /**
-   * Return the coordinate format type used to render the current position or
-   * undefined.
-   * @return {import("../coordinate.js").CoordinateFormat|undefined} The format to render the current
-   *     position in.
-   * @observable
-   * @api
-   */
-
-
-  MousePosition.prototype.getCoordinateFormat = function getCoordinateFormat() {
-    return (
-      /** @type {import("../coordinate.js").CoordinateFormat|undefined} */
-      this.get(COORDINATE_FORMAT)
-    );
-  };
-  /**
-   * Return the projection that is used to report the mouse position.
-   * @return {import("../proj/Projection.js").default|undefined} The projection to report mouse
-   *     position in.
-   * @observable
-   * @api
-   */
-
-
-  MousePosition.prototype.getProjection = function getProjection() {
-    return (
-      /** @type {import("../proj/Projection.js").default|undefined} */
-      this.get(PROJECTION)
-    );
-  };
-  /**
-   * @param {Event} event Browser event.
-   * @protected
-   */
-
-
-  MousePosition.prototype.handleMouseMove = function handleMouseMove(event) {
-    var map = this.getMap();
-    this.lastMouseMovePixel_ = map.getEventPixel(event);
-    this.updateHTML_(this.lastMouseMovePixel_);
-  };
-  /**
-   * @param {Event} event Browser event.
-   * @protected
-   */
-
-
-  MousePosition.prototype.handleMouseOut = function handleMouseOut(event) {
-    this.updateHTML_(null);
-    this.lastMouseMovePixel_ = null;
-  };
-  /**
-   * @inheritDoc
-   * @api
-   */
-
-
-  MousePosition.prototype.setMap = function setMap(map) {
-    Control.prototype.setMap.call(this, map);
-
-    if (map) {
-      var viewport = map.getViewport();
-      this.listenerKeys.push((0, _events.listen)(viewport, _EventType.default.MOUSEMOVE, this.handleMouseMove, this), (0, _events.listen)(viewport, _EventType.default.TOUCHSTART, this.handleMouseMove, this));
-
-      if (this.renderOnMouseOut_) {
-        this.listenerKeys.push((0, _events.listen)(viewport, _EventType.default.MOUSEOUT, this.handleMouseOut, this), (0, _events.listen)(viewport, _EventType.default.TOUCHEND, this.handleMouseOut, this));
-      }
-    }
-  };
-  /**
-   * Set the coordinate format type used to render the current position.
-   * @param {import("../coordinate.js").CoordinateFormat} format The format to render the current
-   *     position in.
-   * @observable
-   * @api
-   */
-
-
-  MousePosition.prototype.setCoordinateFormat = function setCoordinateFormat(format) {
-    this.set(COORDINATE_FORMAT, format);
-  };
-  /**
-   * Set the projection that is used to report the mouse position.
-   * @param {import("../proj.js").ProjectionLike} projection The projection to report mouse
-   *     position in.
-   * @observable
-   * @api
-   */
-
-
-  MousePosition.prototype.setProjection = function setProjection(projection) {
-    this.set(PROJECTION, (0, _proj.get)(projection));
-  };
-  /**
-   * @param {?import("../pixel.js").Pixel} pixel Pixel.
-   * @private
-   */
-
-
-  MousePosition.prototype.updateHTML_ = function updateHTML_(pixel) {
-    var html = this.undefinedHTML_;
-
-    if (pixel && this.mapProjection_) {
-      if (!this.transform_) {
-        var projection = this.getProjection();
-
-        if (projection) {
-          this.transform_ = (0, _proj.getTransformFromProjections)(this.mapProjection_, projection);
-        } else {
-          this.transform_ = _proj.identityTransform;
-        }
-      }
-
-      var map = this.getMap();
-      var coordinate = map.getCoordinateFromPixel(pixel);
-
-      if (coordinate) {
-        this.transform_(coordinate, coordinate);
-        var coordinateFormat = this.getCoordinateFormat();
-
-        if (coordinateFormat) {
-          html = coordinateFormat(coordinate);
-        } else {
-          html = coordinate.toString();
-        }
-      }
-    }
-
-    if (!this.renderedHTML_ || html !== this.renderedHTML_) {
-      this.element.innerHTML = html;
-      this.renderedHTML_ = html;
-    }
-  };
-
-  return MousePosition;
-}(_Control.default);
-/**
- * Update the projection. Rendering of the coordinates is done in
- * `handleMouseMove` and `handleMouseUp`.
- * @param {import("../MapEvent.js").default} mapEvent Map event.
- * @this {MousePosition}
- * @api
- */
-
-
-function render(mapEvent) {
-  var frameState = mapEvent.frameState;
-
-  if (!frameState) {
-    this.mapProjection_ = null;
-  } else {
-    if (this.mapProjection_ != frameState.viewState.projection) {
-      this.mapProjection_ = frameState.viewState.projection;
-      this.transform_ = null;
-    }
-  }
-}
-
-var _default = MousePosition;
-exports.default = _default;
-},{"../events.js":"node_modules/ol/events.js","../events/EventType.js":"node_modules/ol/events/EventType.js","../Object.js":"node_modules/ol/Object.js","./Control.js":"node_modules/ol/control/Control.js","../proj.js":"node_modules/ol/proj.js"}],"node_modules/ol/CollectionEventType.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/CollectionEventType
- */
-
-/**
- * @enum {string}
- */
-var _default = {
-  /**
-   * Triggered when an item is added to the collection.
-   * @event module:ol/Collection.CollectionEvent#add
-   * @api
-   */
-  ADD: 'add',
-
-  /**
-   * Triggered when an item is removed from the collection.
-   * @event module:ol/Collection.CollectionEvent#remove
-   * @api
-   */
-  REMOVE: 'remove'
-};
-exports.default = _default;
-},{}],"node_modules/ol/Collection.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = exports.CollectionEvent = void 0;
-
-var _AssertionError = _interopRequireDefault(require("./AssertionError.js"));
-
-var _CollectionEventType = _interopRequireDefault(require("./CollectionEventType.js"));
-
-var _Object = _interopRequireDefault(require("./Object.js"));
-
-var _Event = _interopRequireDefault(require("./events/Event.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/Collection
- */
-
-/**
- * @enum {string}
- * @private
- */
-var Property = {
-  LENGTH: 'length'
-};
-/**
- * @classdesc
- * Events emitted by {@link module:ol/Collection~Collection} instances are instances of this
- * type.
- */
-
-var CollectionEvent =
-/*@__PURE__*/
-function (Event) {
-  function CollectionEvent(type, opt_element) {
-    Event.call(this, type);
-    /**
-     * The element that is added to or removed from the collection.
-     * @type {*}
-     * @api
-     */
-
-    this.element = opt_element;
-  }
-
-  if (Event) CollectionEvent.__proto__ = Event;
-  CollectionEvent.prototype = Object.create(Event && Event.prototype);
-  CollectionEvent.prototype.constructor = CollectionEvent;
-  return CollectionEvent;
-}(_Event.default);
-/**
- * @typedef {Object} Options
- * @property {boolean} [unique=false] Disallow the same item from being added to
- * the collection twice.
- */
-
-/**
- * @classdesc
- * An expanded version of standard JS Array, adding convenience methods for
- * manipulation. Add and remove changes to the Collection trigger a Collection
- * event. Note that this does not cover changes to the objects _within_ the
- * Collection; they trigger events on the appropriate object, not on the
- * Collection as a whole.
- *
- * @fires CollectionEvent
- *
- * @template T
- * @api
- */
-
-
-exports.CollectionEvent = CollectionEvent;
-
-var Collection =
-/*@__PURE__*/
-function (BaseObject) {
-  function Collection(opt_array, opt_options) {
-    BaseObject.call(this);
-    var options = opt_options || {};
-    /**
-     * @private
-     * @type {boolean}
-     */
-
-    this.unique_ = !!options.unique;
-    /**
-     * @private
-     * @type {!Array<T>}
-     */
-
-    this.array_ = opt_array ? opt_array : [];
-
-    if (this.unique_) {
-      for (var i = 0, ii = this.array_.length; i < ii; ++i) {
-        this.assertUnique_(this.array_[i], i);
-      }
-    }
-
-    this.updateLength_();
-  }
-
-  if (BaseObject) Collection.__proto__ = BaseObject;
-  Collection.prototype = Object.create(BaseObject && BaseObject.prototype);
-  Collection.prototype.constructor = Collection;
-  /**
-   * Remove all elements from the collection.
-   * @api
-   */
-
-  Collection.prototype.clear = function clear() {
-    while (this.getLength() > 0) {
-      this.pop();
-    }
-  };
-  /**
-   * Add elements to the collection.  This pushes each item in the provided array
-   * to the end of the collection.
-   * @param {!Array<T>} arr Array.
-   * @return {Collection<T>} This collection.
-   * @api
-   */
-
-
-  Collection.prototype.extend = function extend(arr) {
-    for (var i = 0, ii = arr.length; i < ii; ++i) {
-      this.push(arr[i]);
-    }
-
-    return this;
-  };
-  /**
-   * Iterate over each element, calling the provided callback.
-   * @param {function(T, number, Array<T>): *} f The function to call
-   *     for every element. This function takes 3 arguments (the element, the
-   *     index and the array). The return value is ignored.
-   * @api
-   */
-
-
-  Collection.prototype.forEach = function forEach(f) {
-    var array = this.array_;
-
-    for (var i = 0, ii = array.length; i < ii; ++i) {
-      f(array[i], i, array);
-    }
-  };
-  /**
-   * Get a reference to the underlying Array object. Warning: if the array
-   * is mutated, no events will be dispatched by the collection, and the
-   * collection's "length" property won't be in sync with the actual length
-   * of the array.
-   * @return {!Array<T>} Array.
-   * @api
-   */
-
-
-  Collection.prototype.getArray = function getArray() {
-    return this.array_;
-  };
-  /**
-   * Get the element at the provided index.
-   * @param {number} index Index.
-   * @return {T} Element.
-   * @api
-   */
-
-
-  Collection.prototype.item = function item(index) {
-    return this.array_[index];
-  };
-  /**
-   * Get the length of this collection.
-   * @return {number} The length of the array.
-   * @observable
-   * @api
-   */
-
-
-  Collection.prototype.getLength = function getLength() {
-    return this.get(Property.LENGTH);
-  };
-  /**
-   * Insert an element at the provided index.
-   * @param {number} index Index.
-   * @param {T} elem Element.
-   * @api
-   */
-
-
-  Collection.prototype.insertAt = function insertAt(index, elem) {
-    if (this.unique_) {
-      this.assertUnique_(elem);
-    }
-
-    this.array_.splice(index, 0, elem);
-    this.updateLength_();
-    this.dispatchEvent(new CollectionEvent(_CollectionEventType.default.ADD, elem));
-  };
-  /**
-   * Remove the last element of the collection and return it.
-   * Return `undefined` if the collection is empty.
-   * @return {T|undefined} Element.
-   * @api
-   */
-
-
-  Collection.prototype.pop = function pop() {
-    return this.removeAt(this.getLength() - 1);
-  };
-  /**
-   * Insert the provided element at the end of the collection.
-   * @param {T} elem Element.
-   * @return {number} New length of the collection.
-   * @api
-   */
-
-
-  Collection.prototype.push = function push(elem) {
-    if (this.unique_) {
-      this.assertUnique_(elem);
-    }
-
-    var n = this.getLength();
-    this.insertAt(n, elem);
-    return this.getLength();
-  };
-  /**
-   * Remove the first occurrence of an element from the collection.
-   * @param {T} elem Element.
-   * @return {T|undefined} The removed element or undefined if none found.
-   * @api
-   */
-
-
-  Collection.prototype.remove = function remove(elem) {
-    var arr = this.array_;
-
-    for (var i = 0, ii = arr.length; i < ii; ++i) {
-      if (arr[i] === elem) {
-        return this.removeAt(i);
-      }
-    }
-
-    return undefined;
-  };
-  /**
-   * Remove the element at the provided index and return it.
-   * Return `undefined` if the collection does not contain this index.
-   * @param {number} index Index.
-   * @return {T|undefined} Value.
-   * @api
-   */
-
-
-  Collection.prototype.removeAt = function removeAt(index) {
-    var prev = this.array_[index];
-    this.array_.splice(index, 1);
-    this.updateLength_();
-    this.dispatchEvent(new CollectionEvent(_CollectionEventType.default.REMOVE, prev));
-    return prev;
-  };
-  /**
-   * Set the element at the provided index.
-   * @param {number} index Index.
-   * @param {T} elem Element.
-   * @api
-   */
-
-
-  Collection.prototype.setAt = function setAt(index, elem) {
-    var n = this.getLength();
-
-    if (index < n) {
-      if (this.unique_) {
-        this.assertUnique_(elem, index);
-      }
-
-      var prev = this.array_[index];
-      this.array_[index] = elem;
-      this.dispatchEvent(new CollectionEvent(_CollectionEventType.default.REMOVE, prev));
-      this.dispatchEvent(new CollectionEvent(_CollectionEventType.default.ADD, elem));
-    } else {
-      for (var j = n; j < index; ++j) {
-        this.insertAt(j, undefined);
-      }
-
-      this.insertAt(index, elem);
-    }
-  };
-  /**
-   * @private
-   */
-
-
-  Collection.prototype.updateLength_ = function updateLength_() {
-    this.set(Property.LENGTH, this.array_.length);
-  };
-  /**
-   * @private
-   * @param {T} elem Element.
-   * @param {number=} opt_except Optional index to ignore.
-   */
-
-
-  Collection.prototype.assertUnique_ = function assertUnique_(elem, opt_except) {
-    for (var i = 0, ii = this.array_.length; i < ii; ++i) {
-      if (this.array_[i] === elem && i !== opt_except) {
-        throw new _AssertionError.default(58);
-      }
-    }
-  };
-
-  return Collection;
-}(_Object.default);
-
-var _default = Collection;
-exports.default = _default;
-},{"./AssertionError.js":"node_modules/ol/AssertionError.js","./CollectionEventType.js":"node_modules/ol/CollectionEventType.js","./Object.js":"node_modules/ol/Object.js","./events/Event.js":"node_modules/ol/events/Event.js"}],"node_modules/ol/MapEvent.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _Event = _interopRequireDefault(require("./events/Event.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/MapEvent
- */
-
-/**
- * @classdesc
- * Events emitted as map events are instances of this type.
- * See {@link module:ol/PluggableMap~PluggableMap} for which events trigger a map event.
- */
-var MapEvent =
-/*@__PURE__*/
-function (Event) {
-  function MapEvent(type, map, opt_frameState) {
-    Event.call(this, type);
-    /**
-     * The map where the event occurred.
-     * @type {import("./PluggableMap.js").default}
-     * @api
-     */
-
-    this.map = map;
-    /**
-     * The frame state at the time of the event.
-     * @type {?import("./PluggableMap.js").FrameState}
-     * @api
-     */
-
-    this.frameState = opt_frameState !== undefined ? opt_frameState : null;
-  }
-
-  if (Event) MapEvent.__proto__ = Event;
-  MapEvent.prototype = Object.create(Event && Event.prototype);
-  MapEvent.prototype.constructor = MapEvent;
-  return MapEvent;
-}(_Event.default);
-
-var _default = MapEvent;
-exports.default = _default;
-},{"./events/Event.js":"node_modules/ol/events/Event.js"}],"node_modules/ol/MapBrowserEvent.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _MapEvent = _interopRequireDefault(require("./MapEvent.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/MapBrowserEvent
- */
-
-/**
- * @classdesc
- * Events emitted as map browser events are instances of this type.
- * See {@link module:ol/PluggableMap~PluggableMap} for which events trigger a map browser event.
- */
-var MapBrowserEvent =
-/*@__PURE__*/
-function (MapEvent) {
-  function MapBrowserEvent(type, map, browserEvent, opt_dragging, opt_frameState) {
-    MapEvent.call(this, type, map, opt_frameState);
-    /**
-     * The original browser event.
-     * @const
-     * @type {Event}
-     * @api
-     */
-
-    this.originalEvent = browserEvent;
-    /**
-     * The map pixel relative to the viewport corresponding to the original browser event.
-     * @type {import("./pixel.js").Pixel}
-     * @api
-     */
-
-    this.pixel = map.getEventPixel(browserEvent);
-    /**
-     * The coordinate in view projection corresponding to the original browser event.
-     * @type {import("./coordinate.js").Coordinate}
-     * @api
-     */
-
-    this.coordinate = map.getCoordinateFromPixel(this.pixel);
-    /**
-     * Indicates if the map is currently being dragged. Only set for
-     * `POINTERDRAG` and `POINTERMOVE` events. Default is `false`.
-     *
-     * @type {boolean}
-     * @api
-     */
-
-    this.dragging = opt_dragging !== undefined ? opt_dragging : false;
-  }
-
-  if (MapEvent) MapBrowserEvent.__proto__ = MapEvent;
-  MapBrowserEvent.prototype = Object.create(MapEvent && MapEvent.prototype);
-  MapBrowserEvent.prototype.constructor = MapBrowserEvent;
-  /**
-   * Prevents the default browser action.
-   * See https://developer.mozilla.org/en-US/docs/Web/API/event.preventDefault.
-   * @override
-   * @api
-   */
-
-  MapBrowserEvent.prototype.preventDefault = function preventDefault() {
-    MapEvent.prototype.preventDefault.call(this);
-    this.originalEvent.preventDefault();
-  };
-  /**
-   * Prevents further propagation of the current event.
-   * See https://developer.mozilla.org/en-US/docs/Web/API/event.stopPropagation.
-   * @override
-   * @api
-   */
-
-
-  MapBrowserEvent.prototype.stopPropagation = function stopPropagation() {
-    MapEvent.prototype.stopPropagation.call(this);
-    this.originalEvent.stopPropagation();
-  };
-
-  return MapBrowserEvent;
-}(_MapEvent.default);
-
-var _default = MapBrowserEvent;
-exports.default = _default;
-},{"./MapEvent.js":"node_modules/ol/MapEvent.js"}],"node_modules/ol/webgl.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getContext = getContext;
-exports.EXTENSIONS = exports.MAX_TEXTURE_SIZE = exports.HAS = exports.DEBUG = exports.FRAMEBUFFER = exports.COMPILE_STATUS = exports.CLAMP_TO_EDGE = exports.TEXTURE0 = exports.TEXTURE_2D = exports.TEXTURE_WRAP_T = exports.TEXTURE_WRAP_S = exports.TEXTURE_MIN_FILTER = exports.TEXTURE_MAG_FILTER = exports.LINEAR = exports.LINK_STATUS = exports.VERTEX_SHADER = exports.FRAGMENT_SHADER = exports.RGBA = exports.FLOAT = exports.UNSIGNED_INT = exports.UNSIGNED_SHORT = exports.UNSIGNED_BYTE = exports.SCISSOR_TEST = exports.DEPTH_TEST = exports.STENCIL_TEST = exports.BLEND = exports.CULL_FACE = exports.DYNAMIC_DRAW = exports.STATIC_DRAW = exports.STREAM_DRAW = exports.ELEMENT_ARRAY_BUFFER = exports.ARRAY_BUFFER = exports.ONE_MINUS_SRC_ALPHA = exports.TRIANGLE_STRIP = exports.TRIANGLES = exports.COLOR_BUFFER_BIT = exports.COLOR_ATTACHMENT0 = exports.SRC_ALPHA = exports.ONE = void 0;
-
-/**
- * @module ol/webgl
- */
-
-/**
- * Constants taken from goog.webgl
- */
-
-/**
- * @const
- * @type {number}
- */
-var ONE = 1;
-/**
- * @const
- * @type {number}
- */
-
-exports.ONE = ONE;
-var SRC_ALPHA = 0x0302;
-/**
- * @const
- * @type {number}
- */
-
-exports.SRC_ALPHA = SRC_ALPHA;
-var COLOR_ATTACHMENT0 = 0x8CE0;
-/**
- * @const
- * @type {number}
- */
-
-exports.COLOR_ATTACHMENT0 = COLOR_ATTACHMENT0;
-var COLOR_BUFFER_BIT = 0x00004000;
-/**
- * @const
- * @type {number}
- */
-
-exports.COLOR_BUFFER_BIT = COLOR_BUFFER_BIT;
-var TRIANGLES = 0x0004;
-/**
- * @const
- * @type {number}
- */
-
-exports.TRIANGLES = TRIANGLES;
-var TRIANGLE_STRIP = 0x0005;
-/**
- * @const
- * @type {number}
- */
-
-exports.TRIANGLE_STRIP = TRIANGLE_STRIP;
-var ONE_MINUS_SRC_ALPHA = 0x0303;
-/**
- * @const
- * @type {number}
- */
-
-exports.ONE_MINUS_SRC_ALPHA = ONE_MINUS_SRC_ALPHA;
-var ARRAY_BUFFER = 0x8892;
-/**
- * @const
- * @type {number}
- */
-
-exports.ARRAY_BUFFER = ARRAY_BUFFER;
-var ELEMENT_ARRAY_BUFFER = 0x8893;
-/**
- * @const
- * @type {number}
- */
-
-exports.ELEMENT_ARRAY_BUFFER = ELEMENT_ARRAY_BUFFER;
-var STREAM_DRAW = 0x88E0;
-/**
- * @const
- * @type {number}
- */
-
-exports.STREAM_DRAW = STREAM_DRAW;
-var STATIC_DRAW = 0x88E4;
-/**
- * @const
- * @type {number}
- */
-
-exports.STATIC_DRAW = STATIC_DRAW;
-var DYNAMIC_DRAW = 0x88E8;
-/**
- * @const
- * @type {number}
- */
-
-exports.DYNAMIC_DRAW = DYNAMIC_DRAW;
-var CULL_FACE = 0x0B44;
-/**
- * @const
- * @type {number}
- */
-
-exports.CULL_FACE = CULL_FACE;
-var BLEND = 0x0BE2;
-/**
- * @const
- * @type {number}
- */
-
-exports.BLEND = BLEND;
-var STENCIL_TEST = 0x0B90;
-/**
- * @const
- * @type {number}
- */
-
-exports.STENCIL_TEST = STENCIL_TEST;
-var DEPTH_TEST = 0x0B71;
-/**
- * @const
- * @type {number}
- */
-
-exports.DEPTH_TEST = DEPTH_TEST;
-var SCISSOR_TEST = 0x0C11;
-/**
- * @const
- * @type {number}
- */
-
-exports.SCISSOR_TEST = SCISSOR_TEST;
-var UNSIGNED_BYTE = 0x1401;
-/**
- * @const
- * @type {number}
- */
-
-exports.UNSIGNED_BYTE = UNSIGNED_BYTE;
-var UNSIGNED_SHORT = 0x1403;
-/**
- * @const
- * @type {number}
- */
-
-exports.UNSIGNED_SHORT = UNSIGNED_SHORT;
-var UNSIGNED_INT = 0x1405;
-/**
- * @const
- * @type {number}
- */
-
-exports.UNSIGNED_INT = UNSIGNED_INT;
-var FLOAT = 0x1406;
-/**
- * @const
- * @type {number}
- */
-
-exports.FLOAT = FLOAT;
-var RGBA = 0x1908;
-/**
- * @const
- * @type {number}
- */
-
-exports.RGBA = RGBA;
-var FRAGMENT_SHADER = 0x8B30;
-/**
- * @const
- * @type {number}
- */
-
-exports.FRAGMENT_SHADER = FRAGMENT_SHADER;
-var VERTEX_SHADER = 0x8B31;
-/**
- * @const
- * @type {number}
- */
-
-exports.VERTEX_SHADER = VERTEX_SHADER;
-var LINK_STATUS = 0x8B82;
-/**
- * @const
- * @type {number}
- */
-
-exports.LINK_STATUS = LINK_STATUS;
-var LINEAR = 0x2601;
-/**
- * @const
- * @type {number}
- */
-
-exports.LINEAR = LINEAR;
-var TEXTURE_MAG_FILTER = 0x2800;
-/**
- * @const
- * @type {number}
- */
-
-exports.TEXTURE_MAG_FILTER = TEXTURE_MAG_FILTER;
-var TEXTURE_MIN_FILTER = 0x2801;
-/**
- * @const
- * @type {number}
- */
-
-exports.TEXTURE_MIN_FILTER = TEXTURE_MIN_FILTER;
-var TEXTURE_WRAP_S = 0x2802;
-/**
- * @const
- * @type {number}
- */
-
-exports.TEXTURE_WRAP_S = TEXTURE_WRAP_S;
-var TEXTURE_WRAP_T = 0x2803;
-/**
- * @const
- * @type {number}
- */
-
-exports.TEXTURE_WRAP_T = TEXTURE_WRAP_T;
-var TEXTURE_2D = 0x0DE1;
-/**
- * @const
- * @type {number}
- */
-
-exports.TEXTURE_2D = TEXTURE_2D;
-var TEXTURE0 = 0x84C0;
-/**
- * @const
- * @type {number}
- */
-
-exports.TEXTURE0 = TEXTURE0;
-var CLAMP_TO_EDGE = 0x812F;
-/**
- * @const
- * @type {number}
- */
-
-exports.CLAMP_TO_EDGE = CLAMP_TO_EDGE;
-var COMPILE_STATUS = 0x8B81;
-/**
- * @const
- * @type {number}
- */
-
-exports.COMPILE_STATUS = COMPILE_STATUS;
-var FRAMEBUFFER = 0x8D40;
-/** end of goog.webgl constants
- */
-
-/**
- * @const
- * @type {Array<string>}
- */
-
-exports.FRAMEBUFFER = FRAMEBUFFER;
-var CONTEXT_IDS = ['experimental-webgl', 'webgl', 'webkit-3d', 'moz-webgl'];
-/**
- * @param {HTMLCanvasElement} canvas Canvas.
- * @param {Object=} opt_attributes Attributes.
- * @return {WebGLRenderingContext} WebGL rendering context.
- */
-
-function getContext(canvas, opt_attributes) {
-  var ii = CONTEXT_IDS.length;
-
-  for (var i = 0; i < ii; ++i) {
-    try {
-      var context = canvas.getContext(CONTEXT_IDS[i], opt_attributes);
-
-      if (context) {
-        return (
-          /** @type {!WebGLRenderingContext} */
-          context
-        );
-      }
-    } catch (e) {// pass
-    }
-  }
-
-  return null;
-}
-/**
- * Include debuggable shader sources.  Default is `true`. This should be set to
- * `false` for production builds.
- * @type {boolean}
- */
-
-
-var DEBUG = true;
-/**
- * The maximum supported WebGL texture size in pixels. If WebGL is not
- * supported, the value is set to `undefined`.
- * @type {number|undefined}
- */
-
-exports.DEBUG = DEBUG;
-var MAX_TEXTURE_SIZE; // value is set below
-
-/**
- * List of supported WebGL extensions.
- * @type {Array<string>}
- */
-
-exports.MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE;
-var EXTENSIONS; // value is set below
-
-/**
- * True if both OpenLayers and browser support WebGL.
- * @type {boolean}
- * @api
- */
-
-exports.EXTENSIONS = EXTENSIONS;
-var HAS = false; //TODO Remove side effects
-
-exports.HAS = HAS;
-
-if (typeof window !== 'undefined' && 'WebGLRenderingContext' in window) {
-  try {
-    var canvas =
-    /** @type {HTMLCanvasElement} */
-    document.createElement('canvas');
-    var gl = getContext(canvas, {
-      failIfMajorPerformanceCaveat: true
-    });
-
-    if (gl) {
-      exports.HAS = HAS = true;
-      exports.MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE =
-      /** @type {number} */
-      gl.getParameter(gl.MAX_TEXTURE_SIZE);
-      exports.EXTENSIONS = EXTENSIONS = gl.getSupportedExtensions();
-    }
-  } catch (e) {// pass
-  }
-}
-},{}],"node_modules/ol/has.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-Object.defineProperty(exports, "WEBGL", {
-  enumerable: true,
-  get: function () {
-    return _webgl.HAS;
-  }
-});
-exports.MSPOINTER = exports.POINTER = exports.TOUCH = exports.GEOLOCATION = exports.CANVAS_LINE_DASH = exports.DEVICE_PIXEL_RATIO = exports.MAC = exports.WEBKIT = exports.SAFARI = exports.FIREFOX = void 0;
-
-var _webgl = require("./webgl.js");
-
-/**
- * @module ol/has
- */
-var ua = typeof navigator !== 'undefined' ? navigator.userAgent.toLowerCase() : '';
-/**
- * User agent string says we are dealing with Firefox as browser.
- * @type {boolean}
- */
-
-var FIREFOX = ua.indexOf('firefox') !== -1;
-/**
- * User agent string says we are dealing with Safari as browser.
- * @type {boolean}
- */
-
-exports.FIREFOX = FIREFOX;
-var SAFARI = ua.indexOf('safari') !== -1 && ua.indexOf('chrom') == -1;
-/**
- * User agent string says we are dealing with a WebKit engine.
- * @type {boolean}
- */
-
-exports.SAFARI = SAFARI;
-var WEBKIT = ua.indexOf('webkit') !== -1 && ua.indexOf('edge') == -1;
-/**
- * User agent string says we are dealing with a Mac as platform.
- * @type {boolean}
- */
-
-exports.WEBKIT = WEBKIT;
-var MAC = ua.indexOf('macintosh') !== -1;
-/**
- * The ratio between physical pixels and device-independent pixels
- * (dips) on the device (`window.devicePixelRatio`).
- * @const
- * @type {number}
- * @api
- */
-
-exports.MAC = MAC;
-var DEVICE_PIXEL_RATIO = window.devicePixelRatio || 1;
-/**
- * True if the browser's Canvas implementation implements {get,set}LineDash.
- * @type {boolean}
- */
-
-exports.DEVICE_PIXEL_RATIO = DEVICE_PIXEL_RATIO;
-
-var CANVAS_LINE_DASH = function () {
-  var has = false;
-
-  try {
-    has = !!document.createElement('canvas').getContext('2d').setLineDash;
-  } catch (e) {// pass
-  }
-
-  return has;
-}();
-/**
- * Is HTML5 geolocation supported in the current browser?
- * @const
- * @type {boolean}
- * @api
- */
-
-
-exports.CANVAS_LINE_DASH = CANVAS_LINE_DASH;
-var GEOLOCATION = 'geolocation' in navigator;
-/**
- * True if browser supports touch events.
- * @const
- * @type {boolean}
- * @api
- */
-
-exports.GEOLOCATION = GEOLOCATION;
-var TOUCH = 'ontouchstart' in window;
-/**
- * True if browser supports pointer events.
- * @const
- * @type {boolean}
- */
-
-exports.TOUCH = TOUCH;
-var POINTER = 'PointerEvent' in window;
-/**
- * True if browser supports ms pointer events (IE 10).
- * @const
- * @type {boolean}
- */
-
-exports.POINTER = POINTER;
-var MSPOINTER = !!navigator.msPointerEnabled;
-exports.MSPOINTER = MSPOINTER;
-},{"./webgl.js":"node_modules/ol/webgl.js"}],"node_modules/ol/MapBrowserEventType.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _EventType = _interopRequireDefault(require("./events/EventType.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/MapBrowserEventType
- */
-
-/**
- * Constants for event names.
- * @enum {string}
- */
-var _default = {
-  /**
-   * A true single click with no dragging and no double click. Note that this
-   * event is delayed by 250 ms to ensure that it is not a double click.
-   * @event module:ol/MapBrowserEvent~MapBrowserEvent#singleclick
-   * @api
-   */
-  SINGLECLICK: 'singleclick',
-
-  /**
-   * A click with no dragging. A double click will fire two of this.
-   * @event module:ol/MapBrowserEvent~MapBrowserEvent#click
-   * @api
-   */
-  CLICK: _EventType.default.CLICK,
-
-  /**
-   * A true double click, with no dragging.
-   * @event module:ol/MapBrowserEvent~MapBrowserEvent#dblclick
-   * @api
-   */
-  DBLCLICK: _EventType.default.DBLCLICK,
-
-  /**
-   * Triggered when a pointer is dragged.
-   * @event module:ol/MapBrowserEvent~MapBrowserEvent#pointerdrag
-   * @api
-   */
-  POINTERDRAG: 'pointerdrag',
-
-  /**
-   * Triggered when a pointer is moved. Note that on touch devices this is
-   * triggered when the map is panned, so is not the same as mousemove.
-   * @event module:ol/MapBrowserEvent~MapBrowserEvent#pointermove
-   * @api
-   */
-  POINTERMOVE: 'pointermove',
-  POINTERDOWN: 'pointerdown',
-  POINTERUP: 'pointerup',
-  POINTEROVER: 'pointerover',
-  POINTEROUT: 'pointerout',
-  POINTERENTER: 'pointerenter',
-  POINTERLEAVE: 'pointerleave',
-  POINTERCANCEL: 'pointercancel'
-};
-exports.default = _default;
-},{"./events/EventType.js":"node_modules/ol/events/EventType.js"}],"node_modules/ol/MapBrowserPointerEvent.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _MapBrowserEvent = _interopRequireDefault(require("./MapBrowserEvent.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/MapBrowserPointerEvent
- */
-var MapBrowserPointerEvent =
-/*@__PURE__*/
-function (MapBrowserEvent) {
-  function MapBrowserPointerEvent(type, map, pointerEvent, opt_dragging, opt_frameState) {
-    MapBrowserEvent.call(this, type, map, pointerEvent.originalEvent, opt_dragging, opt_frameState);
-    /**
-     * @const
-     * @type {import("./pointer/PointerEvent.js").default}
-     */
-
-    this.pointerEvent = pointerEvent;
-  }
-
-  if (MapBrowserEvent) MapBrowserPointerEvent.__proto__ = MapBrowserEvent;
-  MapBrowserPointerEvent.prototype = Object.create(MapBrowserEvent && MapBrowserEvent.prototype);
-  MapBrowserPointerEvent.prototype.constructor = MapBrowserPointerEvent;
-  return MapBrowserPointerEvent;
-}(_MapBrowserEvent.default);
-
-var _default = MapBrowserPointerEvent;
-exports.default = _default;
-},{"./MapBrowserEvent.js":"node_modules/ol/MapBrowserEvent.js"}],"node_modules/ol/pointer/EventType.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/pointer/EventType
- */
-
-/**
- * Constants for event names.
- * @enum {string}
- */
-var _default = {
-  POINTERMOVE: 'pointermove',
-  POINTERDOWN: 'pointerdown',
-  POINTERUP: 'pointerup',
-  POINTEROVER: 'pointerover',
-  POINTEROUT: 'pointerout',
-  POINTERENTER: 'pointerenter',
-  POINTERLEAVE: 'pointerleave',
-  POINTERCANCEL: 'pointercancel'
-};
-exports.default = _default;
-},{}],"node_modules/ol/pointer/EventSource.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/pointer/EventSource
- */
-var EventSource = function EventSource(dispatcher, mapping) {
-  /**
-   * @type {import("./PointerEventHandler.js").default}
-   */
-  this.dispatcher = dispatcher;
-  /**
-   * @private
-   * @const
-   * @type {!Object<string, function(Event)>}
-   */
-
-  this.mapping_ = mapping;
-};
-/**
- * List of events supported by this source.
- * @return {Array<string>} Event names
- */
-
-
-EventSource.prototype.getEvents = function getEvents() {
-  return Object.keys(this.mapping_);
-};
-/**
- * Returns the handler that should handle a given event type.
- * @param {string} eventType The event type.
- * @return {function(Event)} Handler
- */
-
-
-EventSource.prototype.getHandlerForEvent = function getHandlerForEvent(eventType) {
-  return this.mapping_[eventType];
-};
-
-var _default = EventSource;
-exports.default = _default;
-},{}],"node_modules/ol/pointer/MouseSource.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.prepareEvent = prepareEvent;
-exports.default = exports.POINTER_TYPE = exports.POINTER_ID = void 0;
-
-var _EventSource = _interopRequireDefault(require("./EventSource.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/pointer/MouseSource
- */
-// Based on https://github.com/Polymer/PointerEvents
-// Copyright (c) 2013 The Polymer Authors. All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-// * Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-// * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
-// in the documentation and/or other materials provided with the
-// distribution.
-// * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-/**
- * @type {number}
- */
-var POINTER_ID = 1;
-/**
- * @type {string}
- */
-
-exports.POINTER_ID = POINTER_ID;
-var POINTER_TYPE = 'mouse';
-/**
- * Radius around touchend that swallows mouse events.
- *
- * @type {number}
- */
-
-exports.POINTER_TYPE = POINTER_TYPE;
-var DEDUP_DIST = 25;
-/**
- * Handler for `mousedown`.
- *
- * @this {MouseSource}
- * @param {MouseEvent} inEvent The in event.
- */
-
-function mousedown(inEvent) {
-  if (!this.isEventSimulatedFromTouch_(inEvent)) {
-    // TODO(dfreedman) workaround for some elements not sending mouseup
-    // http://crbug/149091
-    if (POINTER_ID.toString() in this.pointerMap) {
-      this.cancel(inEvent);
-    }
-
-    var e = prepareEvent(inEvent, this.dispatcher);
-    this.pointerMap[POINTER_ID.toString()] = inEvent;
-    this.dispatcher.down(e, inEvent);
-  }
-}
-/**
- * Handler for `mousemove`.
- *
- * @this {MouseSource}
- * @param {MouseEvent} inEvent The in event.
- */
-
-
-function mousemove(inEvent) {
-  if (!this.isEventSimulatedFromTouch_(inEvent)) {
-    var e = prepareEvent(inEvent, this.dispatcher);
-    this.dispatcher.move(e, inEvent);
-  }
-}
-/**
- * Handler for `mouseup`.
- *
- * @this {MouseSource}
- * @param {MouseEvent} inEvent The in event.
- */
-
-
-function mouseup(inEvent) {
-  if (!this.isEventSimulatedFromTouch_(inEvent)) {
-    var p = this.pointerMap[POINTER_ID.toString()];
-
-    if (p && p.button === inEvent.button) {
-      var e = prepareEvent(inEvent, this.dispatcher);
-      this.dispatcher.up(e, inEvent);
-      this.cleanupMouse();
-    }
-  }
-}
-/**
- * Handler for `mouseover`.
- *
- * @this {MouseSource}
- * @param {MouseEvent} inEvent The in event.
- */
-
-
-function mouseover(inEvent) {
-  if (!this.isEventSimulatedFromTouch_(inEvent)) {
-    var e = prepareEvent(inEvent, this.dispatcher);
-    this.dispatcher.enterOver(e, inEvent);
-  }
-}
-/**
- * Handler for `mouseout`.
- *
- * @this {MouseSource}
- * @param {MouseEvent} inEvent The in event.
- */
-
-
-function mouseout(inEvent) {
-  if (!this.isEventSimulatedFromTouch_(inEvent)) {
-    var e = prepareEvent(inEvent, this.dispatcher);
-    this.dispatcher.leaveOut(e, inEvent);
-  }
-}
-
-var MouseSource =
-/*@__PURE__*/
-function (EventSource) {
-  function MouseSource(dispatcher) {
-    var mapping = {
-      'mousedown': mousedown,
-      'mousemove': mousemove,
-      'mouseup': mouseup,
-      'mouseover': mouseover,
-      'mouseout': mouseout
-    };
-    EventSource.call(this, dispatcher, mapping);
-    /**
-     * @const
-     * @type {!Object<string, Event|Object>}
-     */
-
-    this.pointerMap = dispatcher.pointerMap;
-    /**
-     * @const
-     * @type {Array<import("../pixel.js").Pixel>}
-     */
-
-    this.lastTouches = [];
-  }
-
-  if (EventSource) MouseSource.__proto__ = EventSource;
-  MouseSource.prototype = Object.create(EventSource && EventSource.prototype);
-  MouseSource.prototype.constructor = MouseSource;
-  /**
-   * Detect if a mouse event was simulated from a touch by
-   * checking if previously there was a touch event at the
-   * same position.
-   *
-   * FIXME - Known problem with the native Android browser on
-   * Samsung GT-I9100 (Android 4.1.2):
-   * In case the page is scrolled, this function does not work
-   * correctly when a canvas is used (WebGL or canvas renderer).
-   * Mouse listeners on canvas elements (for this browser), create
-   * two mouse events: One 'good' and one 'bad' one (on other browsers or
-   * when a div is used, there is only one event). For the 'bad' one,
-   * clientX/clientY and also pageX/pageY are wrong when the page
-   * is scrolled. Because of that, this function can not detect if
-   * the events were simulated from a touch event. As result, a
-   * pointer event at a wrong position is dispatched, which confuses
-   * the map interactions.
-   * It is unclear, how one can get the correct position for the event
-   * or detect that the positions are invalid.
-   *
-   * @private
-   * @param {MouseEvent} inEvent The in event.
-   * @return {boolean} True, if the event was generated by a touch.
-   */
-
-  MouseSource.prototype.isEventSimulatedFromTouch_ = function isEventSimulatedFromTouch_(inEvent) {
-    var lts = this.lastTouches;
-    var x = inEvent.clientX;
-    var y = inEvent.clientY;
-
-    for (var i = 0, l = lts.length, t = void 0; i < l && (t = lts[i]); i++) {
-      // simulated mouse events will be swallowed near a primary touchend
-      var dx = Math.abs(x - t[0]);
-      var dy = Math.abs(y - t[1]);
-
-      if (dx <= DEDUP_DIST && dy <= DEDUP_DIST) {
-        return true;
-      }
-    }
-
-    return false;
-  };
-  /**
-   * Dispatches a `pointercancel` event.
-   *
-   * @param {Event} inEvent The in event.
-   */
-
-
-  MouseSource.prototype.cancel = function cancel(inEvent) {
-    var e = prepareEvent(inEvent, this.dispatcher);
-    this.dispatcher.cancel(e, inEvent);
-    this.cleanupMouse();
-  };
-  /**
-   * Remove the mouse from the list of active pointers.
-   */
-
-
-  MouseSource.prototype.cleanupMouse = function cleanupMouse() {
-    delete this.pointerMap[POINTER_ID.toString()];
-  };
-
-  return MouseSource;
-}(_EventSource.default);
-/**
- * Creates a copy of the original event that will be used
- * for the fake pointer event.
- *
- * @param {Event} inEvent The in event.
- * @param {import("./PointerEventHandler.js").default} dispatcher Event handler.
- * @return {Object} The copied event.
- */
-
-
-function prepareEvent(inEvent, dispatcher) {
-  var e = dispatcher.cloneEvent(inEvent, inEvent); // forward mouse preventDefault
-
-  var pd = e.preventDefault;
-
-  e.preventDefault = function () {
-    inEvent.preventDefault();
-    pd();
-  };
-
-  e.pointerId = POINTER_ID;
-  e.isPrimary = true;
-  e.pointerType = POINTER_TYPE;
-  return e;
-}
-
-var _default = MouseSource;
-exports.default = _default;
-},{"./EventSource.js":"node_modules/ol/pointer/EventSource.js"}],"node_modules/ol/pointer/MsSource.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _EventSource = _interopRequireDefault(require("./EventSource.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/pointer/MsSource
- */
-// Based on https://github.com/Polymer/PointerEvents
-// Copyright (c) 2013 The Polymer Authors. All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-// * Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-// * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
-// in the documentation and/or other materials provided with the
-// distribution.
-// * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-/**
- * @const
- * @type {Array<string>}
- */
-var POINTER_TYPES = ['', 'unavailable', 'touch', 'pen', 'mouse'];
-/**
- * Handler for `msPointerDown`.
- *
- * @this {MsSource}
- * @param {MSPointerEvent} inEvent The in event.
- */
-
-function msPointerDown(inEvent) {
-  this.pointerMap[inEvent.pointerId.toString()] = inEvent;
-  var e = this.prepareEvent_(inEvent);
-  this.dispatcher.down(e, inEvent);
-}
-/**
- * Handler for `msPointerMove`.
- *
- * @this {MsSource}
- * @param {MSPointerEvent} inEvent The in event.
- */
-
-
-function msPointerMove(inEvent) {
-  var e = this.prepareEvent_(inEvent);
-  this.dispatcher.move(e, inEvent);
-}
-/**
- * Handler for `msPointerUp`.
- *
- * @this {MsSource}
- * @param {MSPointerEvent} inEvent The in event.
- */
-
-
-function msPointerUp(inEvent) {
-  var e = this.prepareEvent_(inEvent);
-  this.dispatcher.up(e, inEvent);
-  this.cleanup(inEvent.pointerId);
-}
-/**
- * Handler for `msPointerOut`.
- *
- * @this {MsSource}
- * @param {MSPointerEvent} inEvent The in event.
- */
-
-
-function msPointerOut(inEvent) {
-  var e = this.prepareEvent_(inEvent);
-  this.dispatcher.leaveOut(e, inEvent);
-}
-/**
- * Handler for `msPointerOver`.
- *
- * @this {MsSource}
- * @param {MSPointerEvent} inEvent The in event.
- */
-
-
-function msPointerOver(inEvent) {
-  var e = this.prepareEvent_(inEvent);
-  this.dispatcher.enterOver(e, inEvent);
-}
-/**
- * Handler for `msPointerCancel`.
- *
- * @this {MsSource}
- * @param {MSPointerEvent} inEvent The in event.
- */
-
-
-function msPointerCancel(inEvent) {
-  var e = this.prepareEvent_(inEvent);
-  this.dispatcher.cancel(e, inEvent);
-  this.cleanup(inEvent.pointerId);
-}
-/**
- * Handler for `msLostPointerCapture`.
- *
- * @this {MsSource}
- * @param {MSPointerEvent} inEvent The in event.
- */
-
-
-function msLostPointerCapture(inEvent) {
-  var e = this.dispatcher.makeEvent('lostpointercapture', inEvent, inEvent);
-  this.dispatcher.dispatchEvent(e);
-}
-/**
- * Handler for `msGotPointerCapture`.
- *
- * @this {MsSource}
- * @param {MSPointerEvent} inEvent The in event.
- */
-
-
-function msGotPointerCapture(inEvent) {
-  var e = this.dispatcher.makeEvent('gotpointercapture', inEvent, inEvent);
-  this.dispatcher.dispatchEvent(e);
-}
-
-var MsSource =
-/*@__PURE__*/
-function (EventSource) {
-  function MsSource(dispatcher) {
-    var mapping = {
-      'MSPointerDown': msPointerDown,
-      'MSPointerMove': msPointerMove,
-      'MSPointerUp': msPointerUp,
-      'MSPointerOut': msPointerOut,
-      'MSPointerOver': msPointerOver,
-      'MSPointerCancel': msPointerCancel,
-      'MSGotPointerCapture': msGotPointerCapture,
-      'MSLostPointerCapture': msLostPointerCapture
-    };
-    EventSource.call(this, dispatcher, mapping);
-    /**
-     * @const
-     * @type {!Object<string, MSPointerEvent|Object>}
-     */
-
-    this.pointerMap = dispatcher.pointerMap;
-  }
-
-  if (EventSource) MsSource.__proto__ = EventSource;
-  MsSource.prototype = Object.create(EventSource && EventSource.prototype);
-  MsSource.prototype.constructor = MsSource;
-  /**
-   * Creates a copy of the original event that will be used
-   * for the fake pointer event.
-   *
-   * @private
-   * @param {MSPointerEvent} inEvent The in event.
-   * @return {Object} The copied event.
-   */
-
-  MsSource.prototype.prepareEvent_ = function prepareEvent_(inEvent) {
-    /** @type {MSPointerEvent|Object} */
-    var e = inEvent;
-
-    if (typeof inEvent.pointerType === 'number') {
-      e = this.dispatcher.cloneEvent(inEvent, inEvent);
-      e.pointerType = POINTER_TYPES[inEvent.pointerType];
-    }
-
-    return e;
-  };
-  /**
-   * Remove this pointer from the list of active pointers.
-   * @param {number} pointerId Pointer identifier.
-   */
-
-
-  MsSource.prototype.cleanup = function cleanup(pointerId) {
-    delete this.pointerMap[pointerId.toString()];
-  };
-
-  return MsSource;
-}(_EventSource.default);
-
-var _default = MsSource;
-exports.default = _default;
-},{"./EventSource.js":"node_modules/ol/pointer/EventSource.js"}],"node_modules/ol/pointer/NativeSource.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _EventSource = _interopRequireDefault(require("./EventSource.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/pointer/NativeSource
- */
-// Based on https://github.com/Polymer/PointerEvents
-// Copyright (c) 2013 The Polymer Authors. All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-// * Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-// * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
-// in the documentation and/or other materials provided with the
-// distribution.
-// * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-/**
- * Handler for `pointerdown`.
- *
- * @this {NativeSource}
- * @param {Event} inEvent The in event.
- */
-function pointerDown(inEvent) {
-  this.dispatcher.fireNativeEvent(inEvent);
-}
-/**
- * Handler for `pointermove`.
- *
- * @this {NativeSource}
- * @param {Event} inEvent The in event.
- */
-
-
-function pointerMove(inEvent) {
-  this.dispatcher.fireNativeEvent(inEvent);
-}
-/**
- * Handler for `pointerup`.
- *
- * @this {NativeSource}
- * @param {Event} inEvent The in event.
- */
-
-
-function pointerUp(inEvent) {
-  this.dispatcher.fireNativeEvent(inEvent);
-}
-/**
- * Handler for `pointerout`.
- *
- * @this {NativeSource}
- * @param {Event} inEvent The in event.
- */
-
-
-function pointerOut(inEvent) {
-  this.dispatcher.fireNativeEvent(inEvent);
-}
-/**
- * Handler for `pointerover`.
- *
- * @this {NativeSource}
- * @param {Event} inEvent The in event.
- */
-
-
-function pointerOver(inEvent) {
-  this.dispatcher.fireNativeEvent(inEvent);
-}
-/**
- * Handler for `pointercancel`.
- *
- * @this {NativeSource}
- * @param {Event} inEvent The in event.
- */
-
-
-function pointerCancel(inEvent) {
-  this.dispatcher.fireNativeEvent(inEvent);
-}
-/**
- * Handler for `lostpointercapture`.
- *
- * @this {NativeSource}
- * @param {Event} inEvent The in event.
- */
-
-
-function lostPointerCapture(inEvent) {
-  this.dispatcher.fireNativeEvent(inEvent);
-}
-/**
- * Handler for `gotpointercapture`.
- *
- * @this {NativeSource}
- * @param {Event} inEvent The in event.
- */
-
-
-function gotPointerCapture(inEvent) {
-  this.dispatcher.fireNativeEvent(inEvent);
-}
-
-var NativeSource =
-/*@__PURE__*/
-function (EventSource) {
-  function NativeSource(dispatcher) {
-    var mapping = {
-      'pointerdown': pointerDown,
-      'pointermove': pointerMove,
-      'pointerup': pointerUp,
-      'pointerout': pointerOut,
-      'pointerover': pointerOver,
-      'pointercancel': pointerCancel,
-      'gotpointercapture': gotPointerCapture,
-      'lostpointercapture': lostPointerCapture
-    };
-    EventSource.call(this, dispatcher, mapping);
-  }
-
-  if (EventSource) NativeSource.__proto__ = EventSource;
-  NativeSource.prototype = Object.create(EventSource && EventSource.prototype);
-  NativeSource.prototype.constructor = NativeSource;
-  return NativeSource;
-}(_EventSource.default);
-
-var _default = NativeSource;
-exports.default = _default;
-},{"./EventSource.js":"node_modules/ol/pointer/EventSource.js"}],"node_modules/ol/pointer/PointerEvent.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _Event2 = _interopRequireDefault(require("../events/Event.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/pointer/PointerEvent
- */
-// Based on https://github.com/Polymer/PointerEvents
-// Copyright (c) 2013 The Polymer Authors. All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-// * Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-// * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
-// in the documentation and/or other materials provided with the
-// distribution.
-// * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-/**
- * Is the `buttons` property supported?
- * @type {boolean}
- */
-var HAS_BUTTONS = false;
-
-var PointerEvent =
-/*@__PURE__*/
-function (_Event) {
-  function PointerEvent(type, originalEvent, opt_eventDict) {
-    _Event.call(this, type);
-    /**
-     * @const
-     * @type {Event}
-     */
-
-
-    this.originalEvent = originalEvent;
-    var eventDict = opt_eventDict ? opt_eventDict : {};
-    /**
-     * @type {number}
-     */
-
-    this.buttons = getButtons(eventDict);
-    /**
-     * @type {number}
-     */
-
-    this.pressure = getPressure(eventDict, this.buttons); // MouseEvent related properties
-
-    /**
-     * @type {boolean}
-     */
-
-    this.bubbles = 'bubbles' in eventDict ? eventDict['bubbles'] : false;
-    /**
-     * @type {boolean}
-     */
-
-    this.cancelable = 'cancelable' in eventDict ? eventDict['cancelable'] : false;
-    /**
-     * @type {Object}
-     */
-
-    this.view = 'view' in eventDict ? eventDict['view'] : null;
-    /**
-     * @type {number}
-     */
-
-    this.detail = 'detail' in eventDict ? eventDict['detail'] : null;
-    /**
-     * @type {number}
-     */
-
-    this.screenX = 'screenX' in eventDict ? eventDict['screenX'] : 0;
-    /**
-     * @type {number}
-     */
-
-    this.screenY = 'screenY' in eventDict ? eventDict['screenY'] : 0;
-    /**
-     * @type {number}
-     */
-
-    this.clientX = 'clientX' in eventDict ? eventDict['clientX'] : 0;
-    /**
-     * @type {number}
-     */
-
-    this.clientY = 'clientY' in eventDict ? eventDict['clientY'] : 0;
-    /**
-     * @type {boolean}
-     */
-
-    this.ctrlKey = 'ctrlKey' in eventDict ? eventDict['ctrlKey'] : false;
-    /**
-     * @type {boolean}
-     */
-
-    this.altKey = 'altKey' in eventDict ? eventDict['altKey'] : false;
-    /**
-     * @type {boolean}
-     */
-
-    this.shiftKey = 'shiftKey' in eventDict ? eventDict['shiftKey'] : false;
-    /**
-     * @type {boolean}
-     */
-
-    this.metaKey = 'metaKey' in eventDict ? eventDict['metaKey'] : false;
-    /**
-     * @type {number}
-     */
-
-    this.button = 'button' in eventDict ? eventDict['button'] : 0;
-    /**
-     * @type {Node}
-     */
-
-    this.relatedTarget = 'relatedTarget' in eventDict ? eventDict['relatedTarget'] : null; // PointerEvent related properties
-
-    /**
-     * @const
-     * @type {number}
-     */
-
-    this.pointerId = 'pointerId' in eventDict ? eventDict['pointerId'] : 0;
-    /**
-     * @type {number}
-     */
-
-    this.width = 'width' in eventDict ? eventDict['width'] : 0;
-    /**
-     * @type {number}
-     */
-
-    this.height = 'height' in eventDict ? eventDict['height'] : 0;
-    /**
-     * @type {number}
-     */
-
-    this.tiltX = 'tiltX' in eventDict ? eventDict['tiltX'] : 0;
-    /**
-     * @type {number}
-     */
-
-    this.tiltY = 'tiltY' in eventDict ? eventDict['tiltY'] : 0;
-    /**
-     * @type {string}
-     */
-
-    this.pointerType = 'pointerType' in eventDict ? eventDict['pointerType'] : '';
-    /**
-     * @type {number}
-     */
-
-    this.hwTimestamp = 'hwTimestamp' in eventDict ? eventDict['hwTimestamp'] : 0;
-    /**
-     * @type {boolean}
-     */
-
-    this.isPrimary = 'isPrimary' in eventDict ? eventDict['isPrimary'] : false; // keep the semantics of preventDefault
-
-    if (originalEvent.preventDefault) {
-      this.preventDefault = function () {
-        originalEvent.preventDefault();
-      };
-    }
-  }
-
-  if (_Event) PointerEvent.__proto__ = _Event;
-  PointerEvent.prototype = Object.create(_Event && _Event.prototype);
-  PointerEvent.prototype.constructor = PointerEvent;
-  return PointerEvent;
-}(_Event2.default);
-/**
- * @param {Object<string, ?>} eventDict The event dictionary.
- * @return {number} Button indicator.
- */
-
-
-function getButtons(eventDict) {
-  // According to the w3c spec,
-  // http://www.w3.org/TR/DOM-Level-3-Events/#events-MouseEvent-button
-  // MouseEvent.button == 0 can mean either no mouse button depressed, or the
-  // left mouse button depressed.
-  //
-  // As of now, the only way to distinguish between the two states of
-  // MouseEvent.button is by using the deprecated MouseEvent.which property, as
-  // this maps mouse buttons to positive integers > 0, and uses 0 to mean that
-  // no mouse button is held.
-  //
-  // MouseEvent.which is derived from MouseEvent.button at MouseEvent creation,
-  // but initMouseEvent does not expose an argument with which to set
-  // MouseEvent.which. Calling initMouseEvent with a buttonArg of 0 will set
-  // MouseEvent.button == 0 and MouseEvent.which == 1, breaking the expectations
-  // of app developers.
-  //
-  // The only way to propagate the correct state of MouseEvent.which and
-  // MouseEvent.button to a new MouseEvent.button == 0 and MouseEvent.which == 0
-  // is to call initMouseEvent with a buttonArg value of -1.
-  //
-  // This is fixed with DOM Level 4's use of buttons
-  var buttons;
-
-  if (eventDict.buttons || HAS_BUTTONS) {
-    buttons = eventDict.buttons;
-  } else {
-    switch (eventDict.which) {
-      case 1:
-        buttons = 1;
-        break;
-
-      case 2:
-        buttons = 4;
-        break;
-
-      case 3:
-        buttons = 2;
-        break;
-
-      default:
-        buttons = 0;
-    }
-  }
-
-  return buttons;
-}
-/**
- * @param {Object<string, ?>} eventDict The event dictionary.
- * @param {number} buttons Button indicator.
- * @return {number} The pressure.
- */
-
-
-function getPressure(eventDict, buttons) {
-  // Spec requires that pointers without pressure specified use 0.5 for down
-  // state and 0 for up state.
-  var pressure = 0;
-
-  if (eventDict.pressure) {
-    pressure = eventDict.pressure;
-  } else {
-    pressure = buttons ? 0.5 : 0;
-  }
-
-  return pressure;
-}
-/**
- * Checks if the `buttons` property is supported.
- */
-
-
-(function () {
-  try {
-    var ev = new MouseEvent('click', {
-      buttons: 1
-    });
-    HAS_BUTTONS = ev.buttons === 1;
-  } catch (e) {// pass
-  }
-})();
-
-var _default = PointerEvent;
-exports.default = _default;
-},{"../events/Event.js":"node_modules/ol/events/Event.js"}],"node_modules/ol/pointer/TouchSource.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _array = require("../array.js");
-
-var _EventSource = _interopRequireDefault(require("./EventSource.js"));
-
-var _MouseSource = require("./MouseSource.js");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/pointer/TouchSource
- */
-// Based on https://github.com/Polymer/PointerEvents
-// Copyright (c) 2013 The Polymer Authors. All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-// * Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-// * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
-// in the documentation and/or other materials provided with the
-// distribution.
-// * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-/**
- * @type {number}
- */
-var CLICK_COUNT_TIMEOUT = 200;
-/**
- * @type {string}
- */
-
-var POINTER_TYPE = 'touch';
-/**
- * Handler for `touchstart`, triggers `pointerover`,
- * `pointerenter` and `pointerdown` events.
- *
- * @this {TouchSource}
- * @param {TouchEvent} inEvent The in event.
- */
-
-function touchstart(inEvent) {
-  this.vacuumTouches_(inEvent);
-  this.setPrimaryTouch_(inEvent.changedTouches[0]);
-  this.dedupSynthMouse_(inEvent);
-  this.clickCount_++;
-  this.processTouches_(inEvent, this.overDown_);
-}
-/**
- * Handler for `touchmove`.
- *
- * @this {TouchSource}
- * @param {TouchEvent} inEvent The in event.
- */
-
-
-function touchmove(inEvent) {
-  this.processTouches_(inEvent, this.moveOverOut_);
-}
-/**
- * Handler for `touchend`, triggers `pointerup`,
- * `pointerout` and `pointerleave` events.
- *
- * @this {TouchSource}
- * @param {TouchEvent} inEvent The event.
- */
-
-
-function touchend(inEvent) {
-  this.dedupSynthMouse_(inEvent);
-  this.processTouches_(inEvent, this.upOut_);
-}
-/**
- * Handler for `touchcancel`, triggers `pointercancel`,
- * `pointerout` and `pointerleave` events.
- *
- * @this {TouchSource}
- * @param {TouchEvent} inEvent The in event.
- */
-
-
-function touchcancel(inEvent) {
-  this.processTouches_(inEvent, this.cancelOut_);
-}
-
-var TouchSource =
-/*@__PURE__*/
-function (EventSource) {
-  function TouchSource(dispatcher, mouseSource) {
-    var mapping = {
-      'touchstart': touchstart,
-      'touchmove': touchmove,
-      'touchend': touchend,
-      'touchcancel': touchcancel
-    };
-    EventSource.call(this, dispatcher, mapping);
-    /**
-     * @const
-     * @type {!Object<string, Event|Object>}
-     */
-
-    this.pointerMap = dispatcher.pointerMap;
-    /**
-     * @const
-     * @type {import("./MouseSource.js").default}
-     */
-
-    this.mouseSource = mouseSource;
-    /**
-     * @private
-     * @type {number|undefined}
-     */
-
-    this.firstTouchId_ = undefined;
-    /**
-     * @private
-     * @type {number}
-     */
-
-    this.clickCount_ = 0;
-    /**
-     * @private
-     * @type {?}
-     */
-
-    this.resetId_;
-    /**
-     * Mouse event timeout: This should be long enough to
-     * ignore compat mouse events made by touch.
-     * @private
-     * @type {number}
-     */
-
-    this.dedupTimeout_ = 2500;
-  }
-
-  if (EventSource) TouchSource.__proto__ = EventSource;
-  TouchSource.prototype = Object.create(EventSource && EventSource.prototype);
-  TouchSource.prototype.constructor = TouchSource;
-  /**
-   * @private
-   * @param {Touch} inTouch The in touch.
-   * @return {boolean} True, if this is the primary touch.
-   */
-
-  TouchSource.prototype.isPrimaryTouch_ = function isPrimaryTouch_(inTouch) {
-    return this.firstTouchId_ === inTouch.identifier;
-  };
-  /**
-   * Set primary touch if there are no pointers, or the only pointer is the mouse.
-   * @param {Touch} inTouch The in touch.
-   * @private
-   */
-
-
-  TouchSource.prototype.setPrimaryTouch_ = function setPrimaryTouch_(inTouch) {
-    var count = Object.keys(this.pointerMap).length;
-
-    if (count === 0 || count === 1 && _MouseSource.POINTER_ID.toString() in this.pointerMap) {
-      this.firstTouchId_ = inTouch.identifier;
-      this.cancelResetClickCount_();
-    }
-  };
-  /**
-   * @private
-   * @param {PointerEvent} inPointer The in pointer object.
-   */
-
-
-  TouchSource.prototype.removePrimaryPointer_ = function removePrimaryPointer_(inPointer) {
-    if (inPointer.isPrimary) {
-      this.firstTouchId_ = undefined;
-      this.resetClickCount_();
-    }
-  };
-  /**
-   * @private
-   */
-
-
-  TouchSource.prototype.resetClickCount_ = function resetClickCount_() {
-    this.resetId_ = setTimeout(this.resetClickCountHandler_.bind(this), CLICK_COUNT_TIMEOUT);
-  };
-  /**
-   * @private
-   */
-
-
-  TouchSource.prototype.resetClickCountHandler_ = function resetClickCountHandler_() {
-    this.clickCount_ = 0;
-    this.resetId_ = undefined;
-  };
-  /**
-   * @private
-   */
-
-
-  TouchSource.prototype.cancelResetClickCount_ = function cancelResetClickCount_() {
-    if (this.resetId_ !== undefined) {
-      clearTimeout(this.resetId_);
-    }
-  };
-  /**
-   * @private
-   * @param {TouchEvent} browserEvent Browser event
-   * @param {Touch} inTouch Touch event
-   * @return {PointerEvent} A pointer object.
-   */
-
-
-  TouchSource.prototype.touchToPointer_ = function touchToPointer_(browserEvent, inTouch) {
-    var e = this.dispatcher.cloneEvent(browserEvent, inTouch); // Spec specifies that pointerId 1 is reserved for Mouse.
-    // Touch identifiers can start at 0.
-    // Add 2 to the touch identifier for compatibility.
-
-    e.pointerId = inTouch.identifier + 2; // TODO: check if this is necessary?
-    //e.target = findTarget(e);
-
-    e.bubbles = true;
-    e.cancelable = true;
-    e.detail = this.clickCount_;
-    e.button = 0;
-    e.buttons = 1;
-    e.width = inTouch.radiusX || 0;
-    e.height = inTouch.radiusY || 0;
-    e.pressure = inTouch.force || 0.5;
-    e.isPrimary = this.isPrimaryTouch_(inTouch);
-    e.pointerType = POINTER_TYPE; // make sure that the properties that are different for
-    // each `Touch` object are not copied from the BrowserEvent object
-
-    e.clientX = inTouch.clientX;
-    e.clientY = inTouch.clientY;
-    e.screenX = inTouch.screenX;
-    e.screenY = inTouch.screenY;
-    return e;
-  };
-  /**
-   * @private
-   * @param {TouchEvent} inEvent Touch event
-   * @param {function(TouchEvent, PointerEvent)} inFunction In function.
-   */
-
-
-  TouchSource.prototype.processTouches_ = function processTouches_(inEvent, inFunction) {
-    var touches = Array.prototype.slice.call(inEvent.changedTouches);
-    var count = touches.length;
-
-    function preventDefault() {
-      inEvent.preventDefault();
-    }
-
-    for (var i = 0; i < count; ++i) {
-      var pointer = this.touchToPointer_(inEvent, touches[i]); // forward touch preventDefaults
-
-      pointer.preventDefault = preventDefault;
-      inFunction.call(this, inEvent, pointer);
-    }
-  };
-  /**
-   * @private
-   * @param {TouchList} touchList The touch list.
-   * @param {number} searchId Search identifier.
-   * @return {boolean} True, if the `Touch` with the given id is in the list.
-   */
-
-
-  TouchSource.prototype.findTouch_ = function findTouch_(touchList, searchId) {
-    var l = touchList.length;
-
-    for (var i = 0; i < l; i++) {
-      var touch = touchList[i];
-
-      if (touch.identifier === searchId) {
-        return true;
-      }
-    }
-
-    return false;
-  };
-  /**
-   * In some instances, a touchstart can happen without a touchend. This
-   * leaves the pointermap in a broken state.
-   * Therefore, on every touchstart, we remove the touches that did not fire a
-   * touchend event.
-   * To keep state globally consistent, we fire a pointercancel for
-   * this "abandoned" touch
-   *
-   * @private
-   * @param {TouchEvent} inEvent The in event.
-   */
-
-
-  TouchSource.prototype.vacuumTouches_ = function vacuumTouches_(inEvent) {
-    var touchList = inEvent.touches; // pointerMap.getCount() should be < touchList.length here,
-    // as the touchstart has not been processed yet.
-
-    var keys = Object.keys(this.pointerMap);
-    var count = keys.length;
-
-    if (count >= touchList.length) {
-      var d = [];
-
-      for (var i = 0; i < count; ++i) {
-        var key = Number(keys[i]);
-        var value = this.pointerMap[key]; // Never remove pointerId == 1, which is mouse.
-        // Touch identifiers are 2 smaller than their pointerId, which is the
-        // index in pointermap.
-
-        if (key != _MouseSource.POINTER_ID && !this.findTouch_(touchList, key - 2)) {
-          d.push(value.out);
-        }
-      }
-
-      for (var i$1 = 0; i$1 < d.length; ++i$1) {
-        this.cancelOut_(inEvent, d[i$1]);
-      }
-    }
-  };
-  /**
-   * @private
-   * @param {TouchEvent} browserEvent The event.
-   * @param {PointerEvent} inPointer The in pointer object.
-   */
-
-
-  TouchSource.prototype.overDown_ = function overDown_(browserEvent, inPointer) {
-    this.pointerMap[inPointer.pointerId] = {
-      target: inPointer.target,
-      out: inPointer,
-      outTarget: inPointer.target
-    };
-    this.dispatcher.over(inPointer, browserEvent);
-    this.dispatcher.enter(inPointer, browserEvent);
-    this.dispatcher.down(inPointer, browserEvent);
-  };
-  /**
-   * @private
-   * @param {TouchEvent} browserEvent The event.
-   * @param {PointerEvent} inPointer The in pointer.
-   */
-
-
-  TouchSource.prototype.moveOverOut_ = function moveOverOut_(browserEvent, inPointer) {
-    var event = inPointer;
-    var pointer = this.pointerMap[event.pointerId]; // a finger drifted off the screen, ignore it
-
-    if (!pointer) {
-      return;
-    }
-
-    var outEvent = pointer.out;
-    var outTarget = pointer.outTarget;
-    this.dispatcher.move(event, browserEvent);
-
-    if (outEvent && outTarget !== event.target) {
-      outEvent.relatedTarget = event.target;
-      /** @type {Object} */
-
-      event.relatedTarget = outTarget; // recover from retargeting by shadow
-
-      outEvent.target = outTarget;
-
-      if (event.target) {
-        this.dispatcher.leaveOut(outEvent, browserEvent);
-        this.dispatcher.enterOver(event, browserEvent);
-      } else {
-        // clean up case when finger leaves the screen
-
-        /** @type {Object} */
-        event.target = outTarget;
-        /** @type {Object} */
-
-        event.relatedTarget = null;
-        this.cancelOut_(browserEvent, event);
-      }
-    }
-
-    pointer.out = event;
-    pointer.outTarget = event.target;
-  };
-  /**
-   * @private
-   * @param {TouchEvent} browserEvent An event.
-   * @param {PointerEvent} inPointer The inPointer object.
-   */
-
-
-  TouchSource.prototype.upOut_ = function upOut_(browserEvent, inPointer) {
-    this.dispatcher.up(inPointer, browserEvent);
-    this.dispatcher.out(inPointer, browserEvent);
-    this.dispatcher.leave(inPointer, browserEvent);
-    this.cleanUpPointer_(inPointer);
-  };
-  /**
-   * @private
-   * @param {TouchEvent} browserEvent The event.
-   * @param {PointerEvent} inPointer The in pointer.
-   */
-
-
-  TouchSource.prototype.cancelOut_ = function cancelOut_(browserEvent, inPointer) {
-    this.dispatcher.cancel(inPointer, browserEvent);
-    this.dispatcher.out(inPointer, browserEvent);
-    this.dispatcher.leave(inPointer, browserEvent);
-    this.cleanUpPointer_(inPointer);
-  };
-  /**
-   * @private
-   * @param {PointerEvent} inPointer The inPointer object.
-   */
-
-
-  TouchSource.prototype.cleanUpPointer_ = function cleanUpPointer_(inPointer) {
-    delete this.pointerMap[inPointer.pointerId];
-    this.removePrimaryPointer_(inPointer);
-  };
-  /**
-   * Prevent synth mouse events from creating pointer events.
-   *
-   * @private
-   * @param {TouchEvent} inEvent The in event.
-   */
-
-
-  TouchSource.prototype.dedupSynthMouse_ = function dedupSynthMouse_(inEvent) {
-    var lts = this.mouseSource.lastTouches;
-    var t = inEvent.changedTouches[0]; // only the primary finger will synth mouse events
-
-    if (this.isPrimaryTouch_(t)) {
-      // remember x/y of last touch
-      var lt = [t.clientX, t.clientY];
-      lts.push(lt);
-      setTimeout(function () {
-        // remove touch after timeout
-        (0, _array.remove)(lts, lt);
-      }, this.dedupTimeout_);
-    }
-  };
-
-  return TouchSource;
-}(_EventSource.default);
-
-var _default = TouchSource;
-exports.default = _default;
-},{"../array.js":"node_modules/ol/array.js","./EventSource.js":"node_modules/ol/pointer/EventSource.js","./MouseSource.js":"node_modules/ol/pointer/MouseSource.js"}],"node_modules/ol/pointer/PointerEventHandler.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _events = require("../events.js");
-
-var _Target = _interopRequireDefault(require("../events/Target.js"));
-
-var _has = require("../has.js");
-
-var _EventType = _interopRequireDefault(require("./EventType.js"));
-
-var _MouseSource = _interopRequireWildcard(require("./MouseSource.js"));
-
-var _MsSource = _interopRequireDefault(require("./MsSource.js"));
-
-var _NativeSource = _interopRequireDefault(require("./NativeSource.js"));
-
-var _PointerEvent = _interopRequireDefault(require("./PointerEvent.js"));
-
-var _TouchSource = _interopRequireDefault(require("./TouchSource.js"));
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/pointer/PointerEventHandler
- */
-// Based on https://github.com/Polymer/PointerEvents
-// Copyright (c) 2013 The Polymer Authors. All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-// * Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-// * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
-// in the documentation and/or other materials provided with the
-// distribution.
-// * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-/**
- * Properties to copy when cloning an event, with default values.
- * @type {Array<Array>}
- */
-var CLONE_PROPS = [// MouseEvent
-['bubbles', false], ['cancelable', false], ['view', null], ['detail', null], ['screenX', 0], ['screenY', 0], ['clientX', 0], ['clientY', 0], ['ctrlKey', false], ['altKey', false], ['shiftKey', false], ['metaKey', false], ['button', 0], ['relatedTarget', null], // DOM Level 3
-['buttons', 0], // PointerEvent
-['pointerId', 0], ['width', 0], ['height', 0], ['pressure', 0], ['tiltX', 0], ['tiltY', 0], ['pointerType', ''], ['hwTimestamp', 0], ['isPrimary', false], // event instance
-['type', ''], ['target', null], ['currentTarget', null], ['which', 0]];
-
-var PointerEventHandler =
-/*@__PURE__*/
-function (EventTarget) {
-  function PointerEventHandler(element) {
-    EventTarget.call(this);
-    /**
-     * @const
-     * @private
-     * @type {Element|HTMLDocument}
-     */
-
-    this.element_ = element;
-    /**
-     * @const
-     * @type {!Object<string, Event|Object>}
-     */
-
-    this.pointerMap = {};
-    /**
-     * @type {Object<string, function(Event)>}
-     * @private
-     */
-
-    this.eventMap_ = {};
-    /**
-     * @type {Array<import("./EventSource.js").default>}
-     * @private
-     */
-
-    this.eventSourceList_ = [];
-    this.registerSources();
-  }
-
-  if (EventTarget) PointerEventHandler.__proto__ = EventTarget;
-  PointerEventHandler.prototype = Object.create(EventTarget && EventTarget.prototype);
-  PointerEventHandler.prototype.constructor = PointerEventHandler;
-  /**
-   * Set up the event sources (mouse, touch and native pointers)
-   * that generate pointer events.
-   */
-
-  PointerEventHandler.prototype.registerSources = function registerSources() {
-    if (_has.POINTER) {
-      this.registerSource('native', new _NativeSource.default(this));
-    } else if (_has.MSPOINTER) {
-      this.registerSource('ms', new _MsSource.default(this));
-    } else {
-      var mouseSource = new _MouseSource.default(this);
-      this.registerSource('mouse', mouseSource);
-
-      if (_has.TOUCH) {
-        this.registerSource('touch', new _TouchSource.default(this, mouseSource));
-      }
-    } // register events on the viewport element
-
-
-    this.register_();
-  };
-  /**
-   * Add a new event source that will generate pointer events.
-   *
-   * @param {string} name A name for the event source
-   * @param {import("./EventSource.js").default} source The source event.
-   */
-
-
-  PointerEventHandler.prototype.registerSource = function registerSource(name, source) {
-    var s = source;
-    var newEvents = s.getEvents();
-
-    if (newEvents) {
-      newEvents.forEach(function (e) {
-        var handler = s.getHandlerForEvent(e);
-
-        if (handler) {
-          this.eventMap_[e] = handler.bind(s);
-        }
-      }.bind(this));
-      this.eventSourceList_.push(s);
-    }
-  };
-  /**
-   * Set up the events for all registered event sources.
-   * @private
-   */
-
-
-  PointerEventHandler.prototype.register_ = function register_() {
-    var l = this.eventSourceList_.length;
-
-    for (var i = 0; i < l; i++) {
-      var eventSource = this.eventSourceList_[i];
-      this.addEvents_(eventSource.getEvents());
-    }
-  };
-  /**
-   * Remove all registered events.
-   * @private
-   */
-
-
-  PointerEventHandler.prototype.unregister_ = function unregister_() {
-    var l = this.eventSourceList_.length;
-
-    for (var i = 0; i < l; i++) {
-      var eventSource = this.eventSourceList_[i];
-      this.removeEvents_(eventSource.getEvents());
-    }
-  };
-  /**
-   * Calls the right handler for a new event.
-   * @private
-   * @param {Event} inEvent Browser event.
-   */
-
-
-  PointerEventHandler.prototype.eventHandler_ = function eventHandler_(inEvent) {
-    var type = inEvent.type;
-    var handler = this.eventMap_[type];
-
-    if (handler) {
-      handler(inEvent);
-    }
-  };
-  /**
-   * Setup listeners for the given events.
-   * @private
-   * @param {Array<string>} events List of events.
-   */
-
-
-  PointerEventHandler.prototype.addEvents_ = function addEvents_(events) {
-    events.forEach(function (eventName) {
-      (0, _events.listen)(this.element_, eventName, this.eventHandler_, this);
-    }.bind(this));
-  };
-  /**
-   * Unregister listeners for the given events.
-   * @private
-   * @param {Array<string>} events List of events.
-   */
-
-
-  PointerEventHandler.prototype.removeEvents_ = function removeEvents_(events) {
-    events.forEach(function (e) {
-      (0, _events.unlisten)(this.element_, e, this.eventHandler_, this);
-    }.bind(this));
-  };
-  /**
-   * Returns a snapshot of inEvent, with writable properties.
-   *
-   * @param {Event} event Browser event.
-   * @param {Event|Touch} inEvent An event that contains
-   *    properties to copy.
-   * @return {Object} An object containing shallow copies of
-   *    `inEvent`'s properties.
-   */
-
-
-  PointerEventHandler.prototype.cloneEvent = function cloneEvent(event, inEvent) {
-    var eventCopy = {};
-
-    for (var i = 0, ii = CLONE_PROPS.length; i < ii; i++) {
-      var p = CLONE_PROPS[i][0];
-      eventCopy[p] = event[p] || inEvent[p] || CLONE_PROPS[i][1];
-    }
-
-    return eventCopy;
-  }; // EVENTS
-
-  /**
-   * Triggers a 'pointerdown' event.
-   * @param {Object} data Pointer event data.
-   * @param {Event} event The event.
-   */
-
-
-  PointerEventHandler.prototype.down = function down(data, event) {
-    this.fireEvent(_EventType.default.POINTERDOWN, data, event);
-  };
-  /**
-   * Triggers a 'pointermove' event.
-   * @param {Object} data Pointer event data.
-   * @param {Event} event The event.
-   */
-
-
-  PointerEventHandler.prototype.move = function move(data, event) {
-    this.fireEvent(_EventType.default.POINTERMOVE, data, event);
-  };
-  /**
-   * Triggers a 'pointerup' event.
-   * @param {Object} data Pointer event data.
-   * @param {Event} event The event.
-   */
-
-
-  PointerEventHandler.prototype.up = function up(data, event) {
-    this.fireEvent(_EventType.default.POINTERUP, data, event);
-  };
-  /**
-   * Triggers a 'pointerenter' event.
-   * @param {Object} data Pointer event data.
-   * @param {Event} event The event.
-   */
-
-
-  PointerEventHandler.prototype.enter = function enter(data, event) {
-    data.bubbles = false;
-    this.fireEvent(_EventType.default.POINTERENTER, data, event);
-  };
-  /**
-   * Triggers a 'pointerleave' event.
-   * @param {Object} data Pointer event data.
-   * @param {Event} event The event.
-   */
-
-
-  PointerEventHandler.prototype.leave = function leave(data, event) {
-    data.bubbles = false;
-    this.fireEvent(_EventType.default.POINTERLEAVE, data, event);
-  };
-  /**
-   * Triggers a 'pointerover' event.
-   * @param {Object} data Pointer event data.
-   * @param {Event} event The event.
-   */
-
-
-  PointerEventHandler.prototype.over = function over(data, event) {
-    data.bubbles = true;
-    this.fireEvent(_EventType.default.POINTEROVER, data, event);
-  };
-  /**
-   * Triggers a 'pointerout' event.
-   * @param {Object} data Pointer event data.
-   * @param {Event} event The event.
-   */
-
-
-  PointerEventHandler.prototype.out = function out(data, event) {
-    data.bubbles = true;
-    this.fireEvent(_EventType.default.POINTEROUT, data, event);
-  };
-  /**
-   * Triggers a 'pointercancel' event.
-   * @param {Object} data Pointer event data.
-   * @param {Event} event The event.
-   */
-
-
-  PointerEventHandler.prototype.cancel = function cancel(data, event) {
-    this.fireEvent(_EventType.default.POINTERCANCEL, data, event);
-  };
-  /**
-   * Triggers a combination of 'pointerout' and 'pointerleave' events.
-   * @param {Object} data Pointer event data.
-   * @param {Event} event The event.
-   */
-
-
-  PointerEventHandler.prototype.leaveOut = function leaveOut(data, event) {
-    this.out(data, event);
-
-    if (!this.contains_(data.target, data.relatedTarget)) {
-      this.leave(data, event);
-    }
-  };
-  /**
-   * Triggers a combination of 'pointerover' and 'pointerevents' events.
-   * @param {Object} data Pointer event data.
-   * @param {Event} event The event.
-   */
-
-
-  PointerEventHandler.prototype.enterOver = function enterOver(data, event) {
-    this.over(data, event);
-
-    if (!this.contains_(data.target, data.relatedTarget)) {
-      this.enter(data, event);
-    }
-  };
-  /**
-   * @private
-   * @param {Element} container The container element.
-   * @param {Element} contained The contained element.
-   * @return {boolean} Returns true if the container element
-   *   contains the other element.
-   */
-
-
-  PointerEventHandler.prototype.contains_ = function contains_(container, contained) {
-    if (!container || !contained) {
-      return false;
-    }
-
-    return container.contains(contained);
-  }; // EVENT CREATION AND TRACKING
-
-  /**
-   * Creates a new Event of type `inType`, based on the information in
-   * `data`.
-   *
-   * @param {string} inType A string representing the type of event to create.
-   * @param {Object} data Pointer event data.
-   * @param {Event} event The event.
-   * @return {PointerEvent} A PointerEvent of type `inType`.
-   */
-
-
-  PointerEventHandler.prototype.makeEvent = function makeEvent(inType, data, event) {
-    return new _PointerEvent.default(inType, event, data);
-  };
-  /**
-   * Make and dispatch an event in one call.
-   * @param {string} inType A string representing the type of event.
-   * @param {Object} data Pointer event data.
-   * @param {Event} event The event.
-   */
-
-
-  PointerEventHandler.prototype.fireEvent = function fireEvent(inType, data, event) {
-    var e = this.makeEvent(inType, data, event);
-    this.dispatchEvent(e);
-  };
-  /**
-   * Creates a pointer event from a native pointer event
-   * and dispatches this event.
-   * @param {Event} event A platform event with a target.
-   */
-
-
-  PointerEventHandler.prototype.fireNativeEvent = function fireNativeEvent(event) {
-    var e = this.makeEvent(event.type, event, event);
-    this.dispatchEvent(e);
-  };
-  /**
-   * Wrap a native mouse event into a pointer event.
-   * This proxy method is required for the legacy IE support.
-   * @param {string} eventType The pointer event type.
-   * @param {Event} event The event.
-   * @return {PointerEvent} The wrapped event.
-   */
-
-
-  PointerEventHandler.prototype.wrapMouseEvent = function wrapMouseEvent(eventType, event) {
-    var pointerEvent = this.makeEvent(eventType, (0, _MouseSource.prepareEvent)(event, this), event);
-    return pointerEvent;
-  };
-  /**
-   * @inheritDoc
-   */
-
-
-  PointerEventHandler.prototype.disposeInternal = function disposeInternal() {
-    this.unregister_();
-    EventTarget.prototype.disposeInternal.call(this);
-  };
-
-  return PointerEventHandler;
-}(_Target.default);
-
-var _default = PointerEventHandler;
-exports.default = _default;
-},{"../events.js":"node_modules/ol/events.js","../events/Target.js":"node_modules/ol/events/Target.js","../has.js":"node_modules/ol/has.js","./EventType.js":"node_modules/ol/pointer/EventType.js","./MouseSource.js":"node_modules/ol/pointer/MouseSource.js","./MsSource.js":"node_modules/ol/pointer/MsSource.js","./NativeSource.js":"node_modules/ol/pointer/NativeSource.js","./PointerEvent.js":"node_modules/ol/pointer/PointerEvent.js","./TouchSource.js":"node_modules/ol/pointer/TouchSource.js"}],"node_modules/ol/MapBrowserEventHandler.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _has = require("./has.js");
-
-var _MapBrowserEventType = _interopRequireDefault(require("./MapBrowserEventType.js"));
-
-var _MapBrowserPointerEvent = _interopRequireDefault(require("./MapBrowserPointerEvent.js"));
-
-var _events = require("./events.js");
-
-var _Target = _interopRequireDefault(require("./events/Target.js"));
-
-var _EventType = _interopRequireDefault(require("./pointer/EventType.js"));
-
-var _PointerEventHandler = _interopRequireDefault(require("./pointer/PointerEventHandler.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/MapBrowserEventHandler
- */
-var MapBrowserEventHandler =
-/*@__PURE__*/
-function (EventTarget) {
-  function MapBrowserEventHandler(map, moveTolerance) {
-    EventTarget.call(this);
-    /**
-     * This is the element that we will listen to the real events on.
-     * @type {import("./PluggableMap.js").default}
-     * @private
-     */
-
-    this.map_ = map;
-    /**
-     * @type {any}
-     * @private
-     */
-
-    this.clickTimeoutId_;
-    /**
-     * @type {boolean}
-     * @private
-     */
-
-    this.dragging_ = false;
-    /**
-     * @type {!Array<import("./events.js").EventsKey>}
-     * @private
-     */
-
-    this.dragListenerKeys_ = [];
-    /**
-     * @type {number}
-     * @private
-     */
-
-    this.moveTolerance_ = moveTolerance ? moveTolerance * _has.DEVICE_PIXEL_RATIO : _has.DEVICE_PIXEL_RATIO;
-    /**
-     * The most recent "down" type event (or null if none have occurred).
-     * Set on pointerdown.
-     * @type {import("./pointer/PointerEvent.js").default}
-     * @private
-     */
-
-    this.down_ = null;
-    var element = this.map_.getViewport();
-    /**
-     * @type {number}
-     * @private
-     */
-
-    this.activePointers_ = 0;
-    /**
-     * @type {!Object<number, boolean>}
-     * @private
-     */
-
-    this.trackedTouches_ = {};
-    /**
-     * Event handler which generates pointer events for
-     * the viewport element.
-     *
-     * @type {PointerEventHandler}
-     * @private
-     */
-
-    this.pointerEventHandler_ = new _PointerEventHandler.default(element);
-    /**
-     * Event handler which generates pointer events for
-     * the document (used when dragging).
-     *
-     * @type {PointerEventHandler}
-     * @private
-     */
-
-    this.documentPointerEventHandler_ = null;
-    /**
-     * @type {?import("./events.js").EventsKey}
-     * @private
-     */
-
-    this.pointerdownListenerKey_ = (0, _events.listen)(this.pointerEventHandler_, _EventType.default.POINTERDOWN, this.handlePointerDown_, this);
-    /**
-     * @type {?import("./events.js").EventsKey}
-     * @private
-     */
-
-    this.relayedListenerKey_ = (0, _events.listen)(this.pointerEventHandler_, _EventType.default.POINTERMOVE, this.relayEvent_, this);
-  }
-
-  if (EventTarget) MapBrowserEventHandler.__proto__ = EventTarget;
-  MapBrowserEventHandler.prototype = Object.create(EventTarget && EventTarget.prototype);
-  MapBrowserEventHandler.prototype.constructor = MapBrowserEventHandler;
-  /**
-   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
-   * event.
-   * @private
-   */
-
-  MapBrowserEventHandler.prototype.emulateClick_ = function emulateClick_(pointerEvent) {
-    var newEvent = new _MapBrowserPointerEvent.default(_MapBrowserEventType.default.CLICK, this.map_, pointerEvent);
-    this.dispatchEvent(newEvent);
-
-    if (this.clickTimeoutId_ !== undefined) {
-      // double-click
-      clearTimeout(this.clickTimeoutId_);
-      this.clickTimeoutId_ = undefined;
-      newEvent = new _MapBrowserPointerEvent.default(_MapBrowserEventType.default.DBLCLICK, this.map_, pointerEvent);
-      this.dispatchEvent(newEvent);
-    } else {
-      // click
-      this.clickTimeoutId_ = setTimeout(function () {
-        this.clickTimeoutId_ = undefined;
-        var newEvent = new _MapBrowserPointerEvent.default(_MapBrowserEventType.default.SINGLECLICK, this.map_, pointerEvent);
-        this.dispatchEvent(newEvent);
-      }.bind(this), 250);
-    }
-  };
-  /**
-   * Keeps track on how many pointers are currently active.
-   *
-   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
-   * event.
-   * @private
-   */
-
-
-  MapBrowserEventHandler.prototype.updateActivePointers_ = function updateActivePointers_(pointerEvent) {
-    var event = pointerEvent;
-
-    if (event.type == _MapBrowserEventType.default.POINTERUP || event.type == _MapBrowserEventType.default.POINTERCANCEL) {
-      delete this.trackedTouches_[event.pointerId];
-    } else if (event.type == _MapBrowserEventType.default.POINTERDOWN) {
-      this.trackedTouches_[event.pointerId] = true;
-    }
-
-    this.activePointers_ = Object.keys(this.trackedTouches_).length;
-  };
-  /**
-   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
-   * event.
-   * @private
-   */
-
-
-  MapBrowserEventHandler.prototype.handlePointerUp_ = function handlePointerUp_(pointerEvent) {
-    this.updateActivePointers_(pointerEvent);
-    var newEvent = new _MapBrowserPointerEvent.default(_MapBrowserEventType.default.POINTERUP, this.map_, pointerEvent);
-    this.dispatchEvent(newEvent); // We emulate click events on left mouse button click, touch contact, and pen
-    // contact. isMouseActionButton returns true in these cases (evt.button is set
-    // to 0).
-    // See http://www.w3.org/TR/pointerevents/#button-states
-    // We only fire click, singleclick, and doubleclick if nobody has called
-    // event.stopPropagation() or event.preventDefault().
-
-    if (!newEvent.propagationStopped && !this.dragging_ && this.isMouseActionButton_(pointerEvent)) {
-      this.emulateClick_(this.down_);
-    }
-
-    if (this.activePointers_ === 0) {
-      this.dragListenerKeys_.forEach(_events.unlistenByKey);
-      this.dragListenerKeys_.length = 0;
-      this.dragging_ = false;
-      this.down_ = null;
-      this.documentPointerEventHandler_.dispose();
-      this.documentPointerEventHandler_ = null;
-    }
-  };
-  /**
-   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
-   * event.
-   * @return {boolean} If the left mouse button was pressed.
-   * @private
-   */
-
-
-  MapBrowserEventHandler.prototype.isMouseActionButton_ = function isMouseActionButton_(pointerEvent) {
-    return pointerEvent.button === 0;
-  };
-  /**
-   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
-   * event.
-   * @private
-   */
-
-
-  MapBrowserEventHandler.prototype.handlePointerDown_ = function handlePointerDown_(pointerEvent) {
-    this.updateActivePointers_(pointerEvent);
-    var newEvent = new _MapBrowserPointerEvent.default(_MapBrowserEventType.default.POINTERDOWN, this.map_, pointerEvent);
-    this.dispatchEvent(newEvent);
-    this.down_ = pointerEvent;
-
-    if (this.dragListenerKeys_.length === 0) {
-      /* Set up a pointer event handler on the `document`,
-       * which is required when the pointer is moved outside
-       * the viewport when dragging.
-       */
-      this.documentPointerEventHandler_ = new _PointerEventHandler.default(document);
-      this.dragListenerKeys_.push((0, _events.listen)(this.documentPointerEventHandler_, _MapBrowserEventType.default.POINTERMOVE, this.handlePointerMove_, this), (0, _events.listen)(this.documentPointerEventHandler_, _MapBrowserEventType.default.POINTERUP, this.handlePointerUp_, this),
-      /* Note that the listener for `pointercancel is set up on
-       * `pointerEventHandler_` and not `documentPointerEventHandler_` like
-       * the `pointerup` and `pointermove` listeners.
-       *
-       * The reason for this is the following: `TouchSource.vacuumTouches_()`
-       * issues `pointercancel` events, when there was no `touchend` for a
-       * `touchstart`. Now, let's say a first `touchstart` is registered on
-       * `pointerEventHandler_`. The `documentPointerEventHandler_` is set up.
-       * But `documentPointerEventHandler_` doesn't know about the first
-       * `touchstart`. If there is no `touchend` for the `touchstart`, we can
-       * only receive a `touchcancel` from `pointerEventHandler_`, because it is
-       * only registered there.
-       */
-      (0, _events.listen)(this.pointerEventHandler_, _MapBrowserEventType.default.POINTERCANCEL, this.handlePointerUp_, this));
-    }
-  };
-  /**
-   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
-   * event.
-   * @private
-   */
-
-
-  MapBrowserEventHandler.prototype.handlePointerMove_ = function handlePointerMove_(pointerEvent) {
-    // Between pointerdown and pointerup, pointermove events are triggered.
-    // To avoid a 'false' touchmove event to be dispatched, we test if the pointer
-    // moved a significant distance.
-    if (this.isMoving_(pointerEvent)) {
-      this.dragging_ = true;
-      var newEvent = new _MapBrowserPointerEvent.default(_MapBrowserEventType.default.POINTERDRAG, this.map_, pointerEvent, this.dragging_);
-      this.dispatchEvent(newEvent);
-    } // Some native android browser triggers mousemove events during small period
-    // of time. See: https://code.google.com/p/android/issues/detail?id=5491 or
-    // https://code.google.com/p/android/issues/detail?id=19827
-    // ex: Galaxy Tab P3110 + Android 4.1.1
-
-
-    pointerEvent.preventDefault();
-  };
-  /**
-   * Wrap and relay a pointer event.  Note that this requires that the type
-   * string for the MapBrowserPointerEvent matches the PointerEvent type.
-   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
-   * event.
-   * @private
-   */
-
-
-  MapBrowserEventHandler.prototype.relayEvent_ = function relayEvent_(pointerEvent) {
-    var dragging = !!(this.down_ && this.isMoving_(pointerEvent));
-    this.dispatchEvent(new _MapBrowserPointerEvent.default(pointerEvent.type, this.map_, pointerEvent, dragging));
-  };
-  /**
-   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
-   * event.
-   * @return {boolean} Is moving.
-   * @private
-   */
-
-
-  MapBrowserEventHandler.prototype.isMoving_ = function isMoving_(pointerEvent) {
-    return this.dragging_ || Math.abs(pointerEvent.clientX - this.down_.clientX) > this.moveTolerance_ || Math.abs(pointerEvent.clientY - this.down_.clientY) > this.moveTolerance_;
-  };
-  /**
-   * @inheritDoc
-   */
-
-
-  MapBrowserEventHandler.prototype.disposeInternal = function disposeInternal() {
-    if (this.relayedListenerKey_) {
-      (0, _events.unlistenByKey)(this.relayedListenerKey_);
-      this.relayedListenerKey_ = null;
-    }
-
-    if (this.pointerdownListenerKey_) {
-      (0, _events.unlistenByKey)(this.pointerdownListenerKey_);
-      this.pointerdownListenerKey_ = null;
-    }
-
-    this.dragListenerKeys_.forEach(_events.unlistenByKey);
-    this.dragListenerKeys_.length = 0;
-
-    if (this.documentPointerEventHandler_) {
-      this.documentPointerEventHandler_.dispose();
-      this.documentPointerEventHandler_ = null;
-    }
-
-    if (this.pointerEventHandler_) {
-      this.pointerEventHandler_.dispose();
-      this.pointerEventHandler_ = null;
-    }
-
-    EventTarget.prototype.disposeInternal.call(this);
-  };
-
-  return MapBrowserEventHandler;
-}(_Target.default);
-
-var _default = MapBrowserEventHandler;
-exports.default = _default;
-},{"./has.js":"node_modules/ol/has.js","./MapBrowserEventType.js":"node_modules/ol/MapBrowserEventType.js","./MapBrowserPointerEvent.js":"node_modules/ol/MapBrowserPointerEvent.js","./events.js":"node_modules/ol/events.js","./events/Target.js":"node_modules/ol/events/Target.js","./pointer/EventType.js":"node_modules/ol/pointer/EventType.js","./pointer/PointerEventHandler.js":"node_modules/ol/pointer/PointerEventHandler.js"}],"node_modules/ol/MapProperty.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/MapProperty
- */
-
-/**
- * @enum {string}
- */
-var _default = {
-  LAYERGROUP: 'layergroup',
-  SIZE: 'size',
-  TARGET: 'target',
-  VIEW: 'view'
-};
-exports.default = _default;
-},{}],"node_modules/ol/TileState.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/TileState
- */
-
-/**
- * @enum {number}
- */
-var _default = {
-  IDLE: 0,
-  LOADING: 1,
-  LOADED: 2,
-
-  /**
-   * Indicates that tile loading failed
-   * @type {number}
-   */
-  ERROR: 3,
-  EMPTY: 4,
-  ABORT: 5
-};
-exports.default = _default;
-},{}],"node_modules/ol/structs/PriorityQueue.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = exports.DROP = void 0;
-
-var _asserts = require("../asserts.js");
-
-var _obj = require("../obj.js");
-
-/**
- * @module ol/structs/PriorityQueue
- */
-
-/**
- * @type {number}
- */
-var DROP = Infinity;
-/**
- * @classdesc
- * Priority queue.
- *
- * The implementation is inspired from the Closure Library's Heap class and
- * Python's heapq module.
- *
- * See http://closure-library.googlecode.com/svn/docs/closure_goog_structs_heap.js.source.html
- * and http://hg.python.org/cpython/file/2.7/Lib/heapq.py.
- *
- * @template T
- */
-
-exports.DROP = DROP;
-
-var PriorityQueue = function PriorityQueue(priorityFunction, keyFunction) {
-  /**
-   * @type {function(T): number}
-   * @private
-   */
-  this.priorityFunction_ = priorityFunction;
-  /**
-   * @type {function(T): string}
-   * @private
-   */
-
-  this.keyFunction_ = keyFunction;
-  /**
-   * @type {Array<T>}
-   * @private
-   */
-
-  this.elements_ = [];
-  /**
-   * @type {Array<number>}
-   * @private
-   */
-
-  this.priorities_ = [];
-  /**
-   * @type {!Object<string, boolean>}
-   * @private
-   */
-
-  this.queuedElements_ = {};
-};
-/**
- * FIXME empty description for jsdoc
- */
-
-
-PriorityQueue.prototype.clear = function clear$1() {
-  this.elements_.length = 0;
-  this.priorities_.length = 0;
-  (0, _obj.clear)(this.queuedElements_);
-};
-/**
- * Remove and return the highest-priority element. O(log N).
- * @return {T} Element.
- */
-
-
-PriorityQueue.prototype.dequeue = function dequeue() {
-  var elements = this.elements_;
-  var priorities = this.priorities_;
-  var element = elements[0];
-
-  if (elements.length == 1) {
-    elements.length = 0;
-    priorities.length = 0;
-  } else {
-    elements[0] = elements.pop();
-    priorities[0] = priorities.pop();
-    this.siftUp_(0);
-  }
-
-  var elementKey = this.keyFunction_(element);
-  delete this.queuedElements_[elementKey];
-  return element;
-};
-/**
- * Enqueue an element. O(log N).
- * @param {T} element Element.
- * @return {boolean} The element was added to the queue.
- */
-
-
-PriorityQueue.prototype.enqueue = function enqueue(element) {
-  (0, _asserts.assert)(!(this.keyFunction_(element) in this.queuedElements_), 31); // Tried to enqueue an `element` that was already added to the queue
-
-  var priority = this.priorityFunction_(element);
-
-  if (priority != DROP) {
-    this.elements_.push(element);
-    this.priorities_.push(priority);
-    this.queuedElements_[this.keyFunction_(element)] = true;
-    this.siftDown_(0, this.elements_.length - 1);
-    return true;
-  }
-
-  return false;
-};
-/**
- * @return {number} Count.
- */
-
-
-PriorityQueue.prototype.getCount = function getCount() {
-  return this.elements_.length;
-};
-/**
- * Gets the index of the left child of the node at the given index.
- * @param {number} index The index of the node to get the left child for.
- * @return {number} The index of the left child.
- * @private
- */
-
-
-PriorityQueue.prototype.getLeftChildIndex_ = function getLeftChildIndex_(index) {
-  return index * 2 + 1;
-};
-/**
- * Gets the index of the right child of the node at the given index.
- * @param {number} index The index of the node to get the right child for.
- * @return {number} The index of the right child.
- * @private
- */
-
-
-PriorityQueue.prototype.getRightChildIndex_ = function getRightChildIndex_(index) {
-  return index * 2 + 2;
-};
-/**
- * Gets the index of the parent of the node at the given index.
- * @param {number} index The index of the node to get the parent for.
- * @return {number} The index of the parent.
- * @private
- */
-
-
-PriorityQueue.prototype.getParentIndex_ = function getParentIndex_(index) {
-  return index - 1 >> 1;
-};
-/**
- * Make this a heap. O(N).
- * @private
- */
-
-
-PriorityQueue.prototype.heapify_ = function heapify_() {
-  var i;
-
-  for (i = (this.elements_.length >> 1) - 1; i >= 0; i--) {
-    this.siftUp_(i);
-  }
-};
-/**
- * @return {boolean} Is empty.
- */
-
-
-PriorityQueue.prototype.isEmpty = function isEmpty() {
-  return this.elements_.length === 0;
-};
-/**
- * @param {string} key Key.
- * @return {boolean} Is key queued.
- */
-
-
-PriorityQueue.prototype.isKeyQueued = function isKeyQueued(key) {
-  return key in this.queuedElements_;
-};
-/**
- * @param {T} element Element.
- * @return {boolean} Is queued.
- */
-
-
-PriorityQueue.prototype.isQueued = function isQueued(element) {
-  return this.isKeyQueued(this.keyFunction_(element));
-};
-/**
- * @param {number} index The index of the node to move down.
- * @private
- */
-
-
-PriorityQueue.prototype.siftUp_ = function siftUp_(index) {
-  var elements = this.elements_;
-  var priorities = this.priorities_;
-  var count = elements.length;
-  var element = elements[index];
-  var priority = priorities[index];
-  var startIndex = index;
-
-  while (index < count >> 1) {
-    var lIndex = this.getLeftChildIndex_(index);
-    var rIndex = this.getRightChildIndex_(index);
-    var smallerChildIndex = rIndex < count && priorities[rIndex] < priorities[lIndex] ? rIndex : lIndex;
-    elements[index] = elements[smallerChildIndex];
-    priorities[index] = priorities[smallerChildIndex];
-    index = smallerChildIndex;
-  }
-
-  elements[index] = element;
-  priorities[index] = priority;
-  this.siftDown_(startIndex, index);
-};
-/**
- * @param {number} startIndex The index of the root.
- * @param {number} index The index of the node to move up.
- * @private
- */
-
-
-PriorityQueue.prototype.siftDown_ = function siftDown_(startIndex, index) {
-  var elements = this.elements_;
-  var priorities = this.priorities_;
-  var element = elements[index];
-  var priority = priorities[index];
-
-  while (index > startIndex) {
-    var parentIndex = this.getParentIndex_(index);
-
-    if (priorities[parentIndex] > priority) {
-      elements[index] = elements[parentIndex];
-      priorities[index] = priorities[parentIndex];
-      index = parentIndex;
-    } else {
-      break;
-    }
-  }
-
-  elements[index] = element;
-  priorities[index] = priority;
-};
-/**
- * FIXME empty description for jsdoc
- */
-
-
-PriorityQueue.prototype.reprioritize = function reprioritize() {
-  var priorityFunction = this.priorityFunction_;
-  var elements = this.elements_;
-  var priorities = this.priorities_;
-  var index = 0;
-  var n = elements.length;
-  var element, i, priority;
-
-  for (i = 0; i < n; ++i) {
-    element = elements[i];
-    priority = priorityFunction(element);
-
-    if (priority == DROP) {
-      delete this.queuedElements_[this.keyFunction_(element)];
-    } else {
-      priorities[index] = priority;
-      elements[index++] = element;
-    }
-  }
-
-  elements.length = index;
-  priorities.length = index;
-  this.heapify_();
-};
-
-var _default = PriorityQueue;
-exports.default = _default;
-},{"../asserts.js":"node_modules/ol/asserts.js","../obj.js":"node_modules/ol/obj.js"}],"node_modules/ol/TileQueue.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _TileState = _interopRequireDefault(require("./TileState.js"));
-
-var _events = require("./events.js");
-
-var _EventType = _interopRequireDefault(require("./events/EventType.js"));
-
-var _PriorityQueue = _interopRequireDefault(require("./structs/PriorityQueue.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/TileQueue
- */
-
-/**
- * @typedef {function(import("./Tile.js").default, string, import("./coordinate.js").Coordinate, number): number} PriorityFunction
- */
-var TileQueue =
-/*@__PURE__*/
-function (PriorityQueue) {
-  function TileQueue(tilePriorityFunction, tileChangeCallback) {
-    PriorityQueue.call(
-    /**
-     * @param {Array} element Element.
-     * @return {number} Priority.
-     */
-    this, function (element) {
-      return tilePriorityFunction.apply(null, element);
-    },
-    /**
-     * @param {Array} element Element.
-     * @return {string} Key.
-     */
-    function (element) {
-      return (
-        /** @type {import("./Tile.js").default} */
-        element[0].getKey()
-      );
-    });
-    /**
-     * @private
-     * @type {function(): ?}
-     */
-
-    this.tileChangeCallback_ = tileChangeCallback;
-    /**
-     * @private
-     * @type {number}
-     */
-
-    this.tilesLoading_ = 0;
-    /**
-     * @private
-     * @type {!Object<string,boolean>}
-     */
-
-    this.tilesLoadingKeys_ = {};
-  }
-
-  if (PriorityQueue) TileQueue.__proto__ = PriorityQueue;
-  TileQueue.prototype = Object.create(PriorityQueue && PriorityQueue.prototype);
-  TileQueue.prototype.constructor = TileQueue;
-  /**
-   * @inheritDoc
-   */
-
-  TileQueue.prototype.enqueue = function enqueue(element) {
-    var added = PriorityQueue.prototype.enqueue.call(this, element);
-
-    if (added) {
-      var tile = element[0];
-      (0, _events.listen)(tile, _EventType.default.CHANGE, this.handleTileChange, this);
-    }
-
-    return added;
-  };
-  /**
-   * @return {number} Number of tiles loading.
-   */
-
-
-  TileQueue.prototype.getTilesLoading = function getTilesLoading() {
-    return this.tilesLoading_;
-  };
-  /**
-   * @param {import("./events/Event.js").default} event Event.
-   * @protected
-   */
-
-
-  TileQueue.prototype.handleTileChange = function handleTileChange(event) {
-    var tile =
-    /** @type {import("./Tile.js").default} */
-    event.target;
-    var state = tile.getState();
-
-    if (state === _TileState.default.LOADED || state === _TileState.default.ERROR || state === _TileState.default.EMPTY || state === _TileState.default.ABORT) {
-      (0, _events.unlisten)(tile, _EventType.default.CHANGE, this.handleTileChange, this);
-      var tileKey = tile.getKey();
-
-      if (tileKey in this.tilesLoadingKeys_) {
-        delete this.tilesLoadingKeys_[tileKey];
-        --this.tilesLoading_;
-      }
-
-      this.tileChangeCallback_();
-    }
-  };
-  /**
-   * @param {number} maxTotalLoading Maximum number tiles to load simultaneously.
-   * @param {number} maxNewLoads Maximum number of new tiles to load.
-   */
-
-
-  TileQueue.prototype.loadMoreTiles = function loadMoreTiles(maxTotalLoading, maxNewLoads) {
-    var newLoads = 0;
-    var abortedTiles = false;
-    var state, tile, tileKey;
-
-    while (this.tilesLoading_ < maxTotalLoading && newLoads < maxNewLoads && this.getCount() > 0) {
-      tile =
-      /** @type {import("./Tile.js").default} */
-      this.dequeue()[0];
-      tileKey = tile.getKey();
-      state = tile.getState();
-
-      if (state === _TileState.default.ABORT) {
-        abortedTiles = true;
-      } else if (state === _TileState.default.IDLE && !(tileKey in this.tilesLoadingKeys_)) {
-        this.tilesLoadingKeys_[tileKey] = true;
-        ++this.tilesLoading_;
-        ++newLoads;
-        tile.load();
-      }
-    }
-
-    if (newLoads === 0 && abortedTiles) {
-      // Do not stop the render loop when all wanted tiles were aborted due to
-      // a small, saturated tile cache.
-      this.tileChangeCallback_();
-    }
-  };
-
-  return TileQueue;
-}(_PriorityQueue.default);
-
-var _default = TileQueue;
-exports.default = _default;
-},{"./TileState.js":"node_modules/ol/TileState.js","./events.js":"node_modules/ol/events.js","./events/EventType.js":"node_modules/ol/events/EventType.js","./structs/PriorityQueue.js":"node_modules/ol/structs/PriorityQueue.js"}],"node_modules/ol/tilegrid/common.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.DEFAULT_TILE_SIZE = exports.DEFAULT_MAX_ZOOM = void 0;
-
-/**
- * @module ol/tilegrid/common
- */
-
-/**
- * Default maximum zoom for default tile grids.
- * @type {number}
- */
-var DEFAULT_MAX_ZOOM = 42;
-/**
- * Default tile size.
- * @type {number}
- */
-
-exports.DEFAULT_MAX_ZOOM = DEFAULT_MAX_ZOOM;
-var DEFAULT_TILE_SIZE = 256;
-exports.DEFAULT_TILE_SIZE = DEFAULT_TILE_SIZE;
-},{}],"node_modules/ol/centerconstraint.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createExtent = createExtent;
-exports.none = none;
-
-var _math = require("./math.js");
-
-/**
- * @module ol/centerconstraint
- */
-
-/**
- * @typedef {function((import("./coordinate.js").Coordinate|undefined)): (import("./coordinate.js").Coordinate|undefined)} Type
- */
-
-/**
- * @param {import("./extent.js").Extent} extent Extent.
- * @return {Type} The constraint.
- */
-function createExtent(extent) {
-  return (
-    /**
-     * @param {import("./coordinate.js").Coordinate=} center Center.
-     * @return {import("./coordinate.js").Coordinate|undefined} Center.
-     */
-    function (center) {
-      if (center) {
-        return [(0, _math.clamp)(center[0], extent[0], extent[2]), (0, _math.clamp)(center[1], extent[1], extent[3])];
-      } else {
-        return undefined;
-      }
-    }
-  );
-}
-/**
- * @param {import("./coordinate.js").Coordinate=} center Center.
- * @return {import("./coordinate.js").Coordinate|undefined} Center.
- */
-
-
-function none(center) {
-  return center;
-}
-},{"./math.js":"node_modules/ol/math.js"}],"node_modules/ol/resolutionconstraint.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createSnapToResolutions = createSnapToResolutions;
-exports.createSnapToPower = createSnapToPower;
-
-var _array = require("./array.js");
-
-var _math = require("./math.js");
-
-/**
- * @module ol/resolutionconstraint
- */
-
-/**
- * @typedef {function((number|undefined), number, number): (number|undefined)} Type
- */
-
-/**
- * @param {Array<number>} resolutions Resolutions.
- * @return {Type} Zoom function.
- */
-function createSnapToResolutions(resolutions) {
-  return (
-    /**
-     * @param {number|undefined} resolution Resolution.
-     * @param {number} delta Delta.
-     * @param {number} direction Direction.
-     * @return {number|undefined} Resolution.
-     */
-    function (resolution, delta, direction) {
-      if (resolution !== undefined) {
-        var z = (0, _array.linearFindNearest)(resolutions, resolution, direction);
-        z = (0, _math.clamp)(z + delta, 0, resolutions.length - 1);
-        var index = Math.floor(z);
-
-        if (z != index && index < resolutions.length - 1) {
-          var power = resolutions[index] / resolutions[index + 1];
-          return resolutions[index] / Math.pow(power, z - index);
-        } else {
-          return resolutions[index];
-        }
-      } else {
-        return undefined;
-      }
-    }
-  );
-}
-/**
- * @param {number} power Power.
- * @param {number} maxResolution Maximum resolution.
- * @param {number=} opt_maxLevel Maximum level.
- * @return {Type} Zoom function.
- */
-
-
-function createSnapToPower(power, maxResolution, opt_maxLevel) {
-  return (
-    /**
-     * @param {number|undefined} resolution Resolution.
-     * @param {number} delta Delta.
-     * @param {number} direction Direction.
-     * @return {number|undefined} Resolution.
-     */
-    function (resolution, delta, direction) {
-      if (resolution !== undefined) {
-        var offset = -direction / 2 + 0.5;
-        var oldLevel = Math.floor(Math.log(maxResolution / resolution) / Math.log(power) + offset);
-        var newLevel = Math.max(oldLevel + delta, 0);
-
-        if (opt_maxLevel !== undefined) {
-          newLevel = Math.min(newLevel, opt_maxLevel);
-        }
-
-        return maxResolution / Math.pow(power, newLevel);
-      } else {
-        return undefined;
-      }
-    }
-  );
-}
-},{"./array.js":"node_modules/ol/array.js","./math.js":"node_modules/ol/math.js"}],"node_modules/ol/rotationconstraint.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.disable = disable;
-exports.none = none;
-exports.createSnapToN = createSnapToN;
-exports.createSnapToZero = createSnapToZero;
-
-var _math = require("./math.js");
-
-/**
- * @module ol/rotationconstraint
- */
-
-/**
- * @typedef {function((number|undefined), number): (number|undefined)} Type
- */
-
-/**
- * @param {number|undefined} rotation Rotation.
- * @param {number} delta Delta.
- * @return {number|undefined} Rotation.
- */
-function disable(rotation, delta) {
-  if (rotation !== undefined) {
-    return 0;
-  } else {
-    return undefined;
-  }
-}
-/**
- * @param {number|undefined} rotation Rotation.
- * @param {number} delta Delta.
- * @return {number|undefined} Rotation.
- */
-
-
-function none(rotation, delta) {
-  if (rotation !== undefined) {
-    return rotation + delta;
-  } else {
-    return undefined;
-  }
-}
-/**
- * @param {number} n N.
- * @return {Type} Rotation constraint.
- */
-
-
-function createSnapToN(n) {
-  var theta = 2 * Math.PI / n;
-  return (
-    /**
-     * @param {number|undefined} rotation Rotation.
-     * @param {number} delta Delta.
-     * @return {number|undefined} Rotation.
-     */
-    function (rotation, delta) {
-      if (rotation !== undefined) {
-        rotation = Math.floor((rotation + delta) / theta + 0.5) * theta;
-        return rotation;
-      } else {
-        return undefined;
-      }
-    }
-  );
-}
-/**
- * @param {number=} opt_tolerance Tolerance.
- * @return {Type} Rotation constraint.
- */
-
-
-function createSnapToZero(opt_tolerance) {
-  var tolerance = opt_tolerance || (0, _math.toRadians)(5);
-  return (
-    /**
-     * @param {number|undefined} rotation Rotation.
-     * @param {number} delta Delta.
-     * @return {number|undefined} Rotation.
-     */
-    function (rotation, delta) {
-      if (rotation !== undefined) {
-        if (Math.abs(rotation + delta) <= tolerance) {
-          return 0;
-        } else {
-          return rotation + delta;
-        }
-      } else {
-        return undefined;
-      }
-    }
-  );
-}
-},{"./math.js":"node_modules/ol/math.js"}],"node_modules/ol/ViewHint.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/ViewHint
- */
-
-/**
- * @enum {number}
- */
-var _default = {
-  ANIMATING: 0,
-  INTERACTING: 1
-};
-exports.default = _default;
-},{}],"node_modules/ol/ViewProperty.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/ViewProperty
- */
-
-/**
- * @enum {string}
- */
-var _default = {
-  CENTER: 'center',
-  RESOLUTION: 'resolution',
-  ROTATION: 'rotation'
-};
-exports.default = _default;
-},{}],"node_modules/ol/string.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.padNumber = padNumber;
-exports.compareVersions = compareVersions;
-
-/**
- * @module ol/string
- */
-
-/**
- * @param {number} number Number to be formatted
- * @param {number} width The desired width
- * @param {number=} opt_precision Precision of the output string (i.e. number of decimal places)
- * @returns {string} Formatted string
- */
-function padNumber(number, width, opt_precision) {
-  var numberString = opt_precision !== undefined ? number.toFixed(opt_precision) : '' + number;
-  var decimal = numberString.indexOf('.');
-  decimal = decimal === -1 ? numberString.length : decimal;
-  return decimal > width ? numberString : new Array(1 + width - decimal).join('0') + numberString;
-}
-/**
- * Adapted from https://github.com/omichelsen/compare-versions/blob/master/index.js
- * @param {string|number} v1 First version
- * @param {string|number} v2 Second version
- * @returns {number} Value
- */
-
-
-function compareVersions(v1, v2) {
-  var s1 = ('' + v1).split('.');
-  var s2 = ('' + v2).split('.');
-
-  for (var i = 0; i < Math.max(s1.length, s2.length); i++) {
-    var n1 = parseInt(s1[i] || '0', 10);
-    var n2 = parseInt(s2[i] || '0', 10);
-
-    if (n1 > n2) {
-      return 1;
-    }
-
-    if (n2 > n1) {
-      return -1;
-    }
-  }
-
-  return 0;
-}
-},{}],"node_modules/ol/coordinate.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.add = add;
-exports.closestOnCircle = closestOnCircle;
-exports.closestOnSegment = closestOnSegment;
-exports.createStringXY = createStringXY;
-exports.degreesToStringHDMS = degreesToStringHDMS;
-exports.format = format;
-exports.equals = equals;
-exports.rotate = rotate;
-exports.scale = scale;
-exports.squaredDistance = squaredDistance;
-exports.distance = distance;
-exports.squaredDistanceToSegment = squaredDistanceToSegment;
-exports.toStringHDMS = toStringHDMS;
-exports.toStringXY = toStringXY;
-
-var _math = require("./math.js");
-
-var _string = require("./string.js");
-
-/**
- * @module ol/coordinate
- */
-
-/**
- * An array of numbers representing an xy coordinate. Example: `[16, 48]`.
- * @typedef {Array<number>} Coordinate
- * @api
- */
-
-/**
- * A function that takes a {@link module:ol/coordinate~Coordinate} and
- * transforms it into a `{string}`.
- *
- * @typedef {function((Coordinate|undefined)): string} CoordinateFormat
- * @api
- */
-
-/**
- * Add `delta` to `coordinate`. `coordinate` is modified in place and returned
- * by the function.
- *
- * Example:
- *
- *     import {add} from 'ol/coordinate';
- *
- *     var coord = [7.85, 47.983333];
- *     add(coord, [-2, 4]);
- *     // coord is now [5.85, 51.983333]
- *
- * @param {Coordinate} coordinate Coordinate.
- * @param {Coordinate} delta Delta.
- * @return {Coordinate} The input coordinate adjusted by
- * the given delta.
- * @api
- */
-function add(coordinate, delta) {
-  coordinate[0] += delta[0];
-  coordinate[1] += delta[1];
-  return coordinate;
-}
-/**
- * Calculates the point closest to the passed coordinate on the passed circle.
- *
- * @param {Coordinate} coordinate The coordinate.
- * @param {import("./geom/Circle.js").default} circle The circle.
- * @return {Coordinate} Closest point on the circumference.
- */
-
-
-function closestOnCircle(coordinate, circle) {
-  var r = circle.getRadius();
-  var center = circle.getCenter();
-  var x0 = center[0];
-  var y0 = center[1];
-  var x1 = coordinate[0];
-  var y1 = coordinate[1];
-  var dx = x1 - x0;
-  var dy = y1 - y0;
-
-  if (dx === 0 && dy === 0) {
-    dx = 1;
-  }
-
-  var d = Math.sqrt(dx * dx + dy * dy);
-  var x = x0 + r * dx / d;
-  var y = y0 + r * dy / d;
-  return [x, y];
-}
-/**
- * Calculates the point closest to the passed coordinate on the passed segment.
- * This is the foot of the perpendicular of the coordinate to the segment when
- * the foot is on the segment, or the closest segment coordinate when the foot
- * is outside the segment.
- *
- * @param {Coordinate} coordinate The coordinate.
- * @param {Array<Coordinate>} segment The two coordinates
- * of the segment.
- * @return {Coordinate} The foot of the perpendicular of
- * the coordinate to the segment.
- */
-
-
-function closestOnSegment(coordinate, segment) {
-  var x0 = coordinate[0];
-  var y0 = coordinate[1];
-  var start = segment[0];
-  var end = segment[1];
-  var x1 = start[0];
-  var y1 = start[1];
-  var x2 = end[0];
-  var y2 = end[1];
-  var dx = x2 - x1;
-  var dy = y2 - y1;
-  var along = dx === 0 && dy === 0 ? 0 : (dx * (x0 - x1) + dy * (y0 - y1)) / (dx * dx + dy * dy || 0);
-  var x, y;
-
-  if (along <= 0) {
-    x = x1;
-    y = y1;
-  } else if (along >= 1) {
-    x = x2;
-    y = y2;
-  } else {
-    x = x1 + along * dx;
-    y = y1 + along * dy;
-  }
-
-  return [x, y];
-}
-/**
- * Returns a {@link module:ol/coordinate~CoordinateFormat} function that can be
- * used to format
- * a {Coordinate} to a string.
- *
- * Example without specifying the fractional digits:
- *
- *     import {createStringXY} from 'ol/coordinate';
- *
- *     var coord = [7.85, 47.983333];
- *     var stringifyFunc = createStringXY();
- *     var out = stringifyFunc(coord);
- *     // out is now '8, 48'
- *
- * Example with explicitly specifying 2 fractional digits:
- *
- *     import {createStringXY} from 'ol/coordinate';
- *
- *     var coord = [7.85, 47.983333];
- *     var stringifyFunc = createStringXY(2);
- *     var out = stringifyFunc(coord);
- *     // out is now '7.85, 47.98'
- *
- * @param {number=} opt_fractionDigits The number of digits to include
- *    after the decimal point. Default is `0`.
- * @return {CoordinateFormat} Coordinate format.
- * @api
- */
-
-
-function createStringXY(opt_fractionDigits) {
-  return (
-    /**
-     * @param {Coordinate} coordinate Coordinate.
-     * @return {string} String XY.
-     */
-    function (coordinate) {
-      return toStringXY(coordinate, opt_fractionDigits);
-    }
-  );
-}
-/**
- * @param {string} hemispheres Hemispheres.
- * @param {number} degrees Degrees.
- * @param {number=} opt_fractionDigits The number of digits to include
- *    after the decimal point. Default is `0`.
- * @return {string} String.
- */
-
-
-function degreesToStringHDMS(hemispheres, degrees, opt_fractionDigits) {
-  var normalizedDegrees = (0, _math.modulo)(degrees + 180, 360) - 180;
-  var x = Math.abs(3600 * normalizedDegrees);
-  var dflPrecision = opt_fractionDigits || 0;
-  var precision = Math.pow(10, dflPrecision);
-  var deg = Math.floor(x / 3600);
-  var min = Math.floor((x - deg * 3600) / 60);
-  var sec = x - deg * 3600 - min * 60;
-  sec = Math.ceil(sec * precision) / precision;
-
-  if (sec >= 60) {
-    sec = 0;
-    min += 1;
-  }
-
-  if (min >= 60) {
-    min = 0;
-    deg += 1;
-  }
-
-  return deg + '\u00b0 ' + (0, _string.padNumber)(min, 2) + '\u2032 ' + (0, _string.padNumber)(sec, 2, dflPrecision) + '\u2033' + (normalizedDegrees == 0 ? '' : ' ' + hemispheres.charAt(normalizedDegrees < 0 ? 1 : 0));
-}
-/**
- * Transforms the given {@link module:ol/coordinate~Coordinate} to a string
- * using the given string template. The strings `{x}` and `{y}` in the template
- * will be replaced with the first and second coordinate values respectively.
- *
- * Example without specifying the fractional digits:
- *
- *     import {format} from 'ol/coordinate';
- *
- *     var coord = [7.85, 47.983333];
- *     var template = 'Coordinate is ({x}|{y}).';
- *     var out = format(coord, template);
- *     // out is now 'Coordinate is (8|48).'
- *
- * Example explicitly specifying the fractional digits:
- *
- *     import {format} from 'ol/coordinate';
- *
- *     var coord = [7.85, 47.983333];
- *     var template = 'Coordinate is ({x}|{y}).';
- *     var out = format(coord, template, 2);
- *     // out is now 'Coordinate is (7.85|47.98).'
- *
- * @param {Coordinate} coordinate Coordinate.
- * @param {string} template A template string with `{x}` and `{y}` placeholders
- *     that will be replaced by first and second coordinate values.
- * @param {number=} opt_fractionDigits The number of digits to include
- *    after the decimal point. Default is `0`.
- * @return {string} Formatted coordinate.
- * @api
- */
-
-
-function format(coordinate, template, opt_fractionDigits) {
-  if (coordinate) {
-    return template.replace('{x}', coordinate[0].toFixed(opt_fractionDigits)).replace('{y}', coordinate[1].toFixed(opt_fractionDigits));
-  } else {
-    return '';
-  }
-}
-/**
- * @param {Coordinate} coordinate1 First coordinate.
- * @param {Coordinate} coordinate2 Second coordinate.
- * @return {boolean} The two coordinates are equal.
- */
-
-
-function equals(coordinate1, coordinate2) {
-  var equals = true;
-
-  for (var i = coordinate1.length - 1; i >= 0; --i) {
-    if (coordinate1[i] != coordinate2[i]) {
-      equals = false;
-      break;
-    }
-  }
-
-  return equals;
-}
-/**
- * Rotate `coordinate` by `angle`. `coordinate` is modified in place and
- * returned by the function.
- *
- * Example:
- *
- *     import {rotate} from 'ol/coordinate';
- *
- *     var coord = [7.85, 47.983333];
- *     var rotateRadians = Math.PI / 2; // 90 degrees
- *     rotate(coord, rotateRadians);
- *     // coord is now [-47.983333, 7.85]
- *
- * @param {Coordinate} coordinate Coordinate.
- * @param {number} angle Angle in radian.
- * @return {Coordinate} Coordinate.
- * @api
- */
-
-
-function rotate(coordinate, angle) {
-  var cosAngle = Math.cos(angle);
-  var sinAngle = Math.sin(angle);
-  var x = coordinate[0] * cosAngle - coordinate[1] * sinAngle;
-  var y = coordinate[1] * cosAngle + coordinate[0] * sinAngle;
-  coordinate[0] = x;
-  coordinate[1] = y;
-  return coordinate;
-}
-/**
- * Scale `coordinate` by `scale`. `coordinate` is modified in place and returned
- * by the function.
- *
- * Example:
- *
- *     import {scale as scaleCoordinate} from 'ol/coordinate';
- *
- *     var coord = [7.85, 47.983333];
- *     var scale = 1.2;
- *     scaleCoordinate(coord, scale);
- *     // coord is now [9.42, 57.5799996]
- *
- * @param {Coordinate} coordinate Coordinate.
- * @param {number} scale Scale factor.
- * @return {Coordinate} Coordinate.
- */
-
-
-function scale(coordinate, scale) {
-  coordinate[0] *= scale;
-  coordinate[1] *= scale;
-  return coordinate;
-}
-/**
- * @param {Coordinate} coord1 First coordinate.
- * @param {Coordinate} coord2 Second coordinate.
- * @return {number} Squared distance between coord1 and coord2.
- */
-
-
-function squaredDistance(coord1, coord2) {
-  var dx = coord1[0] - coord2[0];
-  var dy = coord1[1] - coord2[1];
-  return dx * dx + dy * dy;
-}
-/**
- * @param {Coordinate} coord1 First coordinate.
- * @param {Coordinate} coord2 Second coordinate.
- * @return {number} Distance between coord1 and coord2.
- */
-
-
-function distance(coord1, coord2) {
-  return Math.sqrt(squaredDistance(coord1, coord2));
-}
-/**
- * Calculate the squared distance from a coordinate to a line segment.
- *
- * @param {Coordinate} coordinate Coordinate of the point.
- * @param {Array<Coordinate>} segment Line segment (2
- * coordinates).
- * @return {number} Squared distance from the point to the line segment.
- */
-
-
-function squaredDistanceToSegment(coordinate, segment) {
-  return squaredDistance(coordinate, closestOnSegment(coordinate, segment));
-}
-/**
- * Format a geographic coordinate with the hemisphere, degrees, minutes, and
- * seconds.
- *
- * Example without specifying fractional digits:
- *
- *     import {toStringHDMS} from 'ol/coordinate';
- *
- *     var coord = [7.85, 47.983333];
- *     var out = toStringHDMS(coord);
- *     // out is now '47° 58′ 60″ N 7° 50′ 60″ E'
- *
- * Example explicitly specifying 1 fractional digit:
- *
- *     import {toStringHDMS} from 'ol/coordinate';
- *
- *     var coord = [7.85, 47.983333];
- *     var out = toStringHDMS(coord, 1);
- *     // out is now '47° 58′ 60.0″ N 7° 50′ 60.0″ E'
- *
- * @param {Coordinate} coordinate Coordinate.
- * @param {number=} opt_fractionDigits The number of digits to include
- *    after the decimal point. Default is `0`.
- * @return {string} Hemisphere, degrees, minutes and seconds.
- * @api
- */
-
-
-function toStringHDMS(coordinate, opt_fractionDigits) {
-  if (coordinate) {
-    return degreesToStringHDMS('NS', coordinate[1], opt_fractionDigits) + ' ' + degreesToStringHDMS('EW', coordinate[0], opt_fractionDigits);
-  } else {
-    return '';
-  }
-}
-/**
- * Format a coordinate as a comma delimited string.
- *
- * Example without specifying fractional digits:
- *
- *     import {toStringXY} from 'ol/coordinate';
- *
- *     var coord = [7.85, 47.983333];
- *     var out = toStringXY(coord);
- *     // out is now '8, 48'
- *
- * Example explicitly specifying 1 fractional digit:
- *
- *     import {toStringXY} from 'ol/coordinate';
- *
- *     var coord = [7.85, 47.983333];
- *     var out = toStringXY(coord, 1);
- *     // out is now '7.8, 48.0'
- *
- * @param {Coordinate} coordinate Coordinate.
- * @param {number=} opt_fractionDigits The number of digits to include
- *    after the decimal point. Default is `0`.
- * @return {string} XY.
- * @api
- */
-
-
-function toStringXY(coordinate, opt_fractionDigits) {
-  return format(coordinate, '{x}, {y}', opt_fractionDigits);
-}
-},{"./math.js":"node_modules/ol/math.js","./string.js":"node_modules/ol/string.js"}],"node_modules/ol/easing.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.easeIn = easeIn;
-exports.easeOut = easeOut;
-exports.inAndOut = inAndOut;
-exports.linear = linear;
-exports.upAndDown = upAndDown;
-
-/**
- * @module ol/easing
- */
-
-/**
- * Start slow and speed up.
- * @param {number} t Input between 0 and 1.
- * @return {number} Output between 0 and 1.
- * @api
- */
-function easeIn(t) {
-  return Math.pow(t, 3);
-}
-/**
- * Start fast and slow down.
- * @param {number} t Input between 0 and 1.
- * @return {number} Output between 0 and 1.
- * @api
- */
-
-
-function easeOut(t) {
-  return 1 - easeIn(1 - t);
-}
-/**
- * Start slow, speed up, and then slow down again.
- * @param {number} t Input between 0 and 1.
- * @return {number} Output between 0 and 1.
- * @api
- */
-
-
-function inAndOut(t) {
-  return 3 * t * t - 2 * t * t * t;
-}
-/**
- * Maintain a constant speed over time.
- * @param {number} t Input between 0 and 1.
- * @return {number} Output between 0 and 1.
- * @api
- */
-
-
-function linear(t) {
-  return t;
-}
-/**
- * Start slow, speed up, and at the very end slow down again.  This has the
- * same general behavior as {@link module:ol/easing~inAndOut}, but the final
- * slowdown is delayed.
- * @param {number} t Input between 0 and 1.
- * @return {number} Output between 0 and 1.
- * @api
- */
-
-
-function upAndDown(t) {
-  if (t < 0.5) {
-    return inAndOut(2 * t);
-  } else {
-    return 1 - inAndOut(2 * (t - 0.5));
-  }
-}
-},{}],"node_modules/ol/geom/GeometryLayout.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/geom/GeometryLayout
- */
-
-/**
- * The coordinate layout for geometries, indicating whether a 3rd or 4th z ('Z')
- * or measure ('M') coordinate is available. Supported values are `'XY'`,
- * `'XYZ'`, `'XYM'`, `'XYZM'`.
- * @enum {string}
- */
-var _default = {
-  XY: 'XY',
-  XYZ: 'XYZ',
-  XYM: 'XYM',
-  XYZM: 'XYZM'
-};
-exports.default = _default;
-},{}],"node_modules/ol/geom/flat/transform.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.transform2D = transform2D;
-exports.rotate = rotate;
-exports.scale = scale;
-exports.translate = translate;
-
-/**
- * @module ol/geom/flat/transform
- */
-
-/**
- * @param {Array<number>} flatCoordinates Flat coordinates.
- * @param {number} offset Offset.
- * @param {number} end End.
- * @param {number} stride Stride.
- * @param {import("../../transform.js").Transform} transform Transform.
- * @param {Array<number>=} opt_dest Destination.
- * @return {Array<number>} Transformed coordinates.
- */
-function transform2D(flatCoordinates, offset, end, stride, transform, opt_dest) {
-  var dest = opt_dest ? opt_dest : [];
-  var i = 0;
-
-  for (var j = offset; j < end; j += stride) {
-    var x = flatCoordinates[j];
-    var y = flatCoordinates[j + 1];
-    dest[i++] = transform[0] * x + transform[2] * y + transform[4];
-    dest[i++] = transform[1] * x + transform[3] * y + transform[5];
-  }
-
-  if (opt_dest && dest.length != i) {
-    dest.length = i;
-  }
-
-  return dest;
-}
-/**
- * @param {Array<number>} flatCoordinates Flat coordinates.
- * @param {number} offset Offset.
- * @param {number} end End.
- * @param {number} stride Stride.
- * @param {number} angle Angle.
- * @param {Array<number>} anchor Rotation anchor point.
- * @param {Array<number>=} opt_dest Destination.
- * @return {Array<number>} Transformed coordinates.
- */
-
-
-function rotate(flatCoordinates, offset, end, stride, angle, anchor, opt_dest) {
-  var dest = opt_dest ? opt_dest : [];
-  var cos = Math.cos(angle);
-  var sin = Math.sin(angle);
-  var anchorX = anchor[0];
-  var anchorY = anchor[1];
-  var i = 0;
-
-  for (var j = offset; j < end; j += stride) {
-    var deltaX = flatCoordinates[j] - anchorX;
-    var deltaY = flatCoordinates[j + 1] - anchorY;
-    dest[i++] = anchorX + deltaX * cos - deltaY * sin;
-    dest[i++] = anchorY + deltaX * sin + deltaY * cos;
-
-    for (var k = j + 2; k < j + stride; ++k) {
-      dest[i++] = flatCoordinates[k];
-    }
-  }
-
-  if (opt_dest && dest.length != i) {
-    dest.length = i;
-  }
-
-  return dest;
-}
-/**
- * Scale the coordinates.
- * @param {Array<number>} flatCoordinates Flat coordinates.
- * @param {number} offset Offset.
- * @param {number} end End.
- * @param {number} stride Stride.
- * @param {number} sx Scale factor in the x-direction.
- * @param {number} sy Scale factor in the y-direction.
- * @param {Array<number>} anchor Scale anchor point.
- * @param {Array<number>=} opt_dest Destination.
- * @return {Array<number>} Transformed coordinates.
- */
-
-
-function scale(flatCoordinates, offset, end, stride, sx, sy, anchor, opt_dest) {
-  var dest = opt_dest ? opt_dest : [];
-  var anchorX = anchor[0];
-  var anchorY = anchor[1];
-  var i = 0;
-
-  for (var j = offset; j < end; j += stride) {
-    var deltaX = flatCoordinates[j] - anchorX;
-    var deltaY = flatCoordinates[j + 1] - anchorY;
-    dest[i++] = anchorX + sx * deltaX;
-    dest[i++] = anchorY + sy * deltaY;
-
-    for (var k = j + 2; k < j + stride; ++k) {
-      dest[i++] = flatCoordinates[k];
-    }
-  }
-
-  if (opt_dest && dest.length != i) {
-    dest.length = i;
-  }
-
-  return dest;
-}
-/**
- * @param {Array<number>} flatCoordinates Flat coordinates.
- * @param {number} offset Offset.
- * @param {number} end End.
- * @param {number} stride Stride.
- * @param {number} deltaX Delta X.
- * @param {number} deltaY Delta Y.
- * @param {Array<number>=} opt_dest Destination.
- * @return {Array<number>} Transformed coordinates.
- */
-
-
-function translate(flatCoordinates, offset, end, stride, deltaX, deltaY, opt_dest) {
-  var dest = opt_dest ? opt_dest : [];
-  var i = 0;
-
-  for (var j = offset; j < end; j += stride) {
-    dest[i++] = flatCoordinates[j] + deltaX;
-    dest[i++] = flatCoordinates[j + 1] + deltaY;
-
-    for (var k = j + 2; k < j + stride; ++k) {
-      dest[i++] = flatCoordinates[k];
-    }
-  }
-
-  if (opt_dest && dest.length != i) {
-    dest.length = i;
-  }
-
-  return dest;
-}
-},{}],"node_modules/ol/transform.js":[function(require,module,exports) {
+},{"./sphere.js":"node_modules/ol/sphere.js","./extent.js":"node_modules/ol/extent.js","./math.js":"node_modules/ol/math.js","./proj/epsg3857.js":"node_modules/ol/proj/epsg3857.js","./proj/epsg4326.js":"node_modules/ol/proj/epsg4326.js","./proj/Projection.js":"node_modules/ol/proj/Projection.js","./proj/Units.js":"node_modules/ol/proj/Units.js","./proj/projections.js":"node_modules/ol/proj/projections.js","./proj/transforms.js":"node_modules/ol/proj/transforms.js"}],"node_modules/ol/transform.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14779,7 +8822,8640 @@ function makeRegular(polygon, center, radius, opt_angle) {
 
   polygon.changed();
 }
-},{"../array.js":"node_modules/ol/array.js","../extent.js":"node_modules/ol/extent.js","./GeometryLayout.js":"node_modules/ol/geom/GeometryLayout.js","./GeometryType.js":"node_modules/ol/geom/GeometryType.js","./LinearRing.js":"node_modules/ol/geom/LinearRing.js","./Point.js":"node_modules/ol/geom/Point.js","./SimpleGeometry.js":"node_modules/ol/geom/SimpleGeometry.js","../sphere.js":"node_modules/ol/sphere.js","./flat/area.js":"node_modules/ol/geom/flat/area.js","./flat/closest.js":"node_modules/ol/geom/flat/closest.js","./flat/contains.js":"node_modules/ol/geom/flat/contains.js","./flat/deflate.js":"node_modules/ol/geom/flat/deflate.js","./flat/inflate.js":"node_modules/ol/geom/flat/inflate.js","./flat/interiorpoint.js":"node_modules/ol/geom/flat/interiorpoint.js","./flat/intersectsextent.js":"node_modules/ol/geom/flat/intersectsextent.js","./flat/orient.js":"node_modules/ol/geom/flat/orient.js","./flat/simplify.js":"node_modules/ol/geom/flat/simplify.js","../math.js":"node_modules/ol/math.js"}],"node_modules/ol/View.js":[function(require,module,exports) {
+},{"../array.js":"node_modules/ol/array.js","../extent.js":"node_modules/ol/extent.js","./GeometryLayout.js":"node_modules/ol/geom/GeometryLayout.js","./GeometryType.js":"node_modules/ol/geom/GeometryType.js","./LinearRing.js":"node_modules/ol/geom/LinearRing.js","./Point.js":"node_modules/ol/geom/Point.js","./SimpleGeometry.js":"node_modules/ol/geom/SimpleGeometry.js","../sphere.js":"node_modules/ol/sphere.js","./flat/area.js":"node_modules/ol/geom/flat/area.js","./flat/closest.js":"node_modules/ol/geom/flat/closest.js","./flat/contains.js":"node_modules/ol/geom/flat/contains.js","./flat/deflate.js":"node_modules/ol/geom/flat/deflate.js","./flat/inflate.js":"node_modules/ol/geom/flat/inflate.js","./flat/interiorpoint.js":"node_modules/ol/geom/flat/interiorpoint.js","./flat/intersectsextent.js":"node_modules/ol/geom/flat/intersectsextent.js","./flat/orient.js":"node_modules/ol/geom/flat/orient.js","./flat/simplify.js":"node_modules/ol/geom/flat/simplify.js","../math.js":"node_modules/ol/math.js"}],"node_modules/ol/webgl.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getContext = getContext;
+exports.EXTENSIONS = exports.MAX_TEXTURE_SIZE = exports.HAS = exports.DEBUG = exports.FRAMEBUFFER = exports.COMPILE_STATUS = exports.CLAMP_TO_EDGE = exports.TEXTURE0 = exports.TEXTURE_2D = exports.TEXTURE_WRAP_T = exports.TEXTURE_WRAP_S = exports.TEXTURE_MIN_FILTER = exports.TEXTURE_MAG_FILTER = exports.LINEAR = exports.LINK_STATUS = exports.VERTEX_SHADER = exports.FRAGMENT_SHADER = exports.RGBA = exports.FLOAT = exports.UNSIGNED_INT = exports.UNSIGNED_SHORT = exports.UNSIGNED_BYTE = exports.SCISSOR_TEST = exports.DEPTH_TEST = exports.STENCIL_TEST = exports.BLEND = exports.CULL_FACE = exports.DYNAMIC_DRAW = exports.STATIC_DRAW = exports.STREAM_DRAW = exports.ELEMENT_ARRAY_BUFFER = exports.ARRAY_BUFFER = exports.ONE_MINUS_SRC_ALPHA = exports.TRIANGLE_STRIP = exports.TRIANGLES = exports.COLOR_BUFFER_BIT = exports.COLOR_ATTACHMENT0 = exports.SRC_ALPHA = exports.ONE = void 0;
+
+/**
+ * @module ol/webgl
+ */
+
+/**
+ * Constants taken from goog.webgl
+ */
+
+/**
+ * @const
+ * @type {number}
+ */
+var ONE = 1;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.ONE = ONE;
+var SRC_ALPHA = 0x0302;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.SRC_ALPHA = SRC_ALPHA;
+var COLOR_ATTACHMENT0 = 0x8CE0;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.COLOR_ATTACHMENT0 = COLOR_ATTACHMENT0;
+var COLOR_BUFFER_BIT = 0x00004000;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.COLOR_BUFFER_BIT = COLOR_BUFFER_BIT;
+var TRIANGLES = 0x0004;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.TRIANGLES = TRIANGLES;
+var TRIANGLE_STRIP = 0x0005;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.TRIANGLE_STRIP = TRIANGLE_STRIP;
+var ONE_MINUS_SRC_ALPHA = 0x0303;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.ONE_MINUS_SRC_ALPHA = ONE_MINUS_SRC_ALPHA;
+var ARRAY_BUFFER = 0x8892;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.ARRAY_BUFFER = ARRAY_BUFFER;
+var ELEMENT_ARRAY_BUFFER = 0x8893;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.ELEMENT_ARRAY_BUFFER = ELEMENT_ARRAY_BUFFER;
+var STREAM_DRAW = 0x88E0;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.STREAM_DRAW = STREAM_DRAW;
+var STATIC_DRAW = 0x88E4;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.STATIC_DRAW = STATIC_DRAW;
+var DYNAMIC_DRAW = 0x88E8;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.DYNAMIC_DRAW = DYNAMIC_DRAW;
+var CULL_FACE = 0x0B44;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.CULL_FACE = CULL_FACE;
+var BLEND = 0x0BE2;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.BLEND = BLEND;
+var STENCIL_TEST = 0x0B90;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.STENCIL_TEST = STENCIL_TEST;
+var DEPTH_TEST = 0x0B71;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.DEPTH_TEST = DEPTH_TEST;
+var SCISSOR_TEST = 0x0C11;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.SCISSOR_TEST = SCISSOR_TEST;
+var UNSIGNED_BYTE = 0x1401;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.UNSIGNED_BYTE = UNSIGNED_BYTE;
+var UNSIGNED_SHORT = 0x1403;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.UNSIGNED_SHORT = UNSIGNED_SHORT;
+var UNSIGNED_INT = 0x1405;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.UNSIGNED_INT = UNSIGNED_INT;
+var FLOAT = 0x1406;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.FLOAT = FLOAT;
+var RGBA = 0x1908;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.RGBA = RGBA;
+var FRAGMENT_SHADER = 0x8B30;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.FRAGMENT_SHADER = FRAGMENT_SHADER;
+var VERTEX_SHADER = 0x8B31;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.VERTEX_SHADER = VERTEX_SHADER;
+var LINK_STATUS = 0x8B82;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.LINK_STATUS = LINK_STATUS;
+var LINEAR = 0x2601;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.LINEAR = LINEAR;
+var TEXTURE_MAG_FILTER = 0x2800;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.TEXTURE_MAG_FILTER = TEXTURE_MAG_FILTER;
+var TEXTURE_MIN_FILTER = 0x2801;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.TEXTURE_MIN_FILTER = TEXTURE_MIN_FILTER;
+var TEXTURE_WRAP_S = 0x2802;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.TEXTURE_WRAP_S = TEXTURE_WRAP_S;
+var TEXTURE_WRAP_T = 0x2803;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.TEXTURE_WRAP_T = TEXTURE_WRAP_T;
+var TEXTURE_2D = 0x0DE1;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.TEXTURE_2D = TEXTURE_2D;
+var TEXTURE0 = 0x84C0;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.TEXTURE0 = TEXTURE0;
+var CLAMP_TO_EDGE = 0x812F;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.CLAMP_TO_EDGE = CLAMP_TO_EDGE;
+var COMPILE_STATUS = 0x8B81;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.COMPILE_STATUS = COMPILE_STATUS;
+var FRAMEBUFFER = 0x8D40;
+/** end of goog.webgl constants
+ */
+
+/**
+ * @const
+ * @type {Array<string>}
+ */
+
+exports.FRAMEBUFFER = FRAMEBUFFER;
+var CONTEXT_IDS = ['experimental-webgl', 'webgl', 'webkit-3d', 'moz-webgl'];
+/**
+ * @param {HTMLCanvasElement} canvas Canvas.
+ * @param {Object=} opt_attributes Attributes.
+ * @return {WebGLRenderingContext} WebGL rendering context.
+ */
+
+function getContext(canvas, opt_attributes) {
+  var ii = CONTEXT_IDS.length;
+
+  for (var i = 0; i < ii; ++i) {
+    try {
+      var context = canvas.getContext(CONTEXT_IDS[i], opt_attributes);
+
+      if (context) {
+        return (
+          /** @type {!WebGLRenderingContext} */
+          context
+        );
+      }
+    } catch (e) {// pass
+    }
+  }
+
+  return null;
+}
+/**
+ * Include debuggable shader sources.  Default is `true`. This should be set to
+ * `false` for production builds.
+ * @type {boolean}
+ */
+
+
+var DEBUG = true;
+/**
+ * The maximum supported WebGL texture size in pixels. If WebGL is not
+ * supported, the value is set to `undefined`.
+ * @type {number|undefined}
+ */
+
+exports.DEBUG = DEBUG;
+var MAX_TEXTURE_SIZE; // value is set below
+
+/**
+ * List of supported WebGL extensions.
+ * @type {Array<string>}
+ */
+
+exports.MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE;
+var EXTENSIONS; // value is set below
+
+/**
+ * True if both OpenLayers and browser support WebGL.
+ * @type {boolean}
+ * @api
+ */
+
+exports.EXTENSIONS = EXTENSIONS;
+var HAS = false; //TODO Remove side effects
+
+exports.HAS = HAS;
+
+if (typeof window !== 'undefined' && 'WebGLRenderingContext' in window) {
+  try {
+    var canvas =
+    /** @type {HTMLCanvasElement} */
+    document.createElement('canvas');
+    var gl = getContext(canvas, {
+      failIfMajorPerformanceCaveat: true
+    });
+
+    if (gl) {
+      exports.HAS = HAS = true;
+      exports.MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE =
+      /** @type {number} */
+      gl.getParameter(gl.MAX_TEXTURE_SIZE);
+      exports.EXTENSIONS = EXTENSIONS = gl.getSupportedExtensions();
+    }
+  } catch (e) {// pass
+  }
+}
+},{}],"node_modules/ol/has.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "WEBGL", {
+  enumerable: true,
+  get: function () {
+    return _webgl.HAS;
+  }
+});
+exports.MSPOINTER = exports.POINTER = exports.TOUCH = exports.GEOLOCATION = exports.CANVAS_LINE_DASH = exports.DEVICE_PIXEL_RATIO = exports.MAC = exports.WEBKIT = exports.SAFARI = exports.FIREFOX = void 0;
+
+var _webgl = require("./webgl.js");
+
+/**
+ * @module ol/has
+ */
+var ua = typeof navigator !== 'undefined' ? navigator.userAgent.toLowerCase() : '';
+/**
+ * User agent string says we are dealing with Firefox as browser.
+ * @type {boolean}
+ */
+
+var FIREFOX = ua.indexOf('firefox') !== -1;
+/**
+ * User agent string says we are dealing with Safari as browser.
+ * @type {boolean}
+ */
+
+exports.FIREFOX = FIREFOX;
+var SAFARI = ua.indexOf('safari') !== -1 && ua.indexOf('chrom') == -1;
+/**
+ * User agent string says we are dealing with a WebKit engine.
+ * @type {boolean}
+ */
+
+exports.SAFARI = SAFARI;
+var WEBKIT = ua.indexOf('webkit') !== -1 && ua.indexOf('edge') == -1;
+/**
+ * User agent string says we are dealing with a Mac as platform.
+ * @type {boolean}
+ */
+
+exports.WEBKIT = WEBKIT;
+var MAC = ua.indexOf('macintosh') !== -1;
+/**
+ * The ratio between physical pixels and device-independent pixels
+ * (dips) on the device (`window.devicePixelRatio`).
+ * @const
+ * @type {number}
+ * @api
+ */
+
+exports.MAC = MAC;
+var DEVICE_PIXEL_RATIO = window.devicePixelRatio || 1;
+/**
+ * True if the browser's Canvas implementation implements {get,set}LineDash.
+ * @type {boolean}
+ */
+
+exports.DEVICE_PIXEL_RATIO = DEVICE_PIXEL_RATIO;
+
+var CANVAS_LINE_DASH = function () {
+  var has = false;
+
+  try {
+    has = !!document.createElement('canvas').getContext('2d').setLineDash;
+  } catch (e) {// pass
+  }
+
+  return has;
+}();
+/**
+ * Is HTML5 geolocation supported in the current browser?
+ * @const
+ * @type {boolean}
+ * @api
+ */
+
+
+exports.CANVAS_LINE_DASH = CANVAS_LINE_DASH;
+var GEOLOCATION = 'geolocation' in navigator;
+/**
+ * True if browser supports touch events.
+ * @const
+ * @type {boolean}
+ * @api
+ */
+
+exports.GEOLOCATION = GEOLOCATION;
+var TOUCH = 'ontouchstart' in window;
+/**
+ * True if browser supports pointer events.
+ * @const
+ * @type {boolean}
+ */
+
+exports.TOUCH = TOUCH;
+var POINTER = 'PointerEvent' in window;
+/**
+ * True if browser supports ms pointer events (IE 10).
+ * @const
+ * @type {boolean}
+ */
+
+exports.POINTER = POINTER;
+var MSPOINTER = !!navigator.msPointerEnabled;
+exports.MSPOINTER = MSPOINTER;
+},{"./webgl.js":"node_modules/ol/webgl.js"}],"node_modules/ol/Geolocation.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _Object = _interopRequireWildcard(require("./Object.js"));
+
+var _events = require("./events.js");
+
+var _Event = _interopRequireDefault(require("./events/Event.js"));
+
+var _EventType = _interopRequireDefault(require("./events/EventType.js"));
+
+var _Polygon = require("./geom/Polygon.js");
+
+var _has = require("./has.js");
+
+var _math = require("./math.js");
+
+var _proj = require("./proj.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
+/**
+ * @module ol/Geolocation
+ */
+
+/**
+ * @enum {string}
+ */
+var Property = {
+  ACCURACY: 'accuracy',
+  ACCURACY_GEOMETRY: 'accuracyGeometry',
+  ALTITUDE: 'altitude',
+  ALTITUDE_ACCURACY: 'altitudeAccuracy',
+  HEADING: 'heading',
+  POSITION: 'position',
+  PROJECTION: 'projection',
+  SPEED: 'speed',
+  TRACKING: 'tracking',
+  TRACKING_OPTIONS: 'trackingOptions'
+};
+/**
+ * @classdesc
+ * Events emitted on Geolocation error.
+ */
+
+var GeolocationError =
+/*@__PURE__*/
+function (Event) {
+  function GeolocationError(error) {
+    Event.call(this, _EventType.default.ERROR);
+    /**
+     * @type {number}
+     */
+
+    this.code = error.code;
+    /**
+     * @type {string}
+     */
+
+    this.message = error.message;
+  }
+
+  if (Event) GeolocationError.__proto__ = Event;
+  GeolocationError.prototype = Object.create(Event && Event.prototype);
+  GeolocationError.prototype.constructor = GeolocationError;
+  return GeolocationError;
+}(_Event.default);
+/**
+ * @typedef {Object} Options
+ * @property {boolean} [tracking=false] Start Tracking right after
+ * instantiation.
+ * @property {PositionOptions} [trackingOptions] Tracking options.
+ * See http://www.w3.org/TR/geolocation-API/#position_options_interface.
+ * @property {import("./proj.js").ProjectionLike} [projection] The projection the position
+ * is reported in.
+ */
+
+/**
+ * @classdesc
+ * Helper class for providing HTML5 Geolocation capabilities.
+ * The [Geolocation API](http://www.w3.org/TR/geolocation-API/)
+ * is used to locate a user's position.
+ *
+ * To get notified of position changes, register a listener for the generic
+ * `change` event on your instance of {@link module:ol/Geolocation~Geolocation}.
+ *
+ * Example:
+ *
+ *     var geolocation = new Geolocation({
+ *       // take the projection to use from the map's view
+ *       projection: view.getProjection()
+ *     });
+ *     // listen to changes in position
+ *     geolocation.on('change', function(evt) {
+ *       window.console.log(geolocation.getPosition());
+ *     });
+ *
+ * @fires error
+ * @api
+ */
+
+
+var Geolocation =
+/*@__PURE__*/
+function (BaseObject) {
+  function Geolocation(opt_options) {
+    BaseObject.call(this);
+    var options = opt_options || {};
+    /**
+     * The unprojected (EPSG:4326) device position.
+     * @private
+     * @type {import("./coordinate.js").Coordinate}
+     */
+
+    this.position_ = null;
+    /**
+     * @private
+     * @type {import("./proj.js").TransformFunction}
+     */
+
+    this.transform_ = _proj.identityTransform;
+    /**
+     * @private
+     * @type {number|undefined}
+     */
+
+    this.watchId_ = undefined;
+    (0, _events.listen)(this, (0, _Object.getChangeEventType)(Property.PROJECTION), this.handleProjectionChanged_, this);
+    (0, _events.listen)(this, (0, _Object.getChangeEventType)(Property.TRACKING), this.handleTrackingChanged_, this);
+
+    if (options.projection !== undefined) {
+      this.setProjection(options.projection);
+    }
+
+    if (options.trackingOptions !== undefined) {
+      this.setTrackingOptions(options.trackingOptions);
+    }
+
+    this.setTracking(options.tracking !== undefined ? options.tracking : false);
+  }
+
+  if (BaseObject) Geolocation.__proto__ = BaseObject;
+  Geolocation.prototype = Object.create(BaseObject && BaseObject.prototype);
+  Geolocation.prototype.constructor = Geolocation;
+  /**
+   * @inheritDoc
+   */
+
+  Geolocation.prototype.disposeInternal = function disposeInternal() {
+    this.setTracking(false);
+    BaseObject.prototype.disposeInternal.call(this);
+  };
+  /**
+   * @private
+   */
+
+
+  Geolocation.prototype.handleProjectionChanged_ = function handleProjectionChanged_() {
+    var projection = this.getProjection();
+
+    if (projection) {
+      this.transform_ = (0, _proj.getTransformFromProjections)((0, _proj.get)('EPSG:4326'), projection);
+
+      if (this.position_) {
+        this.set(Property.POSITION, this.transform_(this.position_));
+      }
+    }
+  };
+  /**
+   * @private
+   */
+
+
+  Geolocation.prototype.handleTrackingChanged_ = function handleTrackingChanged_() {
+    if (_has.GEOLOCATION) {
+      var tracking = this.getTracking();
+
+      if (tracking && this.watchId_ === undefined) {
+        this.watchId_ = navigator.geolocation.watchPosition(this.positionChange_.bind(this), this.positionError_.bind(this), this.getTrackingOptions());
+      } else if (!tracking && this.watchId_ !== undefined) {
+        navigator.geolocation.clearWatch(this.watchId_);
+        this.watchId_ = undefined;
+      }
+    }
+  };
+  /**
+   * @private
+   * @param {Position} position position event.
+   */
+
+
+  Geolocation.prototype.positionChange_ = function positionChange_(position) {
+    var coords = position.coords;
+    this.set(Property.ACCURACY, coords.accuracy);
+    this.set(Property.ALTITUDE, coords.altitude === null ? undefined : coords.altitude);
+    this.set(Property.ALTITUDE_ACCURACY, coords.altitudeAccuracy === null ? undefined : coords.altitudeAccuracy);
+    this.set(Property.HEADING, coords.heading === null ? undefined : (0, _math.toRadians)(coords.heading));
+
+    if (!this.position_) {
+      this.position_ = [coords.longitude, coords.latitude];
+    } else {
+      this.position_[0] = coords.longitude;
+      this.position_[1] = coords.latitude;
+    }
+
+    var projectedPosition = this.transform_(this.position_);
+    this.set(Property.POSITION, projectedPosition);
+    this.set(Property.SPEED, coords.speed === null ? undefined : coords.speed);
+    var geometry = (0, _Polygon.circular)(this.position_, coords.accuracy);
+    geometry.applyTransform(this.transform_);
+    this.set(Property.ACCURACY_GEOMETRY, geometry);
+    this.changed();
+  };
+  /**
+   * Triggered when the Geolocation returns an error.
+   * @event error
+   * @api
+   */
+
+  /**
+   * @private
+   * @param {PositionError} error error object.
+   */
+
+
+  Geolocation.prototype.positionError_ = function positionError_(error) {
+    this.setTracking(false);
+    this.dispatchEvent(new GeolocationError(error));
+  };
+  /**
+   * Get the accuracy of the position in meters.
+   * @return {number|undefined} The accuracy of the position measurement in
+   *     meters.
+   * @observable
+   * @api
+   */
+
+
+  Geolocation.prototype.getAccuracy = function getAccuracy() {
+    return (
+      /** @type {number|undefined} */
+      this.get(Property.ACCURACY)
+    );
+  };
+  /**
+   * Get a geometry of the position accuracy.
+   * @return {?import("./geom/Polygon.js").default} A geometry of the position accuracy.
+   * @observable
+   * @api
+   */
+
+
+  Geolocation.prototype.getAccuracyGeometry = function getAccuracyGeometry() {
+    return (
+      /** @type {?import("./geom/Polygon.js").default} */
+      this.get(Property.ACCURACY_GEOMETRY) || null
+    );
+  };
+  /**
+   * Get the altitude associated with the position.
+   * @return {number|undefined} The altitude of the position in meters above mean
+   *     sea level.
+   * @observable
+   * @api
+   */
+
+
+  Geolocation.prototype.getAltitude = function getAltitude() {
+    return (
+      /** @type {number|undefined} */
+      this.get(Property.ALTITUDE)
+    );
+  };
+  /**
+   * Get the altitude accuracy of the position.
+   * @return {number|undefined} The accuracy of the altitude measurement in
+   *     meters.
+   * @observable
+   * @api
+   */
+
+
+  Geolocation.prototype.getAltitudeAccuracy = function getAltitudeAccuracy() {
+    return (
+      /** @type {number|undefined} */
+      this.get(Property.ALTITUDE_ACCURACY)
+    );
+  };
+  /**
+   * Get the heading as radians clockwise from North.
+   * Note: depending on the browser, the heading is only defined if the `enableHighAccuracy`
+   * is set to `true` in the tracking options.
+   * @return {number|undefined} The heading of the device in radians from north.
+   * @observable
+   * @api
+   */
+
+
+  Geolocation.prototype.getHeading = function getHeading() {
+    return (
+      /** @type {number|undefined} */
+      this.get(Property.HEADING)
+    );
+  };
+  /**
+   * Get the position of the device.
+   * @return {import("./coordinate.js").Coordinate|undefined} The current position of the device reported
+   *     in the current projection.
+   * @observable
+   * @api
+   */
+
+
+  Geolocation.prototype.getPosition = function getPosition() {
+    return (
+      /** @type {import("./coordinate.js").Coordinate|undefined} */
+      this.get(Property.POSITION)
+    );
+  };
+  /**
+   * Get the projection associated with the position.
+   * @return {import("./proj/Projection.js").default|undefined} The projection the position is
+   *     reported in.
+   * @observable
+   * @api
+   */
+
+
+  Geolocation.prototype.getProjection = function getProjection() {
+    return (
+      /** @type {import("./proj/Projection.js").default|undefined} */
+      this.get(Property.PROJECTION)
+    );
+  };
+  /**
+   * Get the speed in meters per second.
+   * @return {number|undefined} The instantaneous speed of the device in meters
+   *     per second.
+   * @observable
+   * @api
+   */
+
+
+  Geolocation.prototype.getSpeed = function getSpeed() {
+    return (
+      /** @type {number|undefined} */
+      this.get(Property.SPEED)
+    );
+  };
+  /**
+   * Determine if the device location is being tracked.
+   * @return {boolean} The device location is being tracked.
+   * @observable
+   * @api
+   */
+
+
+  Geolocation.prototype.getTracking = function getTracking() {
+    return (
+      /** @type {boolean} */
+      this.get(Property.TRACKING)
+    );
+  };
+  /**
+   * Get the tracking options.
+   * See http://www.w3.org/TR/geolocation-API/#position-options.
+   * @return {PositionOptions|undefined} PositionOptions as defined by
+   *     the [HTML5 Geolocation spec
+   *     ](http://www.w3.org/TR/geolocation-API/#position_options_interface).
+   * @observable
+   * @api
+   */
+
+
+  Geolocation.prototype.getTrackingOptions = function getTrackingOptions() {
+    return (
+      /** @type {PositionOptions|undefined} */
+      this.get(Property.TRACKING_OPTIONS)
+    );
+  };
+  /**
+   * Set the projection to use for transforming the coordinates.
+   * @param {import("./proj.js").ProjectionLike} projection The projection the position is
+   *     reported in.
+   * @observable
+   * @api
+   */
+
+
+  Geolocation.prototype.setProjection = function setProjection(projection) {
+    this.set(Property.PROJECTION, (0, _proj.get)(projection));
+  };
+  /**
+   * Enable or disable tracking.
+   * @param {boolean} tracking Enable tracking.
+   * @observable
+   * @api
+   */
+
+
+  Geolocation.prototype.setTracking = function setTracking(tracking) {
+    this.set(Property.TRACKING, tracking);
+  };
+  /**
+   * Set the tracking options.
+   * See http://www.w3.org/TR/geolocation-API/#position-options.
+   * @param {PositionOptions} options PositionOptions as defined by the
+   *     [HTML5 Geolocation spec
+   *     ](http://www.w3.org/TR/geolocation-API/#position_options_interface).
+   * @observable
+   * @api
+   */
+
+
+  Geolocation.prototype.setTrackingOptions = function setTrackingOptions(options) {
+    this.set(Property.TRACKING_OPTIONS, options);
+  };
+
+  return Geolocation;
+}(_Object.default);
+
+var _default = Geolocation;
+exports.default = _default;
+},{"./Object.js":"node_modules/ol/Object.js","./events.js":"node_modules/ol/events.js","./events/Event.js":"node_modules/ol/events/Event.js","./events/EventType.js":"node_modules/ol/events/EventType.js","./geom/Polygon.js":"node_modules/ol/geom/Polygon.js","./has.js":"node_modules/ol/has.js","./math.js":"node_modules/ol/math.js","./proj.js":"node_modules/ol/proj.js"}],"node_modules/ol/string.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.padNumber = padNumber;
+exports.compareVersions = compareVersions;
+
+/**
+ * @module ol/string
+ */
+
+/**
+ * @param {number} number Number to be formatted
+ * @param {number} width The desired width
+ * @param {number=} opt_precision Precision of the output string (i.e. number of decimal places)
+ * @returns {string} Formatted string
+ */
+function padNumber(number, width, opt_precision) {
+  var numberString = opt_precision !== undefined ? number.toFixed(opt_precision) : '' + number;
+  var decimal = numberString.indexOf('.');
+  decimal = decimal === -1 ? numberString.length : decimal;
+  return decimal > width ? numberString : new Array(1 + width - decimal).join('0') + numberString;
+}
+/**
+ * Adapted from https://github.com/omichelsen/compare-versions/blob/master/index.js
+ * @param {string|number} v1 First version
+ * @param {string|number} v2 Second version
+ * @returns {number} Value
+ */
+
+
+function compareVersions(v1, v2) {
+  var s1 = ('' + v1).split('.');
+  var s2 = ('' + v2).split('.');
+
+  for (var i = 0; i < Math.max(s1.length, s2.length); i++) {
+    var n1 = parseInt(s1[i] || '0', 10);
+    var n2 = parseInt(s2[i] || '0', 10);
+
+    if (n1 > n2) {
+      return 1;
+    }
+
+    if (n2 > n1) {
+      return -1;
+    }
+  }
+
+  return 0;
+}
+},{}],"node_modules/ol/coordinate.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.add = add;
+exports.closestOnCircle = closestOnCircle;
+exports.closestOnSegment = closestOnSegment;
+exports.createStringXY = createStringXY;
+exports.degreesToStringHDMS = degreesToStringHDMS;
+exports.format = format;
+exports.equals = equals;
+exports.rotate = rotate;
+exports.scale = scale;
+exports.squaredDistance = squaredDistance;
+exports.distance = distance;
+exports.squaredDistanceToSegment = squaredDistanceToSegment;
+exports.toStringHDMS = toStringHDMS;
+exports.toStringXY = toStringXY;
+
+var _math = require("./math.js");
+
+var _string = require("./string.js");
+
+/**
+ * @module ol/coordinate
+ */
+
+/**
+ * An array of numbers representing an xy coordinate. Example: `[16, 48]`.
+ * @typedef {Array<number>} Coordinate
+ * @api
+ */
+
+/**
+ * A function that takes a {@link module:ol/coordinate~Coordinate} and
+ * transforms it into a `{string}`.
+ *
+ * @typedef {function((Coordinate|undefined)): string} CoordinateFormat
+ * @api
+ */
+
+/**
+ * Add `delta` to `coordinate`. `coordinate` is modified in place and returned
+ * by the function.
+ *
+ * Example:
+ *
+ *     import {add} from 'ol/coordinate';
+ *
+ *     var coord = [7.85, 47.983333];
+ *     add(coord, [-2, 4]);
+ *     // coord is now [5.85, 51.983333]
+ *
+ * @param {Coordinate} coordinate Coordinate.
+ * @param {Coordinate} delta Delta.
+ * @return {Coordinate} The input coordinate adjusted by
+ * the given delta.
+ * @api
+ */
+function add(coordinate, delta) {
+  coordinate[0] += delta[0];
+  coordinate[1] += delta[1];
+  return coordinate;
+}
+/**
+ * Calculates the point closest to the passed coordinate on the passed circle.
+ *
+ * @param {Coordinate} coordinate The coordinate.
+ * @param {import("./geom/Circle.js").default} circle The circle.
+ * @return {Coordinate} Closest point on the circumference.
+ */
+
+
+function closestOnCircle(coordinate, circle) {
+  var r = circle.getRadius();
+  var center = circle.getCenter();
+  var x0 = center[0];
+  var y0 = center[1];
+  var x1 = coordinate[0];
+  var y1 = coordinate[1];
+  var dx = x1 - x0;
+  var dy = y1 - y0;
+
+  if (dx === 0 && dy === 0) {
+    dx = 1;
+  }
+
+  var d = Math.sqrt(dx * dx + dy * dy);
+  var x = x0 + r * dx / d;
+  var y = y0 + r * dy / d;
+  return [x, y];
+}
+/**
+ * Calculates the point closest to the passed coordinate on the passed segment.
+ * This is the foot of the perpendicular of the coordinate to the segment when
+ * the foot is on the segment, or the closest segment coordinate when the foot
+ * is outside the segment.
+ *
+ * @param {Coordinate} coordinate The coordinate.
+ * @param {Array<Coordinate>} segment The two coordinates
+ * of the segment.
+ * @return {Coordinate} The foot of the perpendicular of
+ * the coordinate to the segment.
+ */
+
+
+function closestOnSegment(coordinate, segment) {
+  var x0 = coordinate[0];
+  var y0 = coordinate[1];
+  var start = segment[0];
+  var end = segment[1];
+  var x1 = start[0];
+  var y1 = start[1];
+  var x2 = end[0];
+  var y2 = end[1];
+  var dx = x2 - x1;
+  var dy = y2 - y1;
+  var along = dx === 0 && dy === 0 ? 0 : (dx * (x0 - x1) + dy * (y0 - y1)) / (dx * dx + dy * dy || 0);
+  var x, y;
+
+  if (along <= 0) {
+    x = x1;
+    y = y1;
+  } else if (along >= 1) {
+    x = x2;
+    y = y2;
+  } else {
+    x = x1 + along * dx;
+    y = y1 + along * dy;
+  }
+
+  return [x, y];
+}
+/**
+ * Returns a {@link module:ol/coordinate~CoordinateFormat} function that can be
+ * used to format
+ * a {Coordinate} to a string.
+ *
+ * Example without specifying the fractional digits:
+ *
+ *     import {createStringXY} from 'ol/coordinate';
+ *
+ *     var coord = [7.85, 47.983333];
+ *     var stringifyFunc = createStringXY();
+ *     var out = stringifyFunc(coord);
+ *     // out is now '8, 48'
+ *
+ * Example with explicitly specifying 2 fractional digits:
+ *
+ *     import {createStringXY} from 'ol/coordinate';
+ *
+ *     var coord = [7.85, 47.983333];
+ *     var stringifyFunc = createStringXY(2);
+ *     var out = stringifyFunc(coord);
+ *     // out is now '7.85, 47.98'
+ *
+ * @param {number=} opt_fractionDigits The number of digits to include
+ *    after the decimal point. Default is `0`.
+ * @return {CoordinateFormat} Coordinate format.
+ * @api
+ */
+
+
+function createStringXY(opt_fractionDigits) {
+  return (
+    /**
+     * @param {Coordinate} coordinate Coordinate.
+     * @return {string} String XY.
+     */
+    function (coordinate) {
+      return toStringXY(coordinate, opt_fractionDigits);
+    }
+  );
+}
+/**
+ * @param {string} hemispheres Hemispheres.
+ * @param {number} degrees Degrees.
+ * @param {number=} opt_fractionDigits The number of digits to include
+ *    after the decimal point. Default is `0`.
+ * @return {string} String.
+ */
+
+
+function degreesToStringHDMS(hemispheres, degrees, opt_fractionDigits) {
+  var normalizedDegrees = (0, _math.modulo)(degrees + 180, 360) - 180;
+  var x = Math.abs(3600 * normalizedDegrees);
+  var dflPrecision = opt_fractionDigits || 0;
+  var precision = Math.pow(10, dflPrecision);
+  var deg = Math.floor(x / 3600);
+  var min = Math.floor((x - deg * 3600) / 60);
+  var sec = x - deg * 3600 - min * 60;
+  sec = Math.ceil(sec * precision) / precision;
+
+  if (sec >= 60) {
+    sec = 0;
+    min += 1;
+  }
+
+  if (min >= 60) {
+    min = 0;
+    deg += 1;
+  }
+
+  return deg + '\u00b0 ' + (0, _string.padNumber)(min, 2) + '\u2032 ' + (0, _string.padNumber)(sec, 2, dflPrecision) + '\u2033' + (normalizedDegrees == 0 ? '' : ' ' + hemispheres.charAt(normalizedDegrees < 0 ? 1 : 0));
+}
+/**
+ * Transforms the given {@link module:ol/coordinate~Coordinate} to a string
+ * using the given string template. The strings `{x}` and `{y}` in the template
+ * will be replaced with the first and second coordinate values respectively.
+ *
+ * Example without specifying the fractional digits:
+ *
+ *     import {format} from 'ol/coordinate';
+ *
+ *     var coord = [7.85, 47.983333];
+ *     var template = 'Coordinate is ({x}|{y}).';
+ *     var out = format(coord, template);
+ *     // out is now 'Coordinate is (8|48).'
+ *
+ * Example explicitly specifying the fractional digits:
+ *
+ *     import {format} from 'ol/coordinate';
+ *
+ *     var coord = [7.85, 47.983333];
+ *     var template = 'Coordinate is ({x}|{y}).';
+ *     var out = format(coord, template, 2);
+ *     // out is now 'Coordinate is (7.85|47.98).'
+ *
+ * @param {Coordinate} coordinate Coordinate.
+ * @param {string} template A template string with `{x}` and `{y}` placeholders
+ *     that will be replaced by first and second coordinate values.
+ * @param {number=} opt_fractionDigits The number of digits to include
+ *    after the decimal point. Default is `0`.
+ * @return {string} Formatted coordinate.
+ * @api
+ */
+
+
+function format(coordinate, template, opt_fractionDigits) {
+  if (coordinate) {
+    return template.replace('{x}', coordinate[0].toFixed(opt_fractionDigits)).replace('{y}', coordinate[1].toFixed(opt_fractionDigits));
+  } else {
+    return '';
+  }
+}
+/**
+ * @param {Coordinate} coordinate1 First coordinate.
+ * @param {Coordinate} coordinate2 Second coordinate.
+ * @return {boolean} The two coordinates are equal.
+ */
+
+
+function equals(coordinate1, coordinate2) {
+  var equals = true;
+
+  for (var i = coordinate1.length - 1; i >= 0; --i) {
+    if (coordinate1[i] != coordinate2[i]) {
+      equals = false;
+      break;
+    }
+  }
+
+  return equals;
+}
+/**
+ * Rotate `coordinate` by `angle`. `coordinate` is modified in place and
+ * returned by the function.
+ *
+ * Example:
+ *
+ *     import {rotate} from 'ol/coordinate';
+ *
+ *     var coord = [7.85, 47.983333];
+ *     var rotateRadians = Math.PI / 2; // 90 degrees
+ *     rotate(coord, rotateRadians);
+ *     // coord is now [-47.983333, 7.85]
+ *
+ * @param {Coordinate} coordinate Coordinate.
+ * @param {number} angle Angle in radian.
+ * @return {Coordinate} Coordinate.
+ * @api
+ */
+
+
+function rotate(coordinate, angle) {
+  var cosAngle = Math.cos(angle);
+  var sinAngle = Math.sin(angle);
+  var x = coordinate[0] * cosAngle - coordinate[1] * sinAngle;
+  var y = coordinate[1] * cosAngle + coordinate[0] * sinAngle;
+  coordinate[0] = x;
+  coordinate[1] = y;
+  return coordinate;
+}
+/**
+ * Scale `coordinate` by `scale`. `coordinate` is modified in place and returned
+ * by the function.
+ *
+ * Example:
+ *
+ *     import {scale as scaleCoordinate} from 'ol/coordinate';
+ *
+ *     var coord = [7.85, 47.983333];
+ *     var scale = 1.2;
+ *     scaleCoordinate(coord, scale);
+ *     // coord is now [9.42, 57.5799996]
+ *
+ * @param {Coordinate} coordinate Coordinate.
+ * @param {number} scale Scale factor.
+ * @return {Coordinate} Coordinate.
+ */
+
+
+function scale(coordinate, scale) {
+  coordinate[0] *= scale;
+  coordinate[1] *= scale;
+  return coordinate;
+}
+/**
+ * @param {Coordinate} coord1 First coordinate.
+ * @param {Coordinate} coord2 Second coordinate.
+ * @return {number} Squared distance between coord1 and coord2.
+ */
+
+
+function squaredDistance(coord1, coord2) {
+  var dx = coord1[0] - coord2[0];
+  var dy = coord1[1] - coord2[1];
+  return dx * dx + dy * dy;
+}
+/**
+ * @param {Coordinate} coord1 First coordinate.
+ * @param {Coordinate} coord2 Second coordinate.
+ * @return {number} Distance between coord1 and coord2.
+ */
+
+
+function distance(coord1, coord2) {
+  return Math.sqrt(squaredDistance(coord1, coord2));
+}
+/**
+ * Calculate the squared distance from a coordinate to a line segment.
+ *
+ * @param {Coordinate} coordinate Coordinate of the point.
+ * @param {Array<Coordinate>} segment Line segment (2
+ * coordinates).
+ * @return {number} Squared distance from the point to the line segment.
+ */
+
+
+function squaredDistanceToSegment(coordinate, segment) {
+  return squaredDistance(coordinate, closestOnSegment(coordinate, segment));
+}
+/**
+ * Format a geographic coordinate with the hemisphere, degrees, minutes, and
+ * seconds.
+ *
+ * Example without specifying fractional digits:
+ *
+ *     import {toStringHDMS} from 'ol/coordinate';
+ *
+ *     var coord = [7.85, 47.983333];
+ *     var out = toStringHDMS(coord);
+ *     // out is now '47° 58′ 60″ N 7° 50′ 60″ E'
+ *
+ * Example explicitly specifying 1 fractional digit:
+ *
+ *     import {toStringHDMS} from 'ol/coordinate';
+ *
+ *     var coord = [7.85, 47.983333];
+ *     var out = toStringHDMS(coord, 1);
+ *     // out is now '47° 58′ 60.0″ N 7° 50′ 60.0″ E'
+ *
+ * @param {Coordinate} coordinate Coordinate.
+ * @param {number=} opt_fractionDigits The number of digits to include
+ *    after the decimal point. Default is `0`.
+ * @return {string} Hemisphere, degrees, minutes and seconds.
+ * @api
+ */
+
+
+function toStringHDMS(coordinate, opt_fractionDigits) {
+  if (coordinate) {
+    return degreesToStringHDMS('NS', coordinate[1], opt_fractionDigits) + ' ' + degreesToStringHDMS('EW', coordinate[0], opt_fractionDigits);
+  } else {
+    return '';
+  }
+}
+/**
+ * Format a coordinate as a comma delimited string.
+ *
+ * Example without specifying fractional digits:
+ *
+ *     import {toStringXY} from 'ol/coordinate';
+ *
+ *     var coord = [7.85, 47.983333];
+ *     var out = toStringXY(coord);
+ *     // out is now '8, 48'
+ *
+ * Example explicitly specifying 1 fractional digit:
+ *
+ *     import {toStringXY} from 'ol/coordinate';
+ *
+ *     var coord = [7.85, 47.983333];
+ *     var out = toStringXY(coord, 1);
+ *     // out is now '7.8, 48.0'
+ *
+ * @param {Coordinate} coordinate Coordinate.
+ * @param {number=} opt_fractionDigits The number of digits to include
+ *    after the decimal point. Default is `0`.
+ * @return {string} XY.
+ * @api
+ */
+
+
+function toStringXY(coordinate, opt_fractionDigits) {
+  return format(coordinate, '{x}, {y}', opt_fractionDigits);
+}
+},{"./math.js":"node_modules/ol/math.js","./string.js":"node_modules/ol/string.js"}],"node_modules/ol/geom/flat/interpolate.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.interpolatePoint = interpolatePoint;
+exports.lineStringCoordinateAtM = lineStringCoordinateAtM;
+exports.lineStringsCoordinateAtM = lineStringsCoordinateAtM;
+
+var _array = require("../../array.js");
+
+var _math = require("../../math.js");
+
+/**
+ * @module ol/geom/flat/interpolate
+ */
+
+/**
+ * @param {Array<number>} flatCoordinates Flat coordinates.
+ * @param {number} offset Offset.
+ * @param {number} end End.
+ * @param {number} stride Stride.
+ * @param {number} fraction Fraction.
+ * @param {Array<number>=} opt_dest Destination.
+ * @return {Array<number>} Destination.
+ */
+function interpolatePoint(flatCoordinates, offset, end, stride, fraction, opt_dest) {
+  var pointX = NaN;
+  var pointY = NaN;
+  var n = (end - offset) / stride;
+
+  if (n === 1) {
+    pointX = flatCoordinates[offset];
+    pointY = flatCoordinates[offset + 1];
+  } else if (n == 2) {
+    pointX = (1 - fraction) * flatCoordinates[offset] + fraction * flatCoordinates[offset + stride];
+    pointY = (1 - fraction) * flatCoordinates[offset + 1] + fraction * flatCoordinates[offset + stride + 1];
+  } else if (n !== 0) {
+    var x1 = flatCoordinates[offset];
+    var y1 = flatCoordinates[offset + 1];
+    var length = 0;
+    var cumulativeLengths = [0];
+
+    for (var i = offset + stride; i < end; i += stride) {
+      var x2 = flatCoordinates[i];
+      var y2 = flatCoordinates[i + 1];
+      length += Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+      cumulativeLengths.push(length);
+      x1 = x2;
+      y1 = y2;
+    }
+
+    var target = fraction * length;
+    var index = (0, _array.binarySearch)(cumulativeLengths, target);
+
+    if (index < 0) {
+      var t = (target - cumulativeLengths[-index - 2]) / (cumulativeLengths[-index - 1] - cumulativeLengths[-index - 2]);
+      var o = offset + (-index - 2) * stride;
+      pointX = (0, _math.lerp)(flatCoordinates[o], flatCoordinates[o + stride], t);
+      pointY = (0, _math.lerp)(flatCoordinates[o + 1], flatCoordinates[o + stride + 1], t);
+    } else {
+      pointX = flatCoordinates[offset + index * stride];
+      pointY = flatCoordinates[offset + index * stride + 1];
+    }
+  }
+
+  if (opt_dest) {
+    opt_dest[0] = pointX;
+    opt_dest[1] = pointY;
+    return opt_dest;
+  } else {
+    return [pointX, pointY];
+  }
+}
+/**
+ * @param {Array<number>} flatCoordinates Flat coordinates.
+ * @param {number} offset Offset.
+ * @param {number} end End.
+ * @param {number} stride Stride.
+ * @param {number} m M.
+ * @param {boolean} extrapolate Extrapolate.
+ * @return {import("../../coordinate.js").Coordinate} Coordinate.
+ */
+
+
+function lineStringCoordinateAtM(flatCoordinates, offset, end, stride, m, extrapolate) {
+  if (end == offset) {
+    return null;
+  }
+
+  var coordinate;
+
+  if (m < flatCoordinates[offset + stride - 1]) {
+    if (extrapolate) {
+      coordinate = flatCoordinates.slice(offset, offset + stride);
+      coordinate[stride - 1] = m;
+      return coordinate;
+    } else {
+      return null;
+    }
+  } else if (flatCoordinates[end - 1] < m) {
+    if (extrapolate) {
+      coordinate = flatCoordinates.slice(end - stride, end);
+      coordinate[stride - 1] = m;
+      return coordinate;
+    } else {
+      return null;
+    }
+  } // FIXME use O(1) search
+
+
+  if (m == flatCoordinates[offset + stride - 1]) {
+    return flatCoordinates.slice(offset, offset + stride);
+  }
+
+  var lo = offset / stride;
+  var hi = end / stride;
+
+  while (lo < hi) {
+    var mid = lo + hi >> 1;
+
+    if (m < flatCoordinates[(mid + 1) * stride - 1]) {
+      hi = mid;
+    } else {
+      lo = mid + 1;
+    }
+  }
+
+  var m0 = flatCoordinates[lo * stride - 1];
+
+  if (m == m0) {
+    return flatCoordinates.slice((lo - 1) * stride, (lo - 1) * stride + stride);
+  }
+
+  var m1 = flatCoordinates[(lo + 1) * stride - 1];
+  var t = (m - m0) / (m1 - m0);
+  coordinate = [];
+
+  for (var i = 0; i < stride - 1; ++i) {
+    coordinate.push((0, _math.lerp)(flatCoordinates[(lo - 1) * stride + i], flatCoordinates[lo * stride + i], t));
+  }
+
+  coordinate.push(m);
+  return coordinate;
+}
+/**
+ * @param {Array<number>} flatCoordinates Flat coordinates.
+ * @param {number} offset Offset.
+ * @param {Array<number>} ends Ends.
+ * @param {number} stride Stride.
+ * @param {number} m M.
+ * @param {boolean} extrapolate Extrapolate.
+ * @param {boolean} interpolate Interpolate.
+ * @return {import("../../coordinate.js").Coordinate} Coordinate.
+ */
+
+
+function lineStringsCoordinateAtM(flatCoordinates, offset, ends, stride, m, extrapolate, interpolate) {
+  if (interpolate) {
+    return lineStringCoordinateAtM(flatCoordinates, offset, ends[ends.length - 1], stride, m, extrapolate);
+  }
+
+  var coordinate;
+
+  if (m < flatCoordinates[stride - 1]) {
+    if (extrapolate) {
+      coordinate = flatCoordinates.slice(0, stride);
+      coordinate[stride - 1] = m;
+      return coordinate;
+    } else {
+      return null;
+    }
+  }
+
+  if (flatCoordinates[flatCoordinates.length - 1] < m) {
+    if (extrapolate) {
+      coordinate = flatCoordinates.slice(flatCoordinates.length - stride);
+      coordinate[stride - 1] = m;
+      return coordinate;
+    } else {
+      return null;
+    }
+  }
+
+  for (var i = 0, ii = ends.length; i < ii; ++i) {
+    var end = ends[i];
+
+    if (offset == end) {
+      continue;
+    }
+
+    if (m < flatCoordinates[offset + stride - 1]) {
+      return null;
+    } else if (m <= flatCoordinates[end - 1]) {
+      return lineStringCoordinateAtM(flatCoordinates, offset, end, stride, m, false);
+    }
+
+    offset = end;
+  }
+
+  return null;
+}
+},{"../../array.js":"node_modules/ol/array.js","../../math.js":"node_modules/ol/math.js"}],"node_modules/ol/geom/flat/length.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.lineStringLength = lineStringLength;
+exports.linearRingLength = linearRingLength;
+
+/**
+ * @module ol/geom/flat/length
+ */
+
+/**
+ * @param {Array<number>} flatCoordinates Flat coordinates.
+ * @param {number} offset Offset.
+ * @param {number} end End.
+ * @param {number} stride Stride.
+ * @return {number} Length.
+ */
+function lineStringLength(flatCoordinates, offset, end, stride) {
+  var x1 = flatCoordinates[offset];
+  var y1 = flatCoordinates[offset + 1];
+  var length = 0;
+
+  for (var i = offset + stride; i < end; i += stride) {
+    var x2 = flatCoordinates[i];
+    var y2 = flatCoordinates[i + 1];
+    length += Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    x1 = x2;
+    y1 = y2;
+  }
+
+  return length;
+}
+/**
+ * @param {Array<number>} flatCoordinates Flat coordinates.
+ * @param {number} offset Offset.
+ * @param {number} end End.
+ * @param {number} stride Stride.
+ * @return {number} Perimeter.
+ */
+
+
+function linearRingLength(flatCoordinates, offset, end, stride) {
+  var perimeter = lineStringLength(flatCoordinates, offset, end, stride);
+  var dx = flatCoordinates[end - stride] - flatCoordinates[offset];
+  var dy = flatCoordinates[end - stride + 1] - flatCoordinates[offset + 1];
+  perimeter += Math.sqrt(dx * dx + dy * dy);
+  return perimeter;
+}
+},{}],"node_modules/ol/geom/LineString.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _array = require("../array.js");
+
+var _extent = require("../extent.js");
+
+var _GeometryLayout = _interopRequireDefault(require("./GeometryLayout.js"));
+
+var _GeometryType = _interopRequireDefault(require("./GeometryType.js"));
+
+var _SimpleGeometry = _interopRequireDefault(require("./SimpleGeometry.js"));
+
+var _closest = require("./flat/closest.js");
+
+var _deflate = require("./flat/deflate.js");
+
+var _inflate = require("./flat/inflate.js");
+
+var _interpolate = require("./flat/interpolate.js");
+
+var _intersectsextent = require("./flat/intersectsextent.js");
+
+var _length = require("./flat/length.js");
+
+var _segments = require("./flat/segments.js");
+
+var _simplify = require("./flat/simplify.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/geom/LineString
+ */
+
+/**
+ * @classdesc
+ * Linestring geometry.
+ *
+ * @api
+ */
+var LineString =
+/*@__PURE__*/
+function (SimpleGeometry) {
+  function LineString(coordinates, opt_layout) {
+    SimpleGeometry.call(this);
+    /**
+     * @private
+     * @type {import("../coordinate.js").Coordinate}
+     */
+
+    this.flatMidpoint_ = null;
+    /**
+     * @private
+     * @type {number}
+     */
+
+    this.flatMidpointRevision_ = -1;
+    /**
+     * @private
+     * @type {number}
+     */
+
+    this.maxDelta_ = -1;
+    /**
+     * @private
+     * @type {number}
+     */
+
+    this.maxDeltaRevision_ = -1;
+
+    if (opt_layout !== undefined && !Array.isArray(coordinates[0])) {
+      this.setFlatCoordinates(opt_layout,
+      /** @type {Array<number>} */
+      coordinates);
+    } else {
+      this.setCoordinates(
+      /** @type {Array<import("../coordinate.js").Coordinate>} */
+      coordinates, opt_layout);
+    }
+  }
+
+  if (SimpleGeometry) LineString.__proto__ = SimpleGeometry;
+  LineString.prototype = Object.create(SimpleGeometry && SimpleGeometry.prototype);
+  LineString.prototype.constructor = LineString;
+  /**
+   * Append the passed coordinate to the coordinates of the linestring.
+   * @param {import("../coordinate.js").Coordinate} coordinate Coordinate.
+   * @api
+   */
+
+  LineString.prototype.appendCoordinate = function appendCoordinate(coordinate) {
+    if (!this.flatCoordinates) {
+      this.flatCoordinates = coordinate.slice();
+    } else {
+      (0, _array.extend)(this.flatCoordinates, coordinate);
+    }
+
+    this.changed();
+  };
+  /**
+   * Make a complete copy of the geometry.
+   * @return {!LineString} Clone.
+   * @override
+   * @api
+   */
+
+
+  LineString.prototype.clone = function clone() {
+    return new LineString(this.flatCoordinates.slice(), this.layout);
+  };
+  /**
+   * @inheritDoc
+   */
+
+
+  LineString.prototype.closestPointXY = function closestPointXY(x, y, closestPoint, minSquaredDistance) {
+    if (minSquaredDistance < (0, _extent.closestSquaredDistanceXY)(this.getExtent(), x, y)) {
+      return minSquaredDistance;
+    }
+
+    if (this.maxDeltaRevision_ != this.getRevision()) {
+      this.maxDelta_ = Math.sqrt((0, _closest.maxSquaredDelta)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride, 0));
+      this.maxDeltaRevision_ = this.getRevision();
+    }
+
+    return (0, _closest.assignClosestPoint)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride, this.maxDelta_, false, x, y, closestPoint, minSquaredDistance);
+  };
+  /**
+   * Iterate over each segment, calling the provided callback.
+   * If the callback returns a truthy value the function returns that
+   * value immediately. Otherwise the function returns `false`.
+   *
+   * @param {function(this: S, import("../coordinate.js").Coordinate, import("../coordinate.js").Coordinate): T} callback Function
+   *     called for each segment.
+   * @return {T|boolean} Value.
+   * @template T,S
+   * @api
+   */
+
+
+  LineString.prototype.forEachSegment = function forEachSegment$1(callback) {
+    return (0, _segments.forEach)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride, callback);
+  };
+  /**
+   * Returns the coordinate at `m` using linear interpolation, or `null` if no
+   * such coordinate exists.
+   *
+   * `opt_extrapolate` controls extrapolation beyond the range of Ms in the
+   * MultiLineString. If `opt_extrapolate` is `true` then Ms less than the first
+   * M will return the first coordinate and Ms greater than the last M will
+   * return the last coordinate.
+   *
+   * @param {number} m M.
+   * @param {boolean=} opt_extrapolate Extrapolate. Default is `false`.
+   * @return {import("../coordinate.js").Coordinate} Coordinate.
+   * @api
+   */
+
+
+  LineString.prototype.getCoordinateAtM = function getCoordinateAtM(m, opt_extrapolate) {
+    if (this.layout != _GeometryLayout.default.XYM && this.layout != _GeometryLayout.default.XYZM) {
+      return null;
+    }
+
+    var extrapolate = opt_extrapolate !== undefined ? opt_extrapolate : false;
+    return (0, _interpolate.lineStringCoordinateAtM)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride, m, extrapolate);
+  };
+  /**
+   * Return the coordinates of the linestring.
+   * @return {Array<import("../coordinate.js").Coordinate>} Coordinates.
+   * @override
+   * @api
+   */
+
+
+  LineString.prototype.getCoordinates = function getCoordinates() {
+    return (0, _inflate.inflateCoordinates)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride);
+  };
+  /**
+   * Return the coordinate at the provided fraction along the linestring.
+   * The `fraction` is a number between 0 and 1, where 0 is the start of the
+   * linestring and 1 is the end.
+   * @param {number} fraction Fraction.
+   * @param {import("../coordinate.js").Coordinate=} opt_dest Optional coordinate whose values will
+   *     be modified. If not provided, a new coordinate will be returned.
+   * @return {import("../coordinate.js").Coordinate} Coordinate of the interpolated point.
+   * @api
+   */
+
+
+  LineString.prototype.getCoordinateAt = function getCoordinateAt(fraction, opt_dest) {
+    return (0, _interpolate.interpolatePoint)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride, fraction, opt_dest);
+  };
+  /**
+   * Return the length of the linestring on projected plane.
+   * @return {number} Length (on projected plane).
+   * @api
+   */
+
+
+  LineString.prototype.getLength = function getLength() {
+    return (0, _length.lineStringLength)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride);
+  };
+  /**
+   * @return {Array<number>} Flat midpoint.
+   */
+
+
+  LineString.prototype.getFlatMidpoint = function getFlatMidpoint() {
+    if (this.flatMidpointRevision_ != this.getRevision()) {
+      this.flatMidpoint_ = this.getCoordinateAt(0.5, this.flatMidpoint_);
+      this.flatMidpointRevision_ = this.getRevision();
+    }
+
+    return this.flatMidpoint_;
+  };
+  /**
+   * @inheritDoc
+   */
+
+
+  LineString.prototype.getSimplifiedGeometryInternal = function getSimplifiedGeometryInternal(squaredTolerance) {
+    var simplifiedFlatCoordinates = [];
+    simplifiedFlatCoordinates.length = (0, _simplify.douglasPeucker)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride, squaredTolerance, simplifiedFlatCoordinates, 0);
+    return new LineString(simplifiedFlatCoordinates, _GeometryLayout.default.XY);
+  };
+  /**
+   * @inheritDoc
+   * @api
+   */
+
+
+  LineString.prototype.getType = function getType() {
+    return _GeometryType.default.LINE_STRING;
+  };
+  /**
+   * @inheritDoc
+   * @api
+   */
+
+
+  LineString.prototype.intersectsExtent = function intersectsExtent(extent) {
+    return (0, _intersectsextent.intersectsLineString)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride, extent);
+  };
+  /**
+   * Set the coordinates of the linestring.
+   * @param {!Array<import("../coordinate.js").Coordinate>} coordinates Coordinates.
+   * @param {GeometryLayout=} opt_layout Layout.
+   * @override
+   * @api
+   */
+
+
+  LineString.prototype.setCoordinates = function setCoordinates(coordinates, opt_layout) {
+    this.setLayout(opt_layout, coordinates, 1);
+
+    if (!this.flatCoordinates) {
+      this.flatCoordinates = [];
+    }
+
+    this.flatCoordinates.length = (0, _deflate.deflateCoordinates)(this.flatCoordinates, 0, coordinates, this.stride);
+    this.changed();
+  };
+
+  return LineString;
+}(_SimpleGeometry.default);
+
+var _default = LineString;
+exports.default = _default;
+},{"../array.js":"node_modules/ol/array.js","../extent.js":"node_modules/ol/extent.js","./GeometryLayout.js":"node_modules/ol/geom/GeometryLayout.js","./GeometryType.js":"node_modules/ol/geom/GeometryType.js","./SimpleGeometry.js":"node_modules/ol/geom/SimpleGeometry.js","./flat/closest.js":"node_modules/ol/geom/flat/closest.js","./flat/deflate.js":"node_modules/ol/geom/flat/deflate.js","./flat/inflate.js":"node_modules/ol/geom/flat/inflate.js","./flat/interpolate.js":"node_modules/ol/geom/flat/interpolate.js","./flat/intersectsextent.js":"node_modules/ol/geom/flat/intersectsextent.js","./flat/length.js":"node_modules/ol/geom/flat/length.js","./flat/segments.js":"node_modules/ol/geom/flat/segments.js","./flat/simplify.js":"node_modules/ol/geom/flat/simplify.js"}],"node_modules/ol/geom/flat/geodesic.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.greatCircleArc = greatCircleArc;
+exports.meridian = meridian;
+exports.parallel = parallel;
+
+var _math = require("../../math.js");
+
+var _proj = require("../../proj.js");
+
+/**
+ * @module ol/geom/flat/geodesic
+ */
+
+/**
+ * @param {function(number): import("../../coordinate.js").Coordinate} interpolate Interpolate function.
+ * @param {import("../../proj.js").TransformFunction} transform Transform from longitude/latitude to
+ *     projected coordinates.
+ * @param {number} squaredTolerance Squared tolerance.
+ * @return {Array<number>} Flat coordinates.
+ */
+function line(interpolate, transform, squaredTolerance) {
+  // FIXME reduce garbage generation
+  // FIXME optimize stack operations
+
+  /** @type {Array<number>} */
+  var flatCoordinates = [];
+  var geoA = interpolate(0);
+  var geoB = interpolate(1);
+  var a = transform(geoA);
+  var b = transform(geoB);
+  /** @type {Array<import("../../coordinate.js").Coordinate>} */
+
+  var geoStack = [geoB, geoA];
+  /** @type {Array<import("../../coordinate.js").Coordinate>} */
+
+  var stack = [b, a];
+  /** @type {Array<number>} */
+
+  var fractionStack = [1, 0];
+  /** @type {!Object<string, boolean>} */
+
+  var fractions = {};
+  var maxIterations = 1e5;
+  var geoM, m, fracA, fracB, fracM, key;
+
+  while (--maxIterations > 0 && fractionStack.length > 0) {
+    // Pop the a coordinate off the stack
+    fracA = fractionStack.pop();
+    geoA = geoStack.pop();
+    a = stack.pop(); // Add the a coordinate if it has not been added yet
+
+    key = fracA.toString();
+
+    if (!(key in fractions)) {
+      flatCoordinates.push(a[0], a[1]);
+      fractions[key] = true;
+    } // Pop the b coordinate off the stack
+
+
+    fracB = fractionStack.pop();
+    geoB = geoStack.pop();
+    b = stack.pop(); // Find the m point between the a and b coordinates
+
+    fracM = (fracA + fracB) / 2;
+    geoM = interpolate(fracM);
+    m = transform(geoM);
+
+    if ((0, _math.squaredSegmentDistance)(m[0], m[1], a[0], a[1], b[0], b[1]) < squaredTolerance) {
+      // If the m point is sufficiently close to the straight line, then we
+      // discard it.  Just use the b coordinate and move on to the next line
+      // segment.
+      flatCoordinates.push(b[0], b[1]);
+      key = fracB.toString();
+      fractions[key] = true;
+    } else {
+      // Otherwise, we need to subdivide the current line segment.  Split it
+      // into two and push the two line segments onto the stack.
+      fractionStack.push(fracB, fracM, fracM, fracA);
+      stack.push(b, m, m, a);
+      geoStack.push(geoB, geoM, geoM, geoA);
+    }
+  }
+
+  return flatCoordinates;
+}
+/**
+ * Generate a great-circle arcs between two lat/lon points.
+ * @param {number} lon1 Longitude 1 in degrees.
+ * @param {number} lat1 Latitude 1 in degrees.
+ * @param {number} lon2 Longitude 2 in degrees.
+ * @param {number} lat2 Latitude 2 in degrees.
+ * @param {import("../../proj/Projection.js").default} projection Projection.
+ * @param {number} squaredTolerance Squared tolerance.
+ * @return {Array<number>} Flat coordinates.
+ */
+
+
+function greatCircleArc(lon1, lat1, lon2, lat2, projection, squaredTolerance) {
+  var geoProjection = (0, _proj.get)('EPSG:4326');
+  var cosLat1 = Math.cos((0, _math.toRadians)(lat1));
+  var sinLat1 = Math.sin((0, _math.toRadians)(lat1));
+  var cosLat2 = Math.cos((0, _math.toRadians)(lat2));
+  var sinLat2 = Math.sin((0, _math.toRadians)(lat2));
+  var cosDeltaLon = Math.cos((0, _math.toRadians)(lon2 - lon1));
+  var sinDeltaLon = Math.sin((0, _math.toRadians)(lon2 - lon1));
+  var d = sinLat1 * sinLat2 + cosLat1 * cosLat2 * cosDeltaLon;
+  return line(
+  /**
+   * @param {number} frac Fraction.
+   * @return {import("../../coordinate.js").Coordinate} Coordinate.
+   */
+  function (frac) {
+    if (1 <= d) {
+      return [lon2, lat2];
+    }
+
+    var D = frac * Math.acos(d);
+    var cosD = Math.cos(D);
+    var sinD = Math.sin(D);
+    var y = sinDeltaLon * cosLat2;
+    var x = cosLat1 * sinLat2 - sinLat1 * cosLat2 * cosDeltaLon;
+    var theta = Math.atan2(y, x);
+    var lat = Math.asin(sinLat1 * cosD + cosLat1 * sinD * Math.cos(theta));
+    var lon = (0, _math.toRadians)(lon1) + Math.atan2(Math.sin(theta) * sinD * cosLat1, cosD - sinLat1 * Math.sin(lat));
+    return [(0, _math.toDegrees)(lon), (0, _math.toDegrees)(lat)];
+  }, (0, _proj.getTransform)(geoProjection, projection), squaredTolerance);
+}
+/**
+ * Generate a meridian (line at constant longitude).
+ * @param {number} lon Longitude.
+ * @param {number} lat1 Latitude 1.
+ * @param {number} lat2 Latitude 2.
+ * @param {import("../../proj/Projection.js").default} projection Projection.
+ * @param {number} squaredTolerance Squared tolerance.
+ * @return {Array<number>} Flat coordinates.
+ */
+
+
+function meridian(lon, lat1, lat2, projection, squaredTolerance) {
+  var epsg4326Projection = (0, _proj.get)('EPSG:4326');
+  return line(
+  /**
+   * @param {number} frac Fraction.
+   * @return {import("../../coordinate.js").Coordinate} Coordinate.
+   */
+  function (frac) {
+    return [lon, lat1 + (lat2 - lat1) * frac];
+  }, (0, _proj.getTransform)(epsg4326Projection, projection), squaredTolerance);
+}
+/**
+ * Generate a parallel (line at constant latitude).
+ * @param {number} lat Latitude.
+ * @param {number} lon1 Longitude 1.
+ * @param {number} lon2 Longitude 2.
+ * @param {import("../../proj/Projection.js").default} projection Projection.
+ * @param {number} squaredTolerance Squared tolerance.
+ * @return {Array<number>} Flat coordinates.
+ */
+
+
+function parallel(lat, lon1, lon2, projection, squaredTolerance) {
+  var epsg4326Projection = (0, _proj.get)('EPSG:4326');
+  return line(
+  /**
+   * @param {number} frac Fraction.
+   * @return {import("../../coordinate.js").Coordinate} Coordinate.
+   */
+  function (frac) {
+    return [lon1 + (lon2 - lon1) * frac, lat];
+  }, (0, _proj.getTransform)(epsg4326Projection, projection), squaredTolerance);
+}
+},{"../../math.js":"node_modules/ol/math.js","../../proj.js":"node_modules/ol/proj.js"}],"node_modules/ol/render/EventType.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/render/EventType
+ */
+
+/**
+ * @enum {string}
+ */
+var _default = {
+  /**
+   * @event module:ol/render/Event~RenderEvent#postcompose
+   * @api
+   */
+  POSTCOMPOSE: 'postcompose',
+
+  /**
+   * @event module:ol/render/Event~RenderEvent#precompose
+   * @api
+   */
+  PRECOMPOSE: 'precompose',
+
+  /**
+   * @event module:ol/render/Event~RenderEvent#render
+   * @api
+   */
+  RENDER: 'render',
+
+  /**
+   * Triggered when rendering is complete, i.e. all sources and tiles have
+   * finished loading for the current viewport, and all tiles are faded in.
+   * @event module:ol/render/Event~RenderEvent#rendercomplete
+   * @api
+   */
+  RENDERCOMPLETE: 'rendercomplete'
+};
+exports.default = _default;
+},{}],"node_modules/ol/color.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.asString = asString;
+exports.asArray = asArray;
+exports.normalize = normalize;
+exports.toString = toString;
+exports.fromString = void 0;
+
+var _asserts = require("./asserts.js");
+
+var _math = require("./math.js");
+
+/**
+ * @module ol/color
+ */
+
+/**
+ * A color represented as a short array [red, green, blue, alpha].
+ * red, green, and blue should be integers in the range 0..255 inclusive.
+ * alpha should be a float in the range 0..1 inclusive. If no alpha value is
+ * given then `1` will be used.
+ * @typedef {Array<number>} Color
+ * @api
+ */
+
+/**
+ * This RegExp matches # followed by 3, 4, 6, or 8 hex digits.
+ * @const
+ * @type {RegExp}
+ * @private
+ */
+var HEX_COLOR_RE_ = /^#([a-f0-9]{3}|[a-f0-9]{4}(?:[a-f0-9]{2}){0,2})$/i;
+/**
+ * Regular expression for matching potential named color style strings.
+ * @const
+ * @type {RegExp}
+ * @private
+ */
+
+var NAMED_COLOR_RE_ = /^([a-z]*)$/i;
+/**
+ * Return the color as an rgba string.
+ * @param {Color|string} color Color.
+ * @return {string} Rgba string.
+ * @api
+ */
+
+function asString(color) {
+  if (typeof color === 'string') {
+    return color;
+  } else {
+    return toString(color);
+  }
+}
+/**
+ * Return named color as an rgba string.
+ * @param {string} color Named color.
+ * @return {string} Rgb string.
+ */
+
+
+function fromNamed(color) {
+  var el = document.createElement('div');
+  el.style.color = color;
+
+  if (el.style.color !== '') {
+    document.body.appendChild(el);
+    var rgb = getComputedStyle(el).color;
+    document.body.removeChild(el);
+    return rgb;
+  } else {
+    return '';
+  }
+}
+/**
+ * @param {string} s String.
+ * @return {Color} Color.
+ */
+
+
+var fromString = function () {
+  // We maintain a small cache of parsed strings.  To provide cheap LRU-like
+  // semantics, whenever the cache grows too large we simply delete an
+  // arbitrary 25% of the entries.
+
+  /**
+   * @const
+   * @type {number}
+   */
+  var MAX_CACHE_SIZE = 1024;
+  /**
+   * @type {Object<string, Color>}
+   */
+
+  var cache = {};
+  /**
+   * @type {number}
+   */
+
+  var cacheSize = 0;
+  return (
+    /**
+     * @param {string} s String.
+     * @return {Color} Color.
+     */
+    function (s) {
+      var color;
+
+      if (cache.hasOwnProperty(s)) {
+        color = cache[s];
+      } else {
+        if (cacheSize >= MAX_CACHE_SIZE) {
+          var i = 0;
+
+          for (var key in cache) {
+            if ((i++ & 3) === 0) {
+              delete cache[key];
+              --cacheSize;
+            }
+          }
+        }
+
+        color = fromStringInternal_(s);
+        cache[s] = color;
+        ++cacheSize;
+      }
+
+      return color;
+    }
+  );
+}();
+/**
+ * Return the color as an array. This function maintains a cache of calculated
+ * arrays which means the result should not be modified.
+ * @param {Color|string} color Color.
+ * @return {Color} Color.
+ * @api
+ */
+
+
+exports.fromString = fromString;
+
+function asArray(color) {
+  if (Array.isArray(color)) {
+    return color;
+  } else {
+    return fromString(color);
+  }
+}
+/**
+ * @param {string} s String.
+ * @private
+ * @return {Color} Color.
+ */
+
+
+function fromStringInternal_(s) {
+  var r, g, b, a, color;
+
+  if (NAMED_COLOR_RE_.exec(s)) {
+    s = fromNamed(s);
+  }
+
+  if (HEX_COLOR_RE_.exec(s)) {
+    // hex
+    var n = s.length - 1; // number of hex digits
+
+    var d; // number of digits per channel
+
+    if (n <= 4) {
+      d = 1;
+    } else {
+      d = 2;
+    }
+
+    var hasAlpha = n === 4 || n === 8;
+    r = parseInt(s.substr(1 + 0 * d, d), 16);
+    g = parseInt(s.substr(1 + 1 * d, d), 16);
+    b = parseInt(s.substr(1 + 2 * d, d), 16);
+
+    if (hasAlpha) {
+      a = parseInt(s.substr(1 + 3 * d, d), 16);
+    } else {
+      a = 255;
+    }
+
+    if (d == 1) {
+      r = (r << 4) + r;
+      g = (g << 4) + g;
+      b = (b << 4) + b;
+
+      if (hasAlpha) {
+        a = (a << 4) + a;
+      }
+    }
+
+    color = [r, g, b, a / 255];
+  } else if (s.indexOf('rgba(') == 0) {
+    // rgba()
+    color = s.slice(5, -1).split(',').map(Number);
+    normalize(color);
+  } else if (s.indexOf('rgb(') == 0) {
+    // rgb()
+    color = s.slice(4, -1).split(',').map(Number);
+    color.push(1);
+    normalize(color);
+  } else {
+    (0, _asserts.assert)(false, 14); // Invalid color
+  }
+
+  return color;
+}
+/**
+ * TODO this function is only used in the test, we probably shouldn't export it
+ * @param {Color} color Color.
+ * @return {Color} Clamped color.
+ */
+
+
+function normalize(color) {
+  color[0] = (0, _math.clamp)(color[0] + 0.5 | 0, 0, 255);
+  color[1] = (0, _math.clamp)(color[1] + 0.5 | 0, 0, 255);
+  color[2] = (0, _math.clamp)(color[2] + 0.5 | 0, 0, 255);
+  color[3] = (0, _math.clamp)(color[3], 0, 1);
+  return color;
+}
+/**
+ * @param {Color} color Color.
+ * @return {string} String.
+ */
+
+
+function toString(color) {
+  var r = color[0];
+
+  if (r != (r | 0)) {
+    r = r + 0.5 | 0;
+  }
+
+  var g = color[1];
+
+  if (g != (g | 0)) {
+    g = g + 0.5 | 0;
+  }
+
+  var b = color[2];
+
+  if (b != (b | 0)) {
+    b = b + 0.5 | 0;
+  }
+
+  var a = color[3] === undefined ? 1 : color[3];
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+}
+},{"./asserts.js":"node_modules/ol/asserts.js","./math.js":"node_modules/ol/math.js"}],"node_modules/ol/style/Fill.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _util = require("../util.js");
+
+var _color = require("../color.js");
+
+/**
+ * @module ol/style/Fill
+ */
+
+/**
+ * @typedef {Object} Options
+ * @property {import("../color.js").Color|import("../colorlike.js").ColorLike} [color] A color, gradient or pattern.
+ * See {@link module:ol/color~Color} and {@link module:ol/colorlike~ColorLike} for possible formats.
+ * Default null; if null, the Canvas/renderer default black will be used.
+ */
+
+/**
+ * @classdesc
+ * Set fill style for vector features.
+ * @api
+ */
+var Fill = function Fill(opt_options) {
+  var options = opt_options || {};
+  /**
+   * @private
+   * @type {import("../color.js").Color|import("../colorlike.js").ColorLike}
+   */
+
+  this.color_ = options.color !== undefined ? options.color : null;
+  /**
+   * @private
+   * @type {string|undefined}
+   */
+
+  this.checksum_ = undefined;
+};
+/**
+ * Clones the style. The color is not cloned if it is an {@link module:ol/colorlike~ColorLike}.
+ * @return {Fill} The cloned style.
+ * @api
+ */
+
+
+Fill.prototype.clone = function clone() {
+  var color = this.getColor();
+  return new Fill({
+    color: Array.isArray(color) ? color.slice() : color || undefined
+  });
+};
+/**
+ * Get the fill color.
+ * @return {import("../color.js").Color|import("../colorlike.js").ColorLike} Color.
+ * @api
+ */
+
+
+Fill.prototype.getColor = function getColor() {
+  return this.color_;
+};
+/**
+ * Set the color.
+ *
+ * @param {import("../color.js").Color|import("../colorlike.js").ColorLike} color Color.
+ * @api
+ */
+
+
+Fill.prototype.setColor = function setColor(color) {
+  this.color_ = color;
+  this.checksum_ = undefined;
+};
+/**
+ * @return {string} The checksum.
+ */
+
+
+Fill.prototype.getChecksum = function getChecksum() {
+  if (this.checksum_ === undefined) {
+    var color = this.color_;
+
+    if (color) {
+      if (Array.isArray(color) || typeof color == 'string') {
+        this.checksum_ = 'f' + (0, _color.asString)(
+        /** @type {import("../color.js").Color|string} */
+        color);
+      } else {
+        this.checksum_ = (0, _util.getUid)(this.color_);
+      }
+    } else {
+      this.checksum_ = 'f-';
+    }
+  }
+
+  return this.checksum_;
+};
+
+var _default = Fill;
+exports.default = _default;
+},{"../util.js":"node_modules/ol/util.js","../color.js":"node_modules/ol/color.js"}],"node_modules/ol/style/Stroke.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _util = require("../util.js");
+
+/**
+ * @module ol/style/Stroke
+ */
+
+/**
+ * @typedef {Object} Options
+ * @property {import("../color.js").Color|import("../colorlike.js").ColorLike} [color] A color, gradient or pattern.
+ * See {@link module:ol/color~Color} and {@link module:ol/colorlike~ColorLike} for possible formats.
+ * Default null; if null, the Canvas/renderer default black will be used.
+ * @property {string} [lineCap='round'] Line cap style: `butt`, `round`, or `square`.
+ * @property {string} [lineJoin='round'] Line join style: `bevel`, `round`, or `miter`.
+ * @property {Array<number>} [lineDash] Line dash pattern. Default is `undefined` (no dash).
+ * Please note that Internet Explorer 10 and lower do not support the `setLineDash` method on
+ * the `CanvasRenderingContext2D` and therefore this option will have no visual effect in these browsers.
+ * @property {number} [lineDashOffset=0] Line dash offset.
+ * @property {number} [miterLimit=10] Miter limit.
+ * @property {number} [width] Width.
+ */
+
+/**
+ * @classdesc
+ * Set stroke style for vector features.
+ * Note that the defaults given are the Canvas defaults, which will be used if
+ * option is not defined. The `get` functions return whatever was entered in
+ * the options; they will not return the default.
+ * @api
+ */
+var Stroke = function Stroke(opt_options) {
+  var options = opt_options || {};
+  /**
+   * @private
+   * @type {import("../color.js").Color|import("../colorlike.js").ColorLike}
+   */
+
+  this.color_ = options.color !== undefined ? options.color : null;
+  /**
+   * @private
+   * @type {string|undefined}
+   */
+
+  this.lineCap_ = options.lineCap;
+  /**
+   * @private
+   * @type {Array<number>}
+   */
+
+  this.lineDash_ = options.lineDash !== undefined ? options.lineDash : null;
+  /**
+   * @private
+   * @type {number|undefined}
+   */
+
+  this.lineDashOffset_ = options.lineDashOffset;
+  /**
+   * @private
+   * @type {string|undefined}
+   */
+
+  this.lineJoin_ = options.lineJoin;
+  /**
+   * @private
+   * @type {number|undefined}
+   */
+
+  this.miterLimit_ = options.miterLimit;
+  /**
+   * @private
+   * @type {number|undefined}
+   */
+
+  this.width_ = options.width;
+  /**
+   * @private
+   * @type {string|undefined}
+   */
+
+  this.checksum_ = undefined;
+};
+/**
+ * Clones the style.
+ * @return {Stroke} The cloned style.
+ * @api
+ */
+
+
+Stroke.prototype.clone = function clone() {
+  var color = this.getColor();
+  return new Stroke({
+    color: Array.isArray(color) ? color.slice() : color || undefined,
+    lineCap: this.getLineCap(),
+    lineDash: this.getLineDash() ? this.getLineDash().slice() : undefined,
+    lineDashOffset: this.getLineDashOffset(),
+    lineJoin: this.getLineJoin(),
+    miterLimit: this.getMiterLimit(),
+    width: this.getWidth()
+  });
+};
+/**
+ * Get the stroke color.
+ * @return {import("../color.js").Color|import("../colorlike.js").ColorLike} Color.
+ * @api
+ */
+
+
+Stroke.prototype.getColor = function getColor() {
+  return this.color_;
+};
+/**
+ * Get the line cap type for the stroke.
+ * @return {string|undefined} Line cap.
+ * @api
+ */
+
+
+Stroke.prototype.getLineCap = function getLineCap() {
+  return this.lineCap_;
+};
+/**
+ * Get the line dash style for the stroke.
+ * @return {Array<number>} Line dash.
+ * @api
+ */
+
+
+Stroke.prototype.getLineDash = function getLineDash() {
+  return this.lineDash_;
+};
+/**
+ * Get the line dash offset for the stroke.
+ * @return {number|undefined} Line dash offset.
+ * @api
+ */
+
+
+Stroke.prototype.getLineDashOffset = function getLineDashOffset() {
+  return this.lineDashOffset_;
+};
+/**
+ * Get the line join type for the stroke.
+ * @return {string|undefined} Line join.
+ * @api
+ */
+
+
+Stroke.prototype.getLineJoin = function getLineJoin() {
+  return this.lineJoin_;
+};
+/**
+ * Get the miter limit for the stroke.
+ * @return {number|undefined} Miter limit.
+ * @api
+ */
+
+
+Stroke.prototype.getMiterLimit = function getMiterLimit() {
+  return this.miterLimit_;
+};
+/**
+ * Get the stroke width.
+ * @return {number|undefined} Width.
+ * @api
+ */
+
+
+Stroke.prototype.getWidth = function getWidth() {
+  return this.width_;
+};
+/**
+ * Set the color.
+ *
+ * @param {import("../color.js").Color|import("../colorlike.js").ColorLike} color Color.
+ * @api
+ */
+
+
+Stroke.prototype.setColor = function setColor(color) {
+  this.color_ = color;
+  this.checksum_ = undefined;
+};
+/**
+ * Set the line cap.
+ *
+ * @param {string|undefined} lineCap Line cap.
+ * @api
+ */
+
+
+Stroke.prototype.setLineCap = function setLineCap(lineCap) {
+  this.lineCap_ = lineCap;
+  this.checksum_ = undefined;
+};
+/**
+ * Set the line dash.
+ *
+ * Please note that Internet Explorer 10 and lower [do not support][mdn] the
+ * `setLineDash` method on the `CanvasRenderingContext2D` and therefore this
+ * property will have no visual effect in these browsers.
+ *
+ * [mdn]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setLineDash#Browser_compatibility
+ *
+ * @param {Array<number>} lineDash Line dash.
+ * @api
+ */
+
+
+Stroke.prototype.setLineDash = function setLineDash(lineDash) {
+  this.lineDash_ = lineDash;
+  this.checksum_ = undefined;
+};
+/**
+ * Set the line dash offset.
+ *
+ * @param {number|undefined} lineDashOffset Line dash offset.
+ * @api
+ */
+
+
+Stroke.prototype.setLineDashOffset = function setLineDashOffset(lineDashOffset) {
+  this.lineDashOffset_ = lineDashOffset;
+  this.checksum_ = undefined;
+};
+/**
+ * Set the line join.
+ *
+ * @param {string|undefined} lineJoin Line join.
+ * @api
+ */
+
+
+Stroke.prototype.setLineJoin = function setLineJoin(lineJoin) {
+  this.lineJoin_ = lineJoin;
+  this.checksum_ = undefined;
+};
+/**
+ * Set the miter limit.
+ *
+ * @param {number|undefined} miterLimit Miter limit.
+ * @api
+ */
+
+
+Stroke.prototype.setMiterLimit = function setMiterLimit(miterLimit) {
+  this.miterLimit_ = miterLimit;
+  this.checksum_ = undefined;
+};
+/**
+ * Set the width.
+ *
+ * @param {number|undefined} width Width.
+ * @api
+ */
+
+
+Stroke.prototype.setWidth = function setWidth(width) {
+  this.width_ = width;
+  this.checksum_ = undefined;
+};
+/**
+ * @return {string} The checksum.
+ */
+
+
+Stroke.prototype.getChecksum = function getChecksum() {
+  if (this.checksum_ === undefined) {
+    this.checksum_ = 's';
+
+    if (this.color_) {
+      if (typeof this.color_ === 'string') {
+        this.checksum_ += this.color_;
+      } else {
+        this.checksum_ += (0, _util.getUid)(this.color_);
+      }
+    } else {
+      this.checksum_ += '-';
+    }
+
+    this.checksum_ += ',' + (this.lineCap_ !== undefined ? this.lineCap_.toString() : '-') + ',' + (this.lineDash_ ? this.lineDash_.toString() : '-') + ',' + (this.lineDashOffset_ !== undefined ? this.lineDashOffset_ : '-') + ',' + (this.lineJoin_ !== undefined ? this.lineJoin_ : '-') + ',' + (this.miterLimit_ !== undefined ? this.miterLimit_.toString() : '-') + ',' + (this.width_ !== undefined ? this.width_.toString() : '-');
+  }
+
+  return this.checksum_;
+};
+
+var _default = Stroke;
+exports.default = _default;
+},{"../util.js":"node_modules/ol/util.js"}],"node_modules/ol/style/TextPlacement.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/style/TextPlacement
+ */
+
+/**
+ * Text placement. One of `'point'`, `'line'`. Default is `'point'`. Note that
+ * `'line'` requires the underlying geometry to be a {@link module:ol/geom/LineString~LineString},
+ * {@link module:ol/geom/Polygon~Polygon}, {@link module:ol/geom/MultiLineString~MultiLineString} or
+ * {@link module:ol/geom/MultiPolygon~MultiPolygon}.
+ * @enum {string}
+ */
+var _default = {
+  POINT: 'point',
+  LINE: 'line'
+};
+exports.default = _default;
+},{}],"node_modules/ol/style/Text.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _Fill = _interopRequireDefault(require("./Fill.js"));
+
+var _TextPlacement = _interopRequireDefault(require("./TextPlacement.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/style/Text
+ */
+
+/**
+ * The default fill color to use if no fill was set at construction time; a
+ * blackish `#333`.
+ *
+ * @const {string}
+ */
+var DEFAULT_FILL_COLOR = '#333';
+/**
+ * @typedef {Object} Options
+ * @property {string} [font] Font style as CSS 'font' value, see:
+ * https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/font. Default is '10px sans-serif'
+ * @property {number} [maxAngle] When `placement` is set to `'line'`, allow a maximum angle between adjacent characters.
+ * The expected value is in radians, and the default is 45° (`Math.PI / 4`).
+ * @property {number} [offsetX=0] Horizontal text offset in pixels. A positive will shift the text right.
+ * @property {number} [offsetY=0] Vertical text offset in pixels. A positive will shift the text down.
+ * @property {boolean} [overflow=false] For polygon labels or when `placement` is set to `'line'`, allow text to exceed
+ * the width of the polygon at the label position or the length of the path that it follows.
+ * @property {import("./TextPlacement.js").default|string} [placement] Text placement.
+ * @property {number} [scale] Scale.
+ * @property {boolean} [rotateWithView=false] Whether to rotate the text with the view.
+ * @property {number} [rotation=0] Rotation in radians (positive rotation clockwise).
+ * @property {string} [text] Text content.
+ * @property {string} [textAlign] Text alignment. Possible values: 'left', 'right', 'center', 'end' or 'start'.
+ * Default is 'center' for `placement: 'point'`. For `placement: 'line'`, the default is to let the renderer choose a
+ * placement where `maxAngle` is not exceeded.
+ * @property {string} [textBaseline='middle'] Text base line. Possible values: 'bottom', 'top', 'middle', 'alphabetic',
+ * 'hanging', 'ideographic'.
+ * @property {import("./Fill.js").default} [fill] Fill style. If none is provided, we'll use a dark fill-style (#333).
+ * @property {import("./Stroke.js").default} [stroke] Stroke style.
+ * @property {import("./Fill.js").default} [backgroundFill] Fill style for the text background when `placement` is
+ * `'point'`. Default is no fill.
+ * @property {import("./Stroke.js").default} [backgroundStroke] Stroke style for the text background  when `placement`
+ * is `'point'`. Default is no stroke.
+ * @property {Array<number>} [padding=[0, 0, 0, 0]] Padding in pixels around the text for decluttering and background. The order of
+ * values in the array is `[top, right, bottom, left]`.
+ */
+
+/**
+ * @classdesc
+ * Set text style for vector features.
+ * @api
+ */
+
+var Text = function Text(opt_options) {
+  var options = opt_options || {};
+  /**
+  * @private
+  * @type {string|undefined}
+  */
+
+  this.font_ = options.font;
+  /**
+  * @private
+  * @type {number|undefined}
+  */
+
+  this.rotation_ = options.rotation;
+  /**
+  * @private
+  * @type {boolean|undefined}
+  */
+
+  this.rotateWithView_ = options.rotateWithView;
+  /**
+  * @private
+  * @type {number|undefined}
+  */
+
+  this.scale_ = options.scale;
+  /**
+  * @private
+  * @type {string|undefined}
+  */
+
+  this.text_ = options.text;
+  /**
+  * @private
+  * @type {string|undefined}
+  */
+
+  this.textAlign_ = options.textAlign;
+  /**
+  * @private
+  * @type {string|undefined}
+  */
+
+  this.textBaseline_ = options.textBaseline;
+  /**
+  * @private
+  * @type {import("./Fill.js").default}
+  */
+
+  this.fill_ = options.fill !== undefined ? options.fill : new _Fill.default({
+    color: DEFAULT_FILL_COLOR
+  });
+  /**
+  * @private
+  * @type {number}
+  */
+
+  this.maxAngle_ = options.maxAngle !== undefined ? options.maxAngle : Math.PI / 4;
+  /**
+  * @private
+  * @type {import("./TextPlacement.js").default|string}
+  */
+
+  this.placement_ = options.placement !== undefined ? options.placement : _TextPlacement.default.POINT;
+  /**
+  * @private
+  * @type {boolean}
+  */
+
+  this.overflow_ = !!options.overflow;
+  /**
+  * @private
+  * @type {import("./Stroke.js").default}
+  */
+
+  this.stroke_ = options.stroke !== undefined ? options.stroke : null;
+  /**
+  * @private
+  * @type {number}
+  */
+
+  this.offsetX_ = options.offsetX !== undefined ? options.offsetX : 0;
+  /**
+  * @private
+  * @type {number}
+  */
+
+  this.offsetY_ = options.offsetY !== undefined ? options.offsetY : 0;
+  /**
+  * @private
+  * @type {import("./Fill.js").default}
+  */
+
+  this.backgroundFill_ = options.backgroundFill ? options.backgroundFill : null;
+  /**
+  * @private
+  * @type {import("./Stroke.js").default}
+  */
+
+  this.backgroundStroke_ = options.backgroundStroke ? options.backgroundStroke : null;
+  /**
+  * @private
+  * @type {Array<number>}
+  */
+
+  this.padding_ = options.padding === undefined ? null : options.padding;
+};
+/**
+* Clones the style.
+* @return {Text} The cloned style.
+* @api
+*/
+
+
+Text.prototype.clone = function clone() {
+  return new Text({
+    font: this.getFont(),
+    placement: this.getPlacement(),
+    maxAngle: this.getMaxAngle(),
+    overflow: this.getOverflow(),
+    rotation: this.getRotation(),
+    rotateWithView: this.getRotateWithView(),
+    scale: this.getScale(),
+    text: this.getText(),
+    textAlign: this.getTextAlign(),
+    textBaseline: this.getTextBaseline(),
+    fill: this.getFill() ? this.getFill().clone() : undefined,
+    stroke: this.getStroke() ? this.getStroke().clone() : undefined,
+    offsetX: this.getOffsetX(),
+    offsetY: this.getOffsetY(),
+    backgroundFill: this.getBackgroundFill() ? this.getBackgroundFill().clone() : undefined,
+    backgroundStroke: this.getBackgroundStroke() ? this.getBackgroundStroke().clone() : undefined
+  });
+};
+/**
+* Get the `overflow` configuration.
+* @return {boolean} Let text overflow the length of the path they follow.
+* @api
+*/
+
+
+Text.prototype.getOverflow = function getOverflow() {
+  return this.overflow_;
+};
+/**
+* Get the font name.
+* @return {string|undefined} Font.
+* @api
+*/
+
+
+Text.prototype.getFont = function getFont() {
+  return this.font_;
+};
+/**
+* Get the maximum angle between adjacent characters.
+* @return {number} Angle in radians.
+* @api
+*/
+
+
+Text.prototype.getMaxAngle = function getMaxAngle() {
+  return this.maxAngle_;
+};
+/**
+* Get the label placement.
+* @return {import("./TextPlacement.js").default|string} Text placement.
+* @api
+*/
+
+
+Text.prototype.getPlacement = function getPlacement() {
+  return this.placement_;
+};
+/**
+* Get the x-offset for the text.
+* @return {number} Horizontal text offset.
+* @api
+*/
+
+
+Text.prototype.getOffsetX = function getOffsetX() {
+  return this.offsetX_;
+};
+/**
+* Get the y-offset for the text.
+* @return {number} Vertical text offset.
+* @api
+*/
+
+
+Text.prototype.getOffsetY = function getOffsetY() {
+  return this.offsetY_;
+};
+/**
+* Get the fill style for the text.
+* @return {import("./Fill.js").default} Fill style.
+* @api
+*/
+
+
+Text.prototype.getFill = function getFill() {
+  return this.fill_;
+};
+/**
+* Determine whether the text rotates with the map.
+* @return {boolean|undefined} Rotate with map.
+* @api
+*/
+
+
+Text.prototype.getRotateWithView = function getRotateWithView() {
+  return this.rotateWithView_;
+};
+/**
+* Get the text rotation.
+* @return {number|undefined} Rotation.
+* @api
+*/
+
+
+Text.prototype.getRotation = function getRotation() {
+  return this.rotation_;
+};
+/**
+* Get the text scale.
+* @return {number|undefined} Scale.
+* @api
+*/
+
+
+Text.prototype.getScale = function getScale() {
+  return this.scale_;
+};
+/**
+* Get the stroke style for the text.
+* @return {import("./Stroke.js").default} Stroke style.
+* @api
+*/
+
+
+Text.prototype.getStroke = function getStroke() {
+  return this.stroke_;
+};
+/**
+* Get the text to be rendered.
+* @return {string|undefined} Text.
+* @api
+*/
+
+
+Text.prototype.getText = function getText() {
+  return this.text_;
+};
+/**
+* Get the text alignment.
+* @return {string|undefined} Text align.
+* @api
+*/
+
+
+Text.prototype.getTextAlign = function getTextAlign() {
+  return this.textAlign_;
+};
+/**
+* Get the text baseline.
+* @return {string|undefined} Text baseline.
+* @api
+*/
+
+
+Text.prototype.getTextBaseline = function getTextBaseline() {
+  return this.textBaseline_;
+};
+/**
+* Get the background fill style for the text.
+* @return {import("./Fill.js").default} Fill style.
+* @api
+*/
+
+
+Text.prototype.getBackgroundFill = function getBackgroundFill() {
+  return this.backgroundFill_;
+};
+/**
+* Get the background stroke style for the text.
+* @return {import("./Stroke.js").default} Stroke style.
+* @api
+*/
+
+
+Text.prototype.getBackgroundStroke = function getBackgroundStroke() {
+  return this.backgroundStroke_;
+};
+/**
+* Get the padding for the text.
+* @return {Array<number>} Padding.
+* @api
+*/
+
+
+Text.prototype.getPadding = function getPadding() {
+  return this.padding_;
+};
+/**
+* Set the `overflow` property.
+*
+* @param {boolean} overflow Let text overflow the path that it follows.
+* @api
+*/
+
+
+Text.prototype.setOverflow = function setOverflow(overflow) {
+  this.overflow_ = overflow;
+};
+/**
+* Set the font.
+*
+* @param {string|undefined} font Font.
+* @api
+*/
+
+
+Text.prototype.setFont = function setFont(font) {
+  this.font_ = font;
+};
+/**
+* Set the maximum angle between adjacent characters.
+*
+* @param {number} maxAngle Angle in radians.
+* @api
+*/
+
+
+Text.prototype.setMaxAngle = function setMaxAngle(maxAngle) {
+  this.maxAngle_ = maxAngle;
+};
+/**
+* Set the x offset.
+*
+* @param {number} offsetX Horizontal text offset.
+* @api
+*/
+
+
+Text.prototype.setOffsetX = function setOffsetX(offsetX) {
+  this.offsetX_ = offsetX;
+};
+/**
+* Set the y offset.
+*
+* @param {number} offsetY Vertical text offset.
+* @api
+*/
+
+
+Text.prototype.setOffsetY = function setOffsetY(offsetY) {
+  this.offsetY_ = offsetY;
+};
+/**
+* Set the text placement.
+*
+* @param {import("./TextPlacement.js").default|string} placement Placement.
+* @api
+*/
+
+
+Text.prototype.setPlacement = function setPlacement(placement) {
+  this.placement_ = placement;
+};
+/**
+* Set the fill.
+*
+* @param {import("./Fill.js").default} fill Fill style.
+* @api
+*/
+
+
+Text.prototype.setFill = function setFill(fill) {
+  this.fill_ = fill;
+};
+/**
+* Set the rotation.
+*
+* @param {number|undefined} rotation Rotation.
+* @api
+*/
+
+
+Text.prototype.setRotation = function setRotation(rotation) {
+  this.rotation_ = rotation;
+};
+/**
+* Set the scale.
+*
+* @param {number|undefined} scale Scale.
+* @api
+*/
+
+
+Text.prototype.setScale = function setScale(scale) {
+  this.scale_ = scale;
+};
+/**
+* Set the stroke.
+*
+* @param {import("./Stroke.js").default} stroke Stroke style.
+* @api
+*/
+
+
+Text.prototype.setStroke = function setStroke(stroke) {
+  this.stroke_ = stroke;
+};
+/**
+* Set the text.
+*
+* @param {string|undefined} text Text.
+* @api
+*/
+
+
+Text.prototype.setText = function setText(text) {
+  this.text_ = text;
+};
+/**
+* Set the text alignment.
+*
+* @param {string|undefined} textAlign Text align.
+* @api
+*/
+
+
+Text.prototype.setTextAlign = function setTextAlign(textAlign) {
+  this.textAlign_ = textAlign;
+};
+/**
+* Set the text baseline.
+*
+* @param {string|undefined} textBaseline Text baseline.
+* @api
+*/
+
+
+Text.prototype.setTextBaseline = function setTextBaseline(textBaseline) {
+  this.textBaseline_ = textBaseline;
+};
+/**
+* Set the background fill.
+*
+* @param {import("./Fill.js").default} fill Fill style.
+* @api
+*/
+
+
+Text.prototype.setBackgroundFill = function setBackgroundFill(fill) {
+  this.backgroundFill_ = fill;
+};
+/**
+* Set the background stroke.
+*
+* @param {import("./Stroke.js").default} stroke Stroke style.
+* @api
+*/
+
+
+Text.prototype.setBackgroundStroke = function setBackgroundStroke(stroke) {
+  this.backgroundStroke_ = stroke;
+};
+/**
+* Set the padding (`[top, right, bottom, left]`).
+*
+* @param {!Array<number>} padding Padding.
+* @api
+*/
+
+
+Text.prototype.setPadding = function setPadding(padding) {
+  this.padding_ = padding;
+};
+
+var _default = Text;
+exports.default = _default;
+},{"./Fill.js":"node_modules/ol/style/Fill.js","./TextPlacement.js":"node_modules/ol/style/TextPlacement.js"}],"node_modules/ol/Graticule.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _coordinate = require("./coordinate.js");
+
+var _events = require("./events.js");
+
+var _extent = require("./extent.js");
+
+var _GeometryLayout = _interopRequireDefault(require("./geom/GeometryLayout.js"));
+
+var _LineString = _interopRequireDefault(require("./geom/LineString.js"));
+
+var _Point = _interopRequireDefault(require("./geom/Point.js"));
+
+var _geodesic = require("./geom/flat/geodesic.js");
+
+var _math = require("./math.js");
+
+var _proj = require("./proj.js");
+
+var _EventType = _interopRequireDefault(require("./render/EventType.js"));
+
+var _Fill = _interopRequireDefault(require("./style/Fill.js"));
+
+var _Stroke = _interopRequireDefault(require("./style/Stroke.js"));
+
+var _Text = _interopRequireDefault(require("./style/Text.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/Graticule
+ */
+
+/**
+ * @type {Stroke}
+ * @private
+ * @const
+ */
+var DEFAULT_STROKE_STYLE = new _Stroke.default({
+  color: 'rgba(0,0,0,0.2)'
+});
+/**
+ * @type {Array<number>}
+ * @private
+ */
+
+var INTERVALS = [90, 45, 30, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1, 0.05, 0.01, 0.005, 0.002, 0.001];
+/**
+ * @typedef {Object} GraticuleLabelDataType
+ * @property {Point} geom
+ * @property {string} text
+ */
+
+/**
+ * @typedef {Object} Options
+ * @property {import("./PluggableMap.js").default} [map] Reference to an
+ * {@link module:ol/Map~Map} object.
+ * @property {number} [maxLines=100] The maximum number of meridians and
+ * parallels from the center of the map. The default value of 100 means that at
+ * most 200 meridians and 200 parallels will be displayed. The default value is
+ * appropriate for conformal projections like Spherical Mercator. If you
+ * increase the value, more lines will be drawn and the drawing performance will
+ * decrease.
+ * @property {Stroke} [strokeStyle='rgba(0,0,0,0.2)'] The
+ * stroke style to use for drawing the graticule. If not provided, a not fully
+ * opaque black will be used.
+ * @property {number} [targetSize=100] The target size of the graticule cells,
+ * in pixels.
+ * @property {boolean} [showLabels=false] Render a label with the respective
+ * latitude/longitude for each graticule line.
+ * @property {function(number):string} [lonLabelFormatter] Label formatter for
+ * longitudes. This function is called with the longitude as argument, and
+ * should return a formatted string representing the longitude. By default,
+ * labels are formatted as degrees, minutes, seconds and hemisphere.
+ * @property {function(number):string} [latLabelFormatter] Label formatter for
+ * latitudes. This function is called with the latitude as argument, and
+ * should return a formatted string representing the latitude. By default,
+ * labels are formatted as degrees, minutes, seconds and hemisphere.
+ * @property {number} [lonLabelPosition=0] Longitude label position in fractions
+ * (0..1) of view extent. 0 means at the bottom of the viewport, 1 means at the
+ * top.
+ * @property {number} [latLabelPosition=1] Latitude label position in fractions
+ * (0..1) of view extent. 0 means at the left of the viewport, 1 means at the
+ * right.
+ * @property {Text} [lonLabelStyle] Longitude label text
+ * style. If not provided, the following style will be used:
+ * ```js
+ * new Text({
+ *   font: '12px Calibri,sans-serif',
+ *   textBaseline: 'bottom',
+ *   fill: new Fill({
+ *     color: 'rgba(0,0,0,1)'
+ *   }),
+ *   stroke: new Stroke({
+ *     color: 'rgba(255,255,255,1)',
+ *     width: 3
+ *   })
+ * });
+ * ```
+ * Note that the default's `textBaseline` configuration will not work well for
+ * `lonLabelPosition` configurations that position labels close to the top of
+ * the viewport.
+ * @property {Text} [latLabelStyle] Latitude label text style.
+ * If not provided, the following style will be used:
+ * ```js
+ * new Text({
+ *   font: '12px Calibri,sans-serif',
+ *   textAlign: 'end',
+ *   fill: new Fill({
+ *     color: 'rgba(0,0,0,1)'
+ *   }),
+ *   stroke: Stroke({
+ *     color: 'rgba(255,255,255,1)',
+ *     width: 3
+ *   })
+ * });
+ * ```
+ * Note that the default's `textAlign` configuration will not work well for
+ * `latLabelPosition` configurations that position labels close to the left of
+ * the viewport.
+ * @property {Array<number>} [intervals=[90, 45, 30, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1, 0.05, 0.01, 0.005, 0.002, 0.001]]
+ * Intervals (in degrees) for the graticule. Example to limit graticules to 30 and 10 degrees intervals:
+ * ```js
+ * [30, 10]
+ * ```
+ */
+
+/**
+ * Render a grid for a coordinate system on a map.
+ * @api
+ */
+
+var Graticule = function Graticule(opt_options) {
+  var options = opt_options || {};
+  /**
+   * @type {import("./PluggableMap.js").default}
+   * @private
+   */
+
+  this.map_ = null;
+  /**
+   * @type {?import("./events.js").EventsKey}
+   * @private
+   */
+
+  this.postcomposeListenerKey_ = null;
+  /**
+   * @type {import("./proj/Projection.js").default}
+   */
+
+  this.projection_ = null;
+  /**
+   * @type {number}
+   * @private
+   */
+
+  this.maxLat_ = Infinity;
+  /**
+   * @type {number}
+   * @private
+   */
+
+  this.maxLon_ = Infinity;
+  /**
+   * @type {number}
+   * @private
+   */
+
+  this.minLat_ = -Infinity;
+  /**
+   * @type {number}
+   * @private
+   */
+
+  this.minLon_ = -Infinity;
+  /**
+   * @type {number}
+   * @private
+   */
+
+  this.maxLatP_ = Infinity;
+  /**
+   * @type {number}
+   * @private
+   */
+
+  this.maxLonP_ = Infinity;
+  /**
+   * @type {number}
+   * @private
+   */
+
+  this.minLatP_ = -Infinity;
+  /**
+   * @type {number}
+   * @private
+   */
+
+  this.minLonP_ = -Infinity;
+  /**
+   * @type {number}
+   * @private
+   */
+
+  this.targetSize_ = options.targetSize !== undefined ? options.targetSize : 100;
+  /**
+   * @type {number}
+   * @private
+   */
+
+  this.maxLines_ = options.maxLines !== undefined ? options.maxLines : 100;
+  /**
+   * @type {Array<LineString>}
+   * @private
+   */
+
+  this.meridians_ = [];
+  /**
+   * @type {Array<LineString>}
+   * @private
+   */
+
+  this.parallels_ = [];
+  /**
+   * @type {Stroke}
+   * @private
+   */
+
+  this.strokeStyle_ = options.strokeStyle !== undefined ? options.strokeStyle : DEFAULT_STROKE_STYLE;
+  /**
+   * @type {import("./proj.js").TransformFunction|undefined}
+   * @private
+   */
+
+  this.fromLonLatTransform_ = undefined;
+  /**
+   * @type {import("./proj.js").TransformFunction|undefined}
+   * @private
+   */
+
+  this.toLonLatTransform_ = undefined;
+  /**
+   * @type {import("./coordinate.js").Coordinate}
+   * @private
+   */
+
+  this.projectionCenterLonLat_ = null;
+  /**
+   * @type {Array<GraticuleLabelDataType>}
+   * @private
+   */
+
+  this.meridiansLabels_ = null;
+  /**
+   * @type {Array<GraticuleLabelDataType>}
+   * @private
+   */
+
+  this.parallelsLabels_ = null;
+
+  if (options.showLabels == true) {
+    /**
+     * @type {null|function(number):string}
+     * @private
+     */
+    this.lonLabelFormatter_ = options.lonLabelFormatter == undefined ? _coordinate.degreesToStringHDMS.bind(this, 'EW') : options.lonLabelFormatter;
+    /**
+     * @type {function(number):string}
+     * @private
+     */
+
+    this.latLabelFormatter_ = options.latLabelFormatter == undefined ? _coordinate.degreesToStringHDMS.bind(this, 'NS') : options.latLabelFormatter;
+    /**
+     * Longitude label position in fractions (0..1) of view extent. 0 means
+     * bottom, 1 means top.
+     * @type {number}
+     * @private
+     */
+
+    this.lonLabelPosition_ = options.lonLabelPosition == undefined ? 0 : options.lonLabelPosition;
+    /**
+     * Latitude Label position in fractions (0..1) of view extent. 0 means left, 1
+     * means right.
+     * @type {number}
+     * @private
+     */
+
+    this.latLabelPosition_ = options.latLabelPosition == undefined ? 1 : options.latLabelPosition;
+    /**
+     * @type {Text}
+     * @private
+     */
+
+    this.lonLabelStyle_ = options.lonLabelStyle !== undefined ? options.lonLabelStyle : new _Text.default({
+      font: '12px Calibri,sans-serif',
+      textBaseline: 'bottom',
+      fill: new _Fill.default({
+        color: 'rgba(0,0,0,1)'
+      }),
+      stroke: new _Stroke.default({
+        color: 'rgba(255,255,255,1)',
+        width: 3
+      })
+    });
+    /**
+     * @type {Text}
+     * @private
+     */
+
+    this.latLabelStyle_ = options.latLabelStyle !== undefined ? options.latLabelStyle : new _Text.default({
+      font: '12px Calibri,sans-serif',
+      textAlign: 'end',
+      fill: new _Fill.default({
+        color: 'rgba(0,0,0,1)'
+      }),
+      stroke: new _Stroke.default({
+        color: 'rgba(255,255,255,1)',
+        width: 3
+      })
+    });
+    this.meridiansLabels_ = [];
+    this.parallelsLabels_ = [];
+  }
+  /**
+   * @type {Array<number>}
+   * @private
+   */
+
+
+  this.intervals_ = options.intervals !== undefined ? options.intervals : INTERVALS;
+  this.setMap(options.map !== undefined ? options.map : null);
+};
+/**
+ * @param {number} lon Longitude.
+ * @param {number} minLat Minimal latitude.
+ * @param {number} maxLat Maximal latitude.
+ * @param {number} squaredTolerance Squared tolerance.
+ * @param {import("./extent.js").Extent} extent Extent.
+ * @param {number} index Index.
+ * @return {number} Index.
+ * @private
+ */
+
+
+Graticule.prototype.addMeridian_ = function addMeridian_(lon, minLat, maxLat, squaredTolerance, extent, index) {
+  var lineString = this.getMeridian_(lon, minLat, maxLat, squaredTolerance, index);
+
+  if ((0, _extent.intersects)(lineString.getExtent(), extent)) {
+    if (this.meridiansLabels_) {
+      var textPoint = this.getMeridianPoint_(lineString, extent, index);
+      this.meridiansLabels_[index] = {
+        geom: textPoint,
+        text: this.lonLabelFormatter_(lon)
+      };
+    }
+
+    this.meridians_[index++] = lineString;
+  }
+
+  return index;
+};
+/**
+ * @param {LineString} lineString Meridian
+ * @param {import("./extent.js").Extent} extent Extent.
+ * @param {number} index Index.
+ * @return {Point} Meridian point.
+ * @private
+ */
+
+
+Graticule.prototype.getMeridianPoint_ = function getMeridianPoint_(lineString, extent, index) {
+  var flatCoordinates = lineString.getFlatCoordinates();
+  var clampedBottom = Math.max(extent[1], flatCoordinates[1]);
+  var clampedTop = Math.min(extent[3], flatCoordinates[flatCoordinates.length - 1]);
+  var lat = (0, _math.clamp)(extent[1] + Math.abs(extent[1] - extent[3]) * this.lonLabelPosition_, clampedBottom, clampedTop);
+  var coordinate = [flatCoordinates[0], lat];
+  var point;
+
+  if (index in this.meridiansLabels_) {
+    point = this.meridiansLabels_[index].geom;
+    point.setCoordinates(coordinate);
+  } else {
+    point = new _Point.default(coordinate);
+  }
+
+  return point;
+};
+/**
+ * @param {number} lat Latitude.
+ * @param {number} minLon Minimal longitude.
+ * @param {number} maxLon Maximal longitude.
+ * @param {number} squaredTolerance Squared tolerance.
+ * @param {import("./extent.js").Extent} extent Extent.
+ * @param {number} index Index.
+ * @return {number} Index.
+ * @private
+ */
+
+
+Graticule.prototype.addParallel_ = function addParallel_(lat, minLon, maxLon, squaredTolerance, extent, index) {
+  var lineString = this.getParallel_(lat, minLon, maxLon, squaredTolerance, index);
+
+  if ((0, _extent.intersects)(lineString.getExtent(), extent)) {
+    if (this.parallelsLabels_) {
+      var textPoint = this.getParallelPoint_(lineString, extent, index);
+      this.parallelsLabels_[index] = {
+        geom: textPoint,
+        text: this.latLabelFormatter_(lat)
+      };
+    }
+
+    this.parallels_[index++] = lineString;
+  }
+
+  return index;
+};
+/**
+ * @param {LineString} lineString Parallels.
+ * @param {import("./extent.js").Extent} extent Extent.
+ * @param {number} index Index.
+ * @return {Point} Parallel point.
+ * @private
+ */
+
+
+Graticule.prototype.getParallelPoint_ = function getParallelPoint_(lineString, extent, index) {
+  var flatCoordinates = lineString.getFlatCoordinates();
+  var clampedLeft = Math.max(extent[0], flatCoordinates[0]);
+  var clampedRight = Math.min(extent[2], flatCoordinates[flatCoordinates.length - 2]);
+  var lon = (0, _math.clamp)(extent[0] + Math.abs(extent[0] - extent[2]) * this.latLabelPosition_, clampedLeft, clampedRight);
+  var coordinate = [lon, flatCoordinates[1]];
+  var point;
+
+  if (index in this.parallelsLabels_) {
+    point = this.parallelsLabels_[index].geom;
+    point.setCoordinates(coordinate);
+  } else {
+    point = new _Point.default(coordinate);
+  }
+
+  return point;
+};
+/**
+ * @param {import("./extent.js").Extent} extent Extent.
+ * @param {import("./coordinate.js").Coordinate} center Center.
+ * @param {number} resolution Resolution.
+ * @param {number} squaredTolerance Squared tolerance.
+ * @private
+ */
+
+
+Graticule.prototype.createGraticule_ = function createGraticule_(extent, center, resolution, squaredTolerance) {
+  var interval = this.getInterval_(resolution);
+
+  if (interval == -1) {
+    this.meridians_.length = this.parallels_.length = 0;
+
+    if (this.meridiansLabels_) {
+      this.meridiansLabels_.length = 0;
+    }
+
+    if (this.parallelsLabels_) {
+      this.parallelsLabels_.length = 0;
+    }
+
+    return;
+  }
+
+  var centerLonLat = this.toLonLatTransform_(center);
+  var centerLon = centerLonLat[0];
+  var centerLat = centerLonLat[1];
+  var maxLines = this.maxLines_;
+  var cnt, idx, lat, lon;
+  var validExtent = [Math.max(extent[0], this.minLonP_), Math.max(extent[1], this.minLatP_), Math.min(extent[2], this.maxLonP_), Math.min(extent[3], this.maxLatP_)];
+  validExtent = (0, _proj.transformExtent)(validExtent, this.projection_, 'EPSG:4326');
+  var maxLat = validExtent[3];
+  var maxLon = validExtent[2];
+  var minLat = validExtent[1];
+  var minLon = validExtent[0]; // Create meridians
+
+  centerLon = Math.floor(centerLon / interval) * interval;
+  lon = (0, _math.clamp)(centerLon, this.minLon_, this.maxLon_);
+  idx = this.addMeridian_(lon, minLat, maxLat, squaredTolerance, extent, 0);
+  cnt = 0;
+
+  while (lon != this.minLon_ && cnt++ < maxLines) {
+    lon = Math.max(lon - interval, this.minLon_);
+    idx = this.addMeridian_(lon, minLat, maxLat, squaredTolerance, extent, idx);
+  }
+
+  lon = (0, _math.clamp)(centerLon, this.minLon_, this.maxLon_);
+  cnt = 0;
+
+  while (lon != this.maxLon_ && cnt++ < maxLines) {
+    lon = Math.min(lon + interval, this.maxLon_);
+    idx = this.addMeridian_(lon, minLat, maxLat, squaredTolerance, extent, idx);
+  }
+
+  this.meridians_.length = idx;
+
+  if (this.meridiansLabels_) {
+    this.meridiansLabels_.length = idx;
+  } // Create parallels
+
+
+  centerLat = Math.floor(centerLat / interval) * interval;
+  lat = (0, _math.clamp)(centerLat, this.minLat_, this.maxLat_);
+  idx = this.addParallel_(lat, minLon, maxLon, squaredTolerance, extent, 0);
+  cnt = 0;
+
+  while (lat != this.minLat_ && cnt++ < maxLines) {
+    lat = Math.max(lat - interval, this.minLat_);
+    idx = this.addParallel_(lat, minLon, maxLon, squaredTolerance, extent, idx);
+  }
+
+  lat = (0, _math.clamp)(centerLat, this.minLat_, this.maxLat_);
+  cnt = 0;
+
+  while (lat != this.maxLat_ && cnt++ < maxLines) {
+    lat = Math.min(lat + interval, this.maxLat_);
+    idx = this.addParallel_(lat, minLon, maxLon, squaredTolerance, extent, idx);
+  }
+
+  this.parallels_.length = idx;
+
+  if (this.parallelsLabels_) {
+    this.parallelsLabels_.length = idx;
+  }
+};
+/**
+ * @param {number} resolution Resolution.
+ * @return {number} The interval in degrees.
+ * @private
+ */
+
+
+Graticule.prototype.getInterval_ = function getInterval_(resolution) {
+  var centerLon = this.projectionCenterLonLat_[0];
+  var centerLat = this.projectionCenterLonLat_[1];
+  var interval = -1;
+  var target = Math.pow(this.targetSize_ * resolution, 2);
+  /** @type {Array<number>} **/
+
+  var p1 = [];
+  /** @type {Array<number>} **/
+
+  var p2 = [];
+
+  for (var i = 0, ii = this.intervals_.length; i < ii; ++i) {
+    var delta = this.intervals_[i] / 2;
+    p1[0] = centerLon - delta;
+    p1[1] = centerLat - delta;
+    p2[0] = centerLon + delta;
+    p2[1] = centerLat + delta;
+    this.fromLonLatTransform_(p1, p1);
+    this.fromLonLatTransform_(p2, p2);
+    var dist = Math.pow(p2[0] - p1[0], 2) + Math.pow(p2[1] - p1[1], 2);
+
+    if (dist <= target) {
+      break;
+    }
+
+    interval = this.intervals_[i];
+  }
+
+  return interval;
+};
+/**
+ * Get the map associated with this graticule.
+ * @return {import("./PluggableMap.js").default} The map.
+ * @api
+ */
+
+
+Graticule.prototype.getMap = function getMap() {
+  return this.map_;
+};
+/**
+ * @param {number} lon Longitude.
+ * @param {number} minLat Minimal latitude.
+ * @param {number} maxLat Maximal latitude.
+ * @param {number} squaredTolerance Squared tolerance.
+ * @return {LineString} The meridian line string.
+ * @param {number} index Index.
+ * @private
+ */
+
+
+Graticule.prototype.getMeridian_ = function getMeridian_(lon, minLat, maxLat, squaredTolerance, index) {
+  var flatCoordinates = (0, _geodesic.meridian)(lon, minLat, maxLat, this.projection_, squaredTolerance);
+  var lineString = this.meridians_[index];
+
+  if (!lineString) {
+    lineString = this.meridians_[index] = new _LineString.default(flatCoordinates, _GeometryLayout.default.XY);
+  } else {
+    lineString.setFlatCoordinates(_GeometryLayout.default.XY, flatCoordinates);
+    lineString.changed();
+  }
+
+  return lineString;
+};
+/**
+ * Get the list of meridians.Meridians are lines of equal longitude.
+ * @return {Array<LineString>} The meridians.
+ * @api
+ */
+
+
+Graticule.prototype.getMeridians = function getMeridians() {
+  return this.meridians_;
+};
+/**
+ * @param {number} lat Latitude.
+ * @param {number} minLon Minimal longitude.
+ * @param {number} maxLon Maximal longitude.
+ * @param {number} squaredTolerance Squared tolerance.
+ * @return {LineString} The parallel line string.
+ * @param {number} index Index.
+ * @private
+ */
+
+
+Graticule.prototype.getParallel_ = function getParallel_(lat, minLon, maxLon, squaredTolerance, index) {
+  var flatCoordinates = (0, _geodesic.parallel)(lat, minLon, maxLon, this.projection_, squaredTolerance);
+  var lineString = this.parallels_[index];
+
+  if (!lineString) {
+    lineString = new _LineString.default(flatCoordinates, _GeometryLayout.default.XY);
+  } else {
+    lineString.setFlatCoordinates(_GeometryLayout.default.XY, flatCoordinates);
+    lineString.changed();
+  }
+
+  return lineString;
+};
+/**
+ * Get the list of parallels.Parallels are lines of equal latitude.
+ * @return {Array<LineString>} The parallels.
+ * @api
+ */
+
+
+Graticule.prototype.getParallels = function getParallels() {
+  return this.parallels_;
+};
+/**
+ * @param {import("./render/Event.js").default} e Event.
+ * @private
+ */
+
+
+Graticule.prototype.handlePostCompose_ = function handlePostCompose_(e) {
+  var vectorContext = e.vectorContext;
+  var frameState = e.frameState;
+  var extent = frameState.extent;
+  var viewState = frameState.viewState;
+  var center = viewState.center;
+  var projection = viewState.projection;
+  var resolution = viewState.resolution;
+  var pixelRatio = frameState.pixelRatio;
+  var squaredTolerance = resolution * resolution / (4 * pixelRatio * pixelRatio);
+  var updateProjectionInfo = !this.projection_ || !(0, _proj.equivalent)(this.projection_, projection);
+
+  if (updateProjectionInfo) {
+    this.updateProjectionInfo_(projection);
+  }
+
+  this.createGraticule_(extent, center, resolution, squaredTolerance); // Draw the lines
+
+  vectorContext.setFillStrokeStyle(null, this.strokeStyle_);
+  var i, l, line;
+
+  for (i = 0, l = this.meridians_.length; i < l; ++i) {
+    line = this.meridians_[i];
+    vectorContext.drawGeometry(line);
+  }
+
+  for (i = 0, l = this.parallels_.length; i < l; ++i) {
+    line = this.parallels_[i];
+    vectorContext.drawGeometry(line);
+  }
+
+  var labelData;
+
+  if (this.meridiansLabels_) {
+    for (i = 0, l = this.meridiansLabels_.length; i < l; ++i) {
+      labelData = this.meridiansLabels_[i];
+      this.lonLabelStyle_.setText(labelData.text);
+      vectorContext.setTextStyle(this.lonLabelStyle_);
+      vectorContext.drawGeometry(labelData.geom);
+    }
+  }
+
+  if (this.parallelsLabels_) {
+    for (i = 0, l = this.parallelsLabels_.length; i < l; ++i) {
+      labelData = this.parallelsLabels_[i];
+      this.latLabelStyle_.setText(labelData.text);
+      vectorContext.setTextStyle(this.latLabelStyle_);
+      vectorContext.drawGeometry(labelData.geom);
+    }
+  }
+};
+/**
+ * @param {import("./proj/Projection.js").default} projection Projection.
+ * @private
+ */
+
+
+Graticule.prototype.updateProjectionInfo_ = function updateProjectionInfo_(projection) {
+  var epsg4326Projection = (0, _proj.get)('EPSG:4326');
+  var worldExtent = projection.getWorldExtent();
+  var worldExtentP = (0, _proj.transformExtent)(worldExtent, epsg4326Projection, projection);
+  this.maxLat_ = worldExtent[3];
+  this.maxLon_ = worldExtent[2];
+  this.minLat_ = worldExtent[1];
+  this.minLon_ = worldExtent[0];
+  this.maxLatP_ = worldExtentP[3];
+  this.maxLonP_ = worldExtentP[2];
+  this.minLatP_ = worldExtentP[1];
+  this.minLonP_ = worldExtentP[0];
+  this.fromLonLatTransform_ = (0, _proj.getTransform)(epsg4326Projection, projection);
+  this.toLonLatTransform_ = (0, _proj.getTransform)(projection, epsg4326Projection);
+  this.projectionCenterLonLat_ = this.toLonLatTransform_((0, _extent.getCenter)(projection.getExtent()));
+  this.projection_ = projection;
+};
+/**
+ * Set the map for this graticule.The graticule will be rendered on the
+ * provided map.
+ * @param {import("./PluggableMap.js").default} map Map.
+ * @api
+ */
+
+
+Graticule.prototype.setMap = function setMap(map) {
+  if (this.map_) {
+    (0, _events.unlistenByKey)(this.postcomposeListenerKey_);
+    this.postcomposeListenerKey_ = null;
+    this.map_.render();
+  }
+
+  if (map) {
+    this.postcomposeListenerKey_ = (0, _events.listen)(map, _EventType.default.POSTCOMPOSE, this.handlePostCompose_, this);
+    map.render();
+  }
+
+  this.map_ = map;
+};
+
+var _default = Graticule;
+exports.default = _default;
+},{"./coordinate.js":"node_modules/ol/coordinate.js","./events.js":"node_modules/ol/events.js","./extent.js":"node_modules/ol/extent.js","./geom/GeometryLayout.js":"node_modules/ol/geom/GeometryLayout.js","./geom/LineString.js":"node_modules/ol/geom/LineString.js","./geom/Point.js":"node_modules/ol/geom/Point.js","./geom/flat/geodesic.js":"node_modules/ol/geom/flat/geodesic.js","./math.js":"node_modules/ol/math.js","./proj.js":"node_modules/ol/proj.js","./render/EventType.js":"node_modules/ol/render/EventType.js","./style/Fill.js":"node_modules/ol/style/Fill.js","./style/Stroke.js":"node_modules/ol/style/Stroke.js","./style/Text.js":"node_modules/ol/style/Text.js"}],"node_modules/ol/ImageBase.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _util = require("./util.js");
+
+var _Target = _interopRequireDefault(require("./events/Target.js"));
+
+var _EventType = _interopRequireDefault(require("./events/EventType.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/ImageBase
+ */
+
+/**
+ * @abstract
+ */
+var ImageBase =
+/*@__PURE__*/
+function (EventTarget) {
+  function ImageBase(extent, resolution, pixelRatio, state) {
+    EventTarget.call(this);
+    /**
+     * @protected
+     * @type {import("./extent.js").Extent}
+     */
+
+    this.extent = extent;
+    /**
+     * @private
+     * @type {number}
+     */
+
+    this.pixelRatio_ = pixelRatio;
+    /**
+     * @protected
+     * @type {number|undefined}
+     */
+
+    this.resolution = resolution;
+    /**
+     * @protected
+     * @type {import("./ImageState.js").default}
+     */
+
+    this.state = state;
+  }
+
+  if (EventTarget) ImageBase.__proto__ = EventTarget;
+  ImageBase.prototype = Object.create(EventTarget && EventTarget.prototype);
+  ImageBase.prototype.constructor = ImageBase;
+  /**
+   * @protected
+   */
+
+  ImageBase.prototype.changed = function changed() {
+    this.dispatchEvent(_EventType.default.CHANGE);
+  };
+  /**
+   * @return {import("./extent.js").Extent} Extent.
+   */
+
+
+  ImageBase.prototype.getExtent = function getExtent() {
+    return this.extent;
+  };
+  /**
+   * @abstract
+   * @return {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} Image.
+   */
+
+
+  ImageBase.prototype.getImage = function getImage() {
+    return (0, _util.abstract)();
+  };
+  /**
+   * @return {number} PixelRatio.
+   */
+
+
+  ImageBase.prototype.getPixelRatio = function getPixelRatio() {
+    return this.pixelRatio_;
+  };
+  /**
+   * @return {number} Resolution.
+   */
+
+
+  ImageBase.prototype.getResolution = function getResolution() {
+    return (
+      /** @type {number} */
+      this.resolution
+    );
+  };
+  /**
+   * @return {import("./ImageState.js").default} State.
+   */
+
+
+  ImageBase.prototype.getState = function getState() {
+    return this.state;
+  };
+  /**
+   * Load not yet loaded URI.
+   * @abstract
+   */
+
+
+  ImageBase.prototype.load = function load() {
+    (0, _util.abstract)();
+  };
+
+  return ImageBase;
+}(_Target.default);
+
+var _default = ImageBase;
+exports.default = _default;
+},{"./util.js":"node_modules/ol/util.js","./events/Target.js":"node_modules/ol/events/Target.js","./events/EventType.js":"node_modules/ol/events/EventType.js"}],"node_modules/ol/ImageState.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/ImageState
+ */
+
+/**
+ * @enum {number}
+ */
+var _default = {
+  IDLE: 0,
+  LOADING: 1,
+  LOADED: 2,
+  ERROR: 3
+};
+exports.default = _default;
+},{}],"node_modules/ol/Image.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _ImageBase = _interopRequireDefault(require("./ImageBase.js"));
+
+var _ImageState = _interopRequireDefault(require("./ImageState.js"));
+
+var _events = require("./events.js");
+
+var _EventType = _interopRequireDefault(require("./events/EventType.js"));
+
+var _extent = require("./extent.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/Image
+ */
+
+/**
+ * A function that takes an {@link module:ol/Image~Image} for the image and a
+ * `{string}` for the src as arguments. It is supposed to make it so the
+ * underlying image {@link module:ol/Image~Image#getImage} is assigned the
+ * content specified by the src. If not specified, the default is
+ *
+ *     function(image, src) {
+ *       image.getImage().src = src;
+ *     }
+ *
+ * Providing a custom `imageLoadFunction` can be useful to load images with
+ * post requests or - in general - through XHR requests, where the src of the
+ * image element would be set to a data URI when the content is loaded.
+ *
+ * @typedef {function(ImageWrapper, string)} LoadFunction
+ * @api
+ */
+var ImageWrapper =
+/*@__PURE__*/
+function (ImageBase) {
+  function ImageWrapper(extent, resolution, pixelRatio, src, crossOrigin, imageLoadFunction) {
+    ImageBase.call(this, extent, resolution, pixelRatio, _ImageState.default.IDLE);
+    /**
+     * @private
+     * @type {string}
+     */
+
+    this.src_ = src;
+    /**
+     * @private
+     * @type {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement}
+     */
+
+    this.image_ = new Image();
+
+    if (crossOrigin !== null) {
+      this.image_.crossOrigin = crossOrigin;
+    }
+    /**
+     * @private
+     * @type {Array<import("./events.js").EventsKey>}
+     */
+
+
+    this.imageListenerKeys_ = null;
+    /**
+     * @protected
+     * @type {ImageState}
+     */
+
+    this.state = _ImageState.default.IDLE;
+    /**
+     * @private
+     * @type {LoadFunction}
+     */
+
+    this.imageLoadFunction_ = imageLoadFunction;
+  }
+
+  if (ImageBase) ImageWrapper.__proto__ = ImageBase;
+  ImageWrapper.prototype = Object.create(ImageBase && ImageBase.prototype);
+  ImageWrapper.prototype.constructor = ImageWrapper;
+  /**
+   * @inheritDoc
+   * @api
+   */
+
+  ImageWrapper.prototype.getImage = function getImage() {
+    return this.image_;
+  };
+  /**
+   * Tracks loading or read errors.
+   *
+   * @private
+   */
+
+
+  ImageWrapper.prototype.handleImageError_ = function handleImageError_() {
+    this.state = _ImageState.default.ERROR;
+    this.unlistenImage_();
+    this.changed();
+  };
+  /**
+   * Tracks successful image load.
+   *
+   * @private
+   */
+
+
+  ImageWrapper.prototype.handleImageLoad_ = function handleImageLoad_() {
+    if (this.resolution === undefined) {
+      this.resolution = (0, _extent.getHeight)(this.extent) / this.image_.height;
+    }
+
+    this.state = _ImageState.default.LOADED;
+    this.unlistenImage_();
+    this.changed();
+  };
+  /**
+   * Load the image or retry if loading previously failed.
+   * Loading is taken care of by the tile queue, and calling this method is
+   * only needed for preloading or for reloading in case of an error.
+   * @override
+   * @api
+   */
+
+
+  ImageWrapper.prototype.load = function load() {
+    if (this.state == _ImageState.default.IDLE || this.state == _ImageState.default.ERROR) {
+      this.state = _ImageState.default.LOADING;
+      this.changed();
+      this.imageListenerKeys_ = [(0, _events.listenOnce)(this.image_, _EventType.default.ERROR, this.handleImageError_, this), (0, _events.listenOnce)(this.image_, _EventType.default.LOAD, this.handleImageLoad_, this)];
+      this.imageLoadFunction_(this, this.src_);
+    }
+  };
+  /**
+   * @param {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} image Image.
+   */
+
+
+  ImageWrapper.prototype.setImage = function setImage(image) {
+    this.image_ = image;
+  };
+  /**
+   * Discards event handlers which listen for load completion or errors.
+   *
+   * @private
+   */
+
+
+  ImageWrapper.prototype.unlistenImage_ = function unlistenImage_() {
+    this.imageListenerKeys_.forEach(_events.unlistenByKey);
+    this.imageListenerKeys_ = null;
+  };
+
+  return ImageWrapper;
+}(_ImageBase.default);
+
+var _default = ImageWrapper;
+exports.default = _default;
+},{"./ImageBase.js":"node_modules/ol/ImageBase.js","./ImageState.js":"node_modules/ol/ImageState.js","./events.js":"node_modules/ol/events.js","./events/EventType.js":"node_modules/ol/events/EventType.js","./extent.js":"node_modules/ol/extent.js"}],"node_modules/ol/ImageCanvas.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _ImageBase = _interopRequireDefault(require("./ImageBase.js"));
+
+var _ImageState = _interopRequireDefault(require("./ImageState.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/ImageCanvas
+ */
+
+/**
+ * A function that is called to trigger asynchronous canvas drawing.  It is
+ * called with a "done" callback that should be called when drawing is done.
+ * If any error occurs during drawing, the "done" callback should be called with
+ * that error.
+ *
+ * @typedef {function(function(Error=))} Loader
+ */
+var ImageCanvas =
+/*@__PURE__*/
+function (ImageBase) {
+  function ImageCanvas(extent, resolution, pixelRatio, canvas, opt_loader) {
+    var state = opt_loader !== undefined ? _ImageState.default.IDLE : _ImageState.default.LOADED;
+    ImageBase.call(this, extent, resolution, pixelRatio, state);
+    /**
+     * Optional canvas loader function.
+     * @type {?Loader}
+     * @private
+     */
+
+    this.loader_ = opt_loader !== undefined ? opt_loader : null;
+    /**
+     * @private
+     * @type {HTMLCanvasElement}
+     */
+
+    this.canvas_ = canvas;
+    /**
+     * @private
+     * @type {Error}
+     */
+
+    this.error_ = null;
+  }
+
+  if (ImageBase) ImageCanvas.__proto__ = ImageBase;
+  ImageCanvas.prototype = Object.create(ImageBase && ImageBase.prototype);
+  ImageCanvas.prototype.constructor = ImageCanvas;
+  /**
+   * Get any error associated with asynchronous rendering.
+   * @return {Error} Any error that occurred during rendering.
+   */
+
+  ImageCanvas.prototype.getError = function getError() {
+    return this.error_;
+  };
+  /**
+   * Handle async drawing complete.
+   * @param {Error=} err Any error during drawing.
+   * @private
+   */
+
+
+  ImageCanvas.prototype.handleLoad_ = function handleLoad_(err) {
+    if (err) {
+      this.error_ = err;
+      this.state = _ImageState.default.ERROR;
+    } else {
+      this.state = _ImageState.default.LOADED;
+    }
+
+    this.changed();
+  };
+  /**
+   * @inheritDoc
+   */
+
+
+  ImageCanvas.prototype.load = function load() {
+    if (this.state == _ImageState.default.IDLE) {
+      this.state = _ImageState.default.LOADING;
+      this.changed();
+      this.loader_(this.handleLoad_.bind(this));
+    }
+  };
+  /**
+   * @return {HTMLCanvasElement} Canvas element.
+   */
+
+
+  ImageCanvas.prototype.getImage = function getImage() {
+    return this.canvas_;
+  };
+
+  return ImageCanvas;
+}(_ImageBase.default);
+
+var _default = ImageCanvas;
+exports.default = _default;
+},{"./ImageBase.js":"node_modules/ol/ImageBase.js","./ImageState.js":"node_modules/ol/ImageState.js"}],"node_modules/ol/TileState.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/TileState
+ */
+
+/**
+ * @enum {number}
+ */
+var _default = {
+  IDLE: 0,
+  LOADING: 1,
+  LOADED: 2,
+
+  /**
+   * Indicates that tile loading failed
+   * @type {number}
+   */
+  ERROR: 3,
+  EMPTY: 4,
+  ABORT: 5
+};
+exports.default = _default;
+},{}],"node_modules/ol/easing.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.easeIn = easeIn;
+exports.easeOut = easeOut;
+exports.inAndOut = inAndOut;
+exports.linear = linear;
+exports.upAndDown = upAndDown;
+
+/**
+ * @module ol/easing
+ */
+
+/**
+ * Start slow and speed up.
+ * @param {number} t Input between 0 and 1.
+ * @return {number} Output between 0 and 1.
+ * @api
+ */
+function easeIn(t) {
+  return Math.pow(t, 3);
+}
+/**
+ * Start fast and slow down.
+ * @param {number} t Input between 0 and 1.
+ * @return {number} Output between 0 and 1.
+ * @api
+ */
+
+
+function easeOut(t) {
+  return 1 - easeIn(1 - t);
+}
+/**
+ * Start slow, speed up, and then slow down again.
+ * @param {number} t Input between 0 and 1.
+ * @return {number} Output between 0 and 1.
+ * @api
+ */
+
+
+function inAndOut(t) {
+  return 3 * t * t - 2 * t * t * t;
+}
+/**
+ * Maintain a constant speed over time.
+ * @param {number} t Input between 0 and 1.
+ * @return {number} Output between 0 and 1.
+ * @api
+ */
+
+
+function linear(t) {
+  return t;
+}
+/**
+ * Start slow, speed up, and at the very end slow down again.  This has the
+ * same general behavior as {@link module:ol/easing~inAndOut}, but the final
+ * slowdown is delayed.
+ * @param {number} t Input between 0 and 1.
+ * @return {number} Output between 0 and 1.
+ * @api
+ */
+
+
+function upAndDown(t) {
+  if (t < 0.5) {
+    return inAndOut(2 * t);
+  } else {
+    return 1 - inAndOut(2 * (t - 0.5));
+  }
+}
+},{}],"node_modules/ol/Tile.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _TileState = _interopRequireDefault(require("./TileState.js"));
+
+var _easing = require("./easing.js");
+
+var _Target = _interopRequireDefault(require("./events/Target.js"));
+
+var _EventType = _interopRequireDefault(require("./events/EventType.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/Tile
+ */
+
+/**
+ * A function that takes an {@link module:ol/Tile} for the tile and a
+ * `{string}` for the url as arguments. The default is
+ * ```js
+ * source.setTileLoadFunction(function(tile, src) {
+ *   tile.getImage().src = src;
+ * });
+ * ```
+ * For more fine grained control, the load function can use fetch or XMLHttpRequest and involve
+ * error handling:
+ *
+ * ```js
+ * import TileState from 'ol/TileState';
+ *
+ * source.setTileLoadFunction(function(tile, src) {
+ *   var xhr = new XMLHttpRequest();
+ *   xhr.responseType = 'blob';
+ *   xhr.addEventListener('loadend', function (evt) {
+ *     var data = this.response;
+ *     if (data !== undefined) {
+ *       tile.getImage().src = URL.createObjectURL(data);
+ *     } else {
+ *       tile.setState(TileState.ERROR);
+ *     }
+ *   });
+ *   xhr.addEventListener('error', function () {
+ *     tile.setState(TileState.ERROR);
+ *   });
+ *   xhr.open('GET', src);
+ *   xhr.send();
+ * });
+ * ```
+ *
+ * @typedef {function(Tile, string)} LoadFunction
+ * @api
+ */
+
+/**
+ * {@link module:ol/source/Tile~Tile} sources use a function of this type to get
+ * the url that provides a tile for a given tile coordinate.
+ *
+ * This function takes an {@link module:ol/tilecoord~TileCoord} for the tile
+ * coordinate, a `{number}` representing the pixel ratio and a
+ * {@link module:ol/proj/Projection} for the projection  as arguments
+ * and returns a `{string}` representing the tile URL, or undefined if no tile
+ * should be requested for the passed tile coordinate.
+ *
+ * @typedef {function(import("./tilecoord.js").TileCoord, number,
+ *           import("./proj/Projection.js").default): (string|undefined)} UrlFunction
+ * @api
+ */
+
+/**
+ * @typedef {Object} Options
+ * @property {number} [transition=250] A duration for tile opacity
+ * transitions in milliseconds. A duration of 0 disables the opacity transition.
+ * @api
+ */
+
+/**
+ * @classdesc
+ * Base class for tiles.
+ *
+ * @abstract
+ */
+var Tile =
+/*@__PURE__*/
+function (EventTarget) {
+  function Tile(tileCoord, state, opt_options) {
+    EventTarget.call(this);
+    var options = opt_options ? opt_options : {};
+    /**
+     * @type {import("./tilecoord.js").TileCoord}
+     */
+
+    this.tileCoord = tileCoord;
+    /**
+     * @protected
+     * @type {TileState}
+     */
+
+    this.state = state;
+    /**
+     * An "interim" tile for this tile. The interim tile may be used while this
+     * one is loading, for "smooth" transitions when changing params/dimensions
+     * on the source.
+     * @type {Tile}
+     */
+
+    this.interimTile = null;
+    /**
+     * A key assigned to the tile. This is used by the tile source to determine
+     * if this tile can effectively be used, or if a new tile should be created
+     * and this one be used as an interim tile for this new tile.
+     * @type {string}
+     */
+
+    this.key = '';
+    /**
+     * The duration for the opacity transition.
+     * @type {number}
+     */
+
+    this.transition_ = options.transition === undefined ? 250 : options.transition;
+    /**
+     * Lookup of start times for rendering transitions.  If the start time is
+     * equal to -1, the transition is complete.
+     * @type {Object<string, number>}
+     */
+
+    this.transitionStarts_ = {};
+  }
+
+  if (EventTarget) Tile.__proto__ = EventTarget;
+  Tile.prototype = Object.create(EventTarget && EventTarget.prototype);
+  Tile.prototype.constructor = Tile;
+  /**
+   * @protected
+   */
+
+  Tile.prototype.changed = function changed() {
+    this.dispatchEvent(_EventType.default.CHANGE);
+  };
+  /**
+   * @return {string} Key.
+   */
+
+
+  Tile.prototype.getKey = function getKey() {
+    return this.key + '/' + this.tileCoord;
+  };
+  /**
+   * Get the interim tile most suitable for rendering using the chain of interim
+   * tiles. This corresponds to the  most recent tile that has been loaded, if no
+   * such tile exists, the original tile is returned.
+   * @return {!Tile} Best tile for rendering.
+   */
+
+
+  Tile.prototype.getInterimTile = function getInterimTile() {
+    if (!this.interimTile) {
+      //empty chain
+      return this;
+    }
+
+    var tile = this.interimTile; // find the first loaded tile and return it. Since the chain is sorted in
+    // decreasing order of creation time, there is no need to search the remainder
+    // of the list (all those tiles correspond to older requests and will be
+    // cleaned up by refreshInterimChain)
+
+    do {
+      if (tile.getState() == _TileState.default.LOADED) {
+        return tile;
+      }
+
+      tile = tile.interimTile;
+    } while (tile); // we can not find a better tile
+
+
+    return this;
+  };
+  /**
+   * Goes through the chain of interim tiles and discards sections of the chain
+   * that are no longer relevant.
+   */
+
+
+  Tile.prototype.refreshInterimChain = function refreshInterimChain() {
+    if (!this.interimTile) {
+      return;
+    }
+
+    var tile = this.interimTile;
+    var prev =
+    /** @type {Tile} */
+    this;
+
+    do {
+      if (tile.getState() == _TileState.default.LOADED) {
+        //we have a loaded tile, we can discard the rest of the list
+        //we would could abort any LOADING tile request
+        //older than this tile (i.e. any LOADING tile following this entry in the chain)
+        tile.interimTile = null;
+        break;
+      } else if (tile.getState() == _TileState.default.LOADING) {
+        //keep this LOADING tile any loaded tiles later in the chain are
+        //older than this tile, so we're still interested in the request
+        prev = tile;
+      } else if (tile.getState() == _TileState.default.IDLE) {
+        //the head of the list is the most current tile, we don't need
+        //to start any other requests for this chain
+        prev.interimTile = tile.interimTile;
+      } else {
+        prev = tile;
+      }
+
+      tile = prev.interimTile;
+    } while (tile);
+  };
+  /**
+   * Get the tile coordinate for this tile.
+   * @return {import("./tilecoord.js").TileCoord} The tile coordinate.
+   * @api
+   */
+
+
+  Tile.prototype.getTileCoord = function getTileCoord() {
+    return this.tileCoord;
+  };
+  /**
+   * @return {TileState} State.
+   */
+
+
+  Tile.prototype.getState = function getState() {
+    return this.state;
+  };
+  /**
+   * Sets the state of this tile. If you write your own {@link module:ol/Tile~LoadFunction tileLoadFunction} ,
+   * it is important to set the state correctly to {@link module:ol/TileState~ERROR}
+   * when the tile cannot be loaded. Otherwise the tile cannot be removed from
+   * the tile queue and will block other requests.
+   * @param {TileState} state State.
+   * @api
+   */
+
+
+  Tile.prototype.setState = function setState(state) {
+    this.state = state;
+    this.changed();
+  };
+  /**
+   * Load the image or retry if loading previously failed.
+   * Loading is taken care of by the tile queue, and calling this method is
+   * only needed for preloading or for reloading in case of an error.
+   * @abstract
+   * @api
+   */
+
+
+  Tile.prototype.load = function load() {};
+  /**
+   * Get the alpha value for rendering.
+   * @param {string} id An id for the renderer.
+   * @param {number} time The render frame time.
+   * @return {number} A number between 0 and 1.
+   */
+
+
+  Tile.prototype.getAlpha = function getAlpha(id, time) {
+    if (!this.transition_) {
+      return 1;
+    }
+
+    var start = this.transitionStarts_[id];
+
+    if (!start) {
+      start = time;
+      this.transitionStarts_[id] = start;
+    } else if (start === -1) {
+      return 1;
+    }
+
+    var delta = time - start + 1000 / 60; // avoid rendering at 0
+
+    if (delta >= this.transition_) {
+      return 1;
+    }
+
+    return (0, _easing.easeIn)(delta / this.transition_);
+  };
+  /**
+   * Determine if a tile is in an alpha transition.  A tile is considered in
+   * transition if tile.getAlpha() has not yet been called or has been called
+   * and returned 1.
+   * @param {string} id An id for the renderer.
+   * @return {boolean} The tile is in transition.
+   */
+
+
+  Tile.prototype.inTransition = function inTransition(id) {
+    if (!this.transition_) {
+      return false;
+    }
+
+    return this.transitionStarts_[id] !== -1;
+  };
+  /**
+   * Mark a transition as complete.
+   * @param {string} id An id for the renderer.
+   */
+
+
+  Tile.prototype.endTransition = function endTransition(id) {
+    if (this.transition_) {
+      this.transitionStarts_[id] = -1;
+    }
+  };
+
+  return Tile;
+}(_Target.default);
+
+var _default = Tile;
+exports.default = _default;
+},{"./TileState.js":"node_modules/ol/TileState.js","./easing.js":"node_modules/ol/easing.js","./events/Target.js":"node_modules/ol/events/Target.js","./events/EventType.js":"node_modules/ol/events/EventType.js"}],"node_modules/ol/dom.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createCanvasContext2D = createCanvasContext2D;
+exports.outerWidth = outerWidth;
+exports.outerHeight = outerHeight;
+exports.replaceNode = replaceNode;
+exports.removeNode = removeNode;
+exports.removeChildren = removeChildren;
+
+/**
+ * @module ol/dom
+ */
+
+/**
+ * Create an html canvas element and returns its 2d context.
+ * @param {number=} opt_width Canvas width.
+ * @param {number=} opt_height Canvas height.
+ * @return {CanvasRenderingContext2D} The context.
+ */
+function createCanvasContext2D(opt_width, opt_height) {
+  var canvas =
+  /** @type {HTMLCanvasElement} */
+  document.createElement('canvas');
+
+  if (opt_width) {
+    canvas.width = opt_width;
+  }
+
+  if (opt_height) {
+    canvas.height = opt_height;
+  }
+
+  return (
+    /** @type {CanvasRenderingContext2D} */
+    canvas.getContext('2d')
+  );
+}
+/**
+ * Get the current computed width for the given element including margin,
+ * padding and border.
+ * Equivalent to jQuery's `$(el).outerWidth(true)`.
+ * @param {!HTMLElement} element Element.
+ * @return {number} The width.
+ */
+
+
+function outerWidth(element) {
+  var width = element.offsetWidth;
+  var style = getComputedStyle(element);
+  width += parseInt(style.marginLeft, 10) + parseInt(style.marginRight, 10);
+  return width;
+}
+/**
+ * Get the current computed height for the given element including margin,
+ * padding and border.
+ * Equivalent to jQuery's `$(el).outerHeight(true)`.
+ * @param {!HTMLElement} element Element.
+ * @return {number} The height.
+ */
+
+
+function outerHeight(element) {
+  var height = element.offsetHeight;
+  var style = getComputedStyle(element);
+  height += parseInt(style.marginTop, 10) + parseInt(style.marginBottom, 10);
+  return height;
+}
+/**
+ * @param {Node} newNode Node to replace old node
+ * @param {Node} oldNode The node to be replaced
+ */
+
+
+function replaceNode(newNode, oldNode) {
+  var parent = oldNode.parentNode;
+
+  if (parent) {
+    parent.replaceChild(newNode, oldNode);
+  }
+}
+/**
+ * @param {Node} node The node to remove.
+ * @returns {Node} The node that was removed or null.
+ */
+
+
+function removeNode(node) {
+  return node && node.parentNode ? node.parentNode.removeChild(node) : null;
+}
+/**
+ * @param {Node} node The node to remove the children from.
+ */
+
+
+function removeChildren(node) {
+  while (node.lastChild) {
+    node.removeChild(node.lastChild);
+  }
+}
+},{}],"node_modules/ol/ImageTile.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _Tile = _interopRequireDefault(require("./Tile.js"));
+
+var _TileState = _interopRequireDefault(require("./TileState.js"));
+
+var _dom = require("./dom.js");
+
+var _events = require("./events.js");
+
+var _EventType = _interopRequireDefault(require("./events/EventType.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/ImageTile
+ */
+var ImageTile =
+/*@__PURE__*/
+function (Tile) {
+  function ImageTile(tileCoord, state, src, crossOrigin, tileLoadFunction, opt_options) {
+    Tile.call(this, tileCoord, state, opt_options);
+    /**
+     * @private
+     * @type {?string}
+     */
+
+    this.crossOrigin_ = crossOrigin;
+    /**
+     * Image URI
+     *
+     * @private
+     * @type {string}
+     */
+
+    this.src_ = src;
+    /**
+     * @private
+     * @type {HTMLImageElement|HTMLCanvasElement}
+     */
+
+    this.image_ = new Image();
+
+    if (crossOrigin !== null) {
+      this.image_.crossOrigin = crossOrigin;
+    }
+    /**
+     * @private
+     * @type {Array<import("./events.js").EventsKey>}
+     */
+
+
+    this.imageListenerKeys_ = null;
+    /**
+     * @private
+     * @type {import("./Tile.js").LoadFunction}
+     */
+
+    this.tileLoadFunction_ = tileLoadFunction;
+  }
+
+  if (Tile) ImageTile.__proto__ = Tile;
+  ImageTile.prototype = Object.create(Tile && Tile.prototype);
+  ImageTile.prototype.constructor = ImageTile;
+  /**
+   * @inheritDoc
+   */
+
+  ImageTile.prototype.disposeInternal = function disposeInternal() {
+    if (this.state == _TileState.default.LOADING) {
+      this.unlistenImage_();
+      this.image_ = getBlankImage();
+    }
+
+    if (this.interimTile) {
+      this.interimTile.dispose();
+    }
+
+    this.state = _TileState.default.ABORT;
+    this.changed();
+    Tile.prototype.disposeInternal.call(this);
+  };
+  /**
+   * Get the HTML image element for this tile (may be a Canvas, Image, or Video).
+   * @return {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} Image.
+   * @api
+   */
+
+
+  ImageTile.prototype.getImage = function getImage() {
+    return this.image_;
+  };
+  /**
+   * @inheritDoc
+   */
+
+
+  ImageTile.prototype.getKey = function getKey() {
+    return this.src_;
+  };
+  /**
+   * Tracks loading or read errors.
+   *
+   * @private
+   */
+
+
+  ImageTile.prototype.handleImageError_ = function handleImageError_() {
+    this.state = _TileState.default.ERROR;
+    this.unlistenImage_();
+    this.image_ = getBlankImage();
+    this.changed();
+  };
+  /**
+   * Tracks successful image load.
+   *
+   * @private
+   */
+
+
+  ImageTile.prototype.handleImageLoad_ = function handleImageLoad_() {
+    var image =
+    /** @type {HTMLImageElement} */
+    this.image_;
+
+    if (image.naturalWidth && image.naturalHeight) {
+      this.state = _TileState.default.LOADED;
+    } else {
+      this.state = _TileState.default.EMPTY;
+    }
+
+    this.unlistenImage_();
+    this.changed();
+  };
+  /**
+   * @inheritDoc
+   * @api
+   */
+
+
+  ImageTile.prototype.load = function load() {
+    if (this.state == _TileState.default.ERROR) {
+      this.state = _TileState.default.IDLE;
+      this.image_ = new Image();
+
+      if (this.crossOrigin_ !== null) {
+        this.image_.crossOrigin = this.crossOrigin_;
+      }
+    }
+
+    if (this.state == _TileState.default.IDLE) {
+      this.state = _TileState.default.LOADING;
+      this.changed();
+      this.imageListenerKeys_ = [(0, _events.listenOnce)(this.image_, _EventType.default.ERROR, this.handleImageError_, this), (0, _events.listenOnce)(this.image_, _EventType.default.LOAD, this.handleImageLoad_, this)];
+      this.tileLoadFunction_(this, this.src_);
+    }
+  };
+  /**
+   * Discards event handlers which listen for load completion or errors.
+   *
+   * @private
+   */
+
+
+  ImageTile.prototype.unlistenImage_ = function unlistenImage_() {
+    this.imageListenerKeys_.forEach(_events.unlistenByKey);
+    this.imageListenerKeys_ = null;
+  };
+
+  return ImageTile;
+}(_Tile.default);
+/**
+ * Get a 1-pixel blank image.
+ * @return {HTMLCanvasElement} Blank image.
+ */
+
+
+function getBlankImage() {
+  var ctx = (0, _dom.createCanvasContext2D)(1, 1);
+  ctx.fillStyle = 'rgba(0,0,0,0)';
+  ctx.fillRect(0, 0, 1, 1);
+  return ctx.canvas;
+}
+
+var _default = ImageTile;
+exports.default = _default;
+},{"./Tile.js":"node_modules/ol/Tile.js","./TileState.js":"node_modules/ol/TileState.js","./dom.js":"node_modules/ol/dom.js","./events.js":"node_modules/ol/events.js","./events/EventType.js":"node_modules/ol/events/EventType.js"}],"node_modules/ol/Kinetic.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/Kinetic
+ */
+
+/**
+ * @classdesc
+ * Implementation of inertial deceleration for map movement.
+ *
+ * @api
+ */
+var Kinetic = function Kinetic(decay, minVelocity, delay) {
+  /**
+   * @private
+   * @type {number}
+   */
+  this.decay_ = decay;
+  /**
+   * @private
+   * @type {number}
+   */
+
+  this.minVelocity_ = minVelocity;
+  /**
+   * @private
+   * @type {number}
+   */
+
+  this.delay_ = delay;
+  /**
+   * @private
+   * @type {Array<number>}
+   */
+
+  this.points_ = [];
+  /**
+   * @private
+   * @type {number}
+   */
+
+  this.angle_ = 0;
+  /**
+   * @private
+   * @type {number}
+   */
+
+  this.initialVelocity_ = 0;
+};
+/**
+ * FIXME empty description for jsdoc
+ */
+
+
+Kinetic.prototype.begin = function begin() {
+  this.points_.length = 0;
+  this.angle_ = 0;
+  this.initialVelocity_ = 0;
+};
+/**
+ * @param {number} x X.
+ * @param {number} y Y.
+ */
+
+
+Kinetic.prototype.update = function update(x, y) {
+  this.points_.push(x, y, Date.now());
+};
+/**
+ * @return {boolean} Whether we should do kinetic animation.
+ */
+
+
+Kinetic.prototype.end = function end() {
+  if (this.points_.length < 6) {
+    // at least 2 points are required (i.e. there must be at least 6 elements
+    // in the array)
+    return false;
+  }
+
+  var delay = Date.now() - this.delay_;
+  var lastIndex = this.points_.length - 3;
+
+  if (this.points_[lastIndex + 2] < delay) {
+    // the last tracked point is too old, which means that the user stopped
+    // panning before releasing the map
+    return false;
+  } // get the first point which still falls into the delay time
+
+
+  var firstIndex = lastIndex - 3;
+
+  while (firstIndex > 0 && this.points_[firstIndex + 2] > delay) {
+    firstIndex -= 3;
+  }
+
+  var duration = this.points_[lastIndex + 2] - this.points_[firstIndex + 2]; // we don't want a duration of 0 (divide by zero)
+  // we also make sure the user panned for a duration of at least one frame
+  // (1/60s) to compute sane displacement values
+
+  if (duration < 1000 / 60) {
+    return false;
+  }
+
+  var dx = this.points_[lastIndex] - this.points_[firstIndex];
+  var dy = this.points_[lastIndex + 1] - this.points_[firstIndex + 1];
+  this.angle_ = Math.atan2(dy, dx);
+  this.initialVelocity_ = Math.sqrt(dx * dx + dy * dy) / duration;
+  return this.initialVelocity_ > this.minVelocity_;
+};
+/**
+ * @return {number} Total distance travelled (pixels).
+ */
+
+
+Kinetic.prototype.getDistance = function getDistance() {
+  return (this.minVelocity_ - this.initialVelocity_) / this.decay_;
+};
+/**
+ * @return {number} Angle of the kinetic panning animation (radians).
+ */
+
+
+Kinetic.prototype.getAngle = function getAngle() {
+  return this.angle_;
+};
+
+var _default = Kinetic;
+exports.default = _default;
+},{}],"node_modules/ol/MapEvent.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _Event = _interopRequireDefault(require("./events/Event.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/MapEvent
+ */
+
+/**
+ * @classdesc
+ * Events emitted as map events are instances of this type.
+ * See {@link module:ol/PluggableMap~PluggableMap} for which events trigger a map event.
+ */
+var MapEvent =
+/*@__PURE__*/
+function (Event) {
+  function MapEvent(type, map, opt_frameState) {
+    Event.call(this, type);
+    /**
+     * The map where the event occurred.
+     * @type {import("./PluggableMap.js").default}
+     * @api
+     */
+
+    this.map = map;
+    /**
+     * The frame state at the time of the event.
+     * @type {?import("./PluggableMap.js").FrameState}
+     * @api
+     */
+
+    this.frameState = opt_frameState !== undefined ? opt_frameState : null;
+  }
+
+  if (Event) MapEvent.__proto__ = Event;
+  MapEvent.prototype = Object.create(Event && Event.prototype);
+  MapEvent.prototype.constructor = MapEvent;
+  return MapEvent;
+}(_Event.default);
+
+var _default = MapEvent;
+exports.default = _default;
+},{"./events/Event.js":"node_modules/ol/events/Event.js"}],"node_modules/ol/MapBrowserEvent.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _MapEvent = _interopRequireDefault(require("./MapEvent.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/MapBrowserEvent
+ */
+
+/**
+ * @classdesc
+ * Events emitted as map browser events are instances of this type.
+ * See {@link module:ol/PluggableMap~PluggableMap} for which events trigger a map browser event.
+ */
+var MapBrowserEvent =
+/*@__PURE__*/
+function (MapEvent) {
+  function MapBrowserEvent(type, map, browserEvent, opt_dragging, opt_frameState) {
+    MapEvent.call(this, type, map, opt_frameState);
+    /**
+     * The original browser event.
+     * @const
+     * @type {Event}
+     * @api
+     */
+
+    this.originalEvent = browserEvent;
+    /**
+     * The map pixel relative to the viewport corresponding to the original browser event.
+     * @type {import("./pixel.js").Pixel}
+     * @api
+     */
+
+    this.pixel = map.getEventPixel(browserEvent);
+    /**
+     * The coordinate in view projection corresponding to the original browser event.
+     * @type {import("./coordinate.js").Coordinate}
+     * @api
+     */
+
+    this.coordinate = map.getCoordinateFromPixel(this.pixel);
+    /**
+     * Indicates if the map is currently being dragged. Only set for
+     * `POINTERDRAG` and `POINTERMOVE` events. Default is `false`.
+     *
+     * @type {boolean}
+     * @api
+     */
+
+    this.dragging = opt_dragging !== undefined ? opt_dragging : false;
+  }
+
+  if (MapEvent) MapBrowserEvent.__proto__ = MapEvent;
+  MapBrowserEvent.prototype = Object.create(MapEvent && MapEvent.prototype);
+  MapBrowserEvent.prototype.constructor = MapBrowserEvent;
+  /**
+   * Prevents the default browser action.
+   * See https://developer.mozilla.org/en-US/docs/Web/API/event.preventDefault.
+   * @override
+   * @api
+   */
+
+  MapBrowserEvent.prototype.preventDefault = function preventDefault() {
+    MapEvent.prototype.preventDefault.call(this);
+    this.originalEvent.preventDefault();
+  };
+  /**
+   * Prevents further propagation of the current event.
+   * See https://developer.mozilla.org/en-US/docs/Web/API/event.stopPropagation.
+   * @override
+   * @api
+   */
+
+
+  MapBrowserEvent.prototype.stopPropagation = function stopPropagation() {
+    MapEvent.prototype.stopPropagation.call(this);
+    this.originalEvent.stopPropagation();
+  };
+
+  return MapBrowserEvent;
+}(_MapEvent.default);
+
+var _default = MapBrowserEvent;
+exports.default = _default;
+},{"./MapEvent.js":"node_modules/ol/MapEvent.js"}],"node_modules/ol/MapBrowserEventType.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _EventType = _interopRequireDefault(require("./events/EventType.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/MapBrowserEventType
+ */
+
+/**
+ * Constants for event names.
+ * @enum {string}
+ */
+var _default = {
+  /**
+   * A true single click with no dragging and no double click. Note that this
+   * event is delayed by 250 ms to ensure that it is not a double click.
+   * @event module:ol/MapBrowserEvent~MapBrowserEvent#singleclick
+   * @api
+   */
+  SINGLECLICK: 'singleclick',
+
+  /**
+   * A click with no dragging. A double click will fire two of this.
+   * @event module:ol/MapBrowserEvent~MapBrowserEvent#click
+   * @api
+   */
+  CLICK: _EventType.default.CLICK,
+
+  /**
+   * A true double click, with no dragging.
+   * @event module:ol/MapBrowserEvent~MapBrowserEvent#dblclick
+   * @api
+   */
+  DBLCLICK: _EventType.default.DBLCLICK,
+
+  /**
+   * Triggered when a pointer is dragged.
+   * @event module:ol/MapBrowserEvent~MapBrowserEvent#pointerdrag
+   * @api
+   */
+  POINTERDRAG: 'pointerdrag',
+
+  /**
+   * Triggered when a pointer is moved. Note that on touch devices this is
+   * triggered when the map is panned, so is not the same as mousemove.
+   * @event module:ol/MapBrowserEvent~MapBrowserEvent#pointermove
+   * @api
+   */
+  POINTERMOVE: 'pointermove',
+  POINTERDOWN: 'pointerdown',
+  POINTERUP: 'pointerup',
+  POINTEROVER: 'pointerover',
+  POINTEROUT: 'pointerout',
+  POINTERENTER: 'pointerenter',
+  POINTERLEAVE: 'pointerleave',
+  POINTERCANCEL: 'pointercancel'
+};
+exports.default = _default;
+},{"./events/EventType.js":"node_modules/ol/events/EventType.js"}],"node_modules/ol/MapBrowserPointerEvent.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _MapBrowserEvent = _interopRequireDefault(require("./MapBrowserEvent.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/MapBrowserPointerEvent
+ */
+var MapBrowserPointerEvent =
+/*@__PURE__*/
+function (MapBrowserEvent) {
+  function MapBrowserPointerEvent(type, map, pointerEvent, opt_dragging, opt_frameState) {
+    MapBrowserEvent.call(this, type, map, pointerEvent.originalEvent, opt_dragging, opt_frameState);
+    /**
+     * @const
+     * @type {import("./pointer/PointerEvent.js").default}
+     */
+
+    this.pointerEvent = pointerEvent;
+  }
+
+  if (MapBrowserEvent) MapBrowserPointerEvent.__proto__ = MapBrowserEvent;
+  MapBrowserPointerEvent.prototype = Object.create(MapBrowserEvent && MapBrowserEvent.prototype);
+  MapBrowserPointerEvent.prototype.constructor = MapBrowserPointerEvent;
+  return MapBrowserPointerEvent;
+}(_MapBrowserEvent.default);
+
+var _default = MapBrowserPointerEvent;
+exports.default = _default;
+},{"./MapBrowserEvent.js":"node_modules/ol/MapBrowserEvent.js"}],"node_modules/ol/pointer/EventType.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/pointer/EventType
+ */
+
+/**
+ * Constants for event names.
+ * @enum {string}
+ */
+var _default = {
+  POINTERMOVE: 'pointermove',
+  POINTERDOWN: 'pointerdown',
+  POINTERUP: 'pointerup',
+  POINTEROVER: 'pointerover',
+  POINTEROUT: 'pointerout',
+  POINTERENTER: 'pointerenter',
+  POINTERLEAVE: 'pointerleave',
+  POINTERCANCEL: 'pointercancel'
+};
+exports.default = _default;
+},{}],"node_modules/ol/pointer/EventSource.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/pointer/EventSource
+ */
+var EventSource = function EventSource(dispatcher, mapping) {
+  /**
+   * @type {import("./PointerEventHandler.js").default}
+   */
+  this.dispatcher = dispatcher;
+  /**
+   * @private
+   * @const
+   * @type {!Object<string, function(Event)>}
+   */
+
+  this.mapping_ = mapping;
+};
+/**
+ * List of events supported by this source.
+ * @return {Array<string>} Event names
+ */
+
+
+EventSource.prototype.getEvents = function getEvents() {
+  return Object.keys(this.mapping_);
+};
+/**
+ * Returns the handler that should handle a given event type.
+ * @param {string} eventType The event type.
+ * @return {function(Event)} Handler
+ */
+
+
+EventSource.prototype.getHandlerForEvent = function getHandlerForEvent(eventType) {
+  return this.mapping_[eventType];
+};
+
+var _default = EventSource;
+exports.default = _default;
+},{}],"node_modules/ol/pointer/MouseSource.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.prepareEvent = prepareEvent;
+exports.default = exports.POINTER_TYPE = exports.POINTER_ID = void 0;
+
+var _EventSource = _interopRequireDefault(require("./EventSource.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/pointer/MouseSource
+ */
+// Based on https://github.com/Polymer/PointerEvents
+// Copyright (c) 2013 The Polymer Authors. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+// * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+/**
+ * @type {number}
+ */
+var POINTER_ID = 1;
+/**
+ * @type {string}
+ */
+
+exports.POINTER_ID = POINTER_ID;
+var POINTER_TYPE = 'mouse';
+/**
+ * Radius around touchend that swallows mouse events.
+ *
+ * @type {number}
+ */
+
+exports.POINTER_TYPE = POINTER_TYPE;
+var DEDUP_DIST = 25;
+/**
+ * Handler for `mousedown`.
+ *
+ * @this {MouseSource}
+ * @param {MouseEvent} inEvent The in event.
+ */
+
+function mousedown(inEvent) {
+  if (!this.isEventSimulatedFromTouch_(inEvent)) {
+    // TODO(dfreedman) workaround for some elements not sending mouseup
+    // http://crbug/149091
+    if (POINTER_ID.toString() in this.pointerMap) {
+      this.cancel(inEvent);
+    }
+
+    var e = prepareEvent(inEvent, this.dispatcher);
+    this.pointerMap[POINTER_ID.toString()] = inEvent;
+    this.dispatcher.down(e, inEvent);
+  }
+}
+/**
+ * Handler for `mousemove`.
+ *
+ * @this {MouseSource}
+ * @param {MouseEvent} inEvent The in event.
+ */
+
+
+function mousemove(inEvent) {
+  if (!this.isEventSimulatedFromTouch_(inEvent)) {
+    var e = prepareEvent(inEvent, this.dispatcher);
+    this.dispatcher.move(e, inEvent);
+  }
+}
+/**
+ * Handler for `mouseup`.
+ *
+ * @this {MouseSource}
+ * @param {MouseEvent} inEvent The in event.
+ */
+
+
+function mouseup(inEvent) {
+  if (!this.isEventSimulatedFromTouch_(inEvent)) {
+    var p = this.pointerMap[POINTER_ID.toString()];
+
+    if (p && p.button === inEvent.button) {
+      var e = prepareEvent(inEvent, this.dispatcher);
+      this.dispatcher.up(e, inEvent);
+      this.cleanupMouse();
+    }
+  }
+}
+/**
+ * Handler for `mouseover`.
+ *
+ * @this {MouseSource}
+ * @param {MouseEvent} inEvent The in event.
+ */
+
+
+function mouseover(inEvent) {
+  if (!this.isEventSimulatedFromTouch_(inEvent)) {
+    var e = prepareEvent(inEvent, this.dispatcher);
+    this.dispatcher.enterOver(e, inEvent);
+  }
+}
+/**
+ * Handler for `mouseout`.
+ *
+ * @this {MouseSource}
+ * @param {MouseEvent} inEvent The in event.
+ */
+
+
+function mouseout(inEvent) {
+  if (!this.isEventSimulatedFromTouch_(inEvent)) {
+    var e = prepareEvent(inEvent, this.dispatcher);
+    this.dispatcher.leaveOut(e, inEvent);
+  }
+}
+
+var MouseSource =
+/*@__PURE__*/
+function (EventSource) {
+  function MouseSource(dispatcher) {
+    var mapping = {
+      'mousedown': mousedown,
+      'mousemove': mousemove,
+      'mouseup': mouseup,
+      'mouseover': mouseover,
+      'mouseout': mouseout
+    };
+    EventSource.call(this, dispatcher, mapping);
+    /**
+     * @const
+     * @type {!Object<string, Event|Object>}
+     */
+
+    this.pointerMap = dispatcher.pointerMap;
+    /**
+     * @const
+     * @type {Array<import("../pixel.js").Pixel>}
+     */
+
+    this.lastTouches = [];
+  }
+
+  if (EventSource) MouseSource.__proto__ = EventSource;
+  MouseSource.prototype = Object.create(EventSource && EventSource.prototype);
+  MouseSource.prototype.constructor = MouseSource;
+  /**
+   * Detect if a mouse event was simulated from a touch by
+   * checking if previously there was a touch event at the
+   * same position.
+   *
+   * FIXME - Known problem with the native Android browser on
+   * Samsung GT-I9100 (Android 4.1.2):
+   * In case the page is scrolled, this function does not work
+   * correctly when a canvas is used (WebGL or canvas renderer).
+   * Mouse listeners on canvas elements (for this browser), create
+   * two mouse events: One 'good' and one 'bad' one (on other browsers or
+   * when a div is used, there is only one event). For the 'bad' one,
+   * clientX/clientY and also pageX/pageY are wrong when the page
+   * is scrolled. Because of that, this function can not detect if
+   * the events were simulated from a touch event. As result, a
+   * pointer event at a wrong position is dispatched, which confuses
+   * the map interactions.
+   * It is unclear, how one can get the correct position for the event
+   * or detect that the positions are invalid.
+   *
+   * @private
+   * @param {MouseEvent} inEvent The in event.
+   * @return {boolean} True, if the event was generated by a touch.
+   */
+
+  MouseSource.prototype.isEventSimulatedFromTouch_ = function isEventSimulatedFromTouch_(inEvent) {
+    var lts = this.lastTouches;
+    var x = inEvent.clientX;
+    var y = inEvent.clientY;
+
+    for (var i = 0, l = lts.length, t = void 0; i < l && (t = lts[i]); i++) {
+      // simulated mouse events will be swallowed near a primary touchend
+      var dx = Math.abs(x - t[0]);
+      var dy = Math.abs(y - t[1]);
+
+      if (dx <= DEDUP_DIST && dy <= DEDUP_DIST) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+  /**
+   * Dispatches a `pointercancel` event.
+   *
+   * @param {Event} inEvent The in event.
+   */
+
+
+  MouseSource.prototype.cancel = function cancel(inEvent) {
+    var e = prepareEvent(inEvent, this.dispatcher);
+    this.dispatcher.cancel(e, inEvent);
+    this.cleanupMouse();
+  };
+  /**
+   * Remove the mouse from the list of active pointers.
+   */
+
+
+  MouseSource.prototype.cleanupMouse = function cleanupMouse() {
+    delete this.pointerMap[POINTER_ID.toString()];
+  };
+
+  return MouseSource;
+}(_EventSource.default);
+/**
+ * Creates a copy of the original event that will be used
+ * for the fake pointer event.
+ *
+ * @param {Event} inEvent The in event.
+ * @param {import("./PointerEventHandler.js").default} dispatcher Event handler.
+ * @return {Object} The copied event.
+ */
+
+
+function prepareEvent(inEvent, dispatcher) {
+  var e = dispatcher.cloneEvent(inEvent, inEvent); // forward mouse preventDefault
+
+  var pd = e.preventDefault;
+
+  e.preventDefault = function () {
+    inEvent.preventDefault();
+    pd();
+  };
+
+  e.pointerId = POINTER_ID;
+  e.isPrimary = true;
+  e.pointerType = POINTER_TYPE;
+  return e;
+}
+
+var _default = MouseSource;
+exports.default = _default;
+},{"./EventSource.js":"node_modules/ol/pointer/EventSource.js"}],"node_modules/ol/pointer/MsSource.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _EventSource = _interopRequireDefault(require("./EventSource.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/pointer/MsSource
+ */
+// Based on https://github.com/Polymer/PointerEvents
+// Copyright (c) 2013 The Polymer Authors. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+// * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+/**
+ * @const
+ * @type {Array<string>}
+ */
+var POINTER_TYPES = ['', 'unavailable', 'touch', 'pen', 'mouse'];
+/**
+ * Handler for `msPointerDown`.
+ *
+ * @this {MsSource}
+ * @param {MSPointerEvent} inEvent The in event.
+ */
+
+function msPointerDown(inEvent) {
+  this.pointerMap[inEvent.pointerId.toString()] = inEvent;
+  var e = this.prepareEvent_(inEvent);
+  this.dispatcher.down(e, inEvent);
+}
+/**
+ * Handler for `msPointerMove`.
+ *
+ * @this {MsSource}
+ * @param {MSPointerEvent} inEvent The in event.
+ */
+
+
+function msPointerMove(inEvent) {
+  var e = this.prepareEvent_(inEvent);
+  this.dispatcher.move(e, inEvent);
+}
+/**
+ * Handler for `msPointerUp`.
+ *
+ * @this {MsSource}
+ * @param {MSPointerEvent} inEvent The in event.
+ */
+
+
+function msPointerUp(inEvent) {
+  var e = this.prepareEvent_(inEvent);
+  this.dispatcher.up(e, inEvent);
+  this.cleanup(inEvent.pointerId);
+}
+/**
+ * Handler for `msPointerOut`.
+ *
+ * @this {MsSource}
+ * @param {MSPointerEvent} inEvent The in event.
+ */
+
+
+function msPointerOut(inEvent) {
+  var e = this.prepareEvent_(inEvent);
+  this.dispatcher.leaveOut(e, inEvent);
+}
+/**
+ * Handler for `msPointerOver`.
+ *
+ * @this {MsSource}
+ * @param {MSPointerEvent} inEvent The in event.
+ */
+
+
+function msPointerOver(inEvent) {
+  var e = this.prepareEvent_(inEvent);
+  this.dispatcher.enterOver(e, inEvent);
+}
+/**
+ * Handler for `msPointerCancel`.
+ *
+ * @this {MsSource}
+ * @param {MSPointerEvent} inEvent The in event.
+ */
+
+
+function msPointerCancel(inEvent) {
+  var e = this.prepareEvent_(inEvent);
+  this.dispatcher.cancel(e, inEvent);
+  this.cleanup(inEvent.pointerId);
+}
+/**
+ * Handler for `msLostPointerCapture`.
+ *
+ * @this {MsSource}
+ * @param {MSPointerEvent} inEvent The in event.
+ */
+
+
+function msLostPointerCapture(inEvent) {
+  var e = this.dispatcher.makeEvent('lostpointercapture', inEvent, inEvent);
+  this.dispatcher.dispatchEvent(e);
+}
+/**
+ * Handler for `msGotPointerCapture`.
+ *
+ * @this {MsSource}
+ * @param {MSPointerEvent} inEvent The in event.
+ */
+
+
+function msGotPointerCapture(inEvent) {
+  var e = this.dispatcher.makeEvent('gotpointercapture', inEvent, inEvent);
+  this.dispatcher.dispatchEvent(e);
+}
+
+var MsSource =
+/*@__PURE__*/
+function (EventSource) {
+  function MsSource(dispatcher) {
+    var mapping = {
+      'MSPointerDown': msPointerDown,
+      'MSPointerMove': msPointerMove,
+      'MSPointerUp': msPointerUp,
+      'MSPointerOut': msPointerOut,
+      'MSPointerOver': msPointerOver,
+      'MSPointerCancel': msPointerCancel,
+      'MSGotPointerCapture': msGotPointerCapture,
+      'MSLostPointerCapture': msLostPointerCapture
+    };
+    EventSource.call(this, dispatcher, mapping);
+    /**
+     * @const
+     * @type {!Object<string, MSPointerEvent|Object>}
+     */
+
+    this.pointerMap = dispatcher.pointerMap;
+  }
+
+  if (EventSource) MsSource.__proto__ = EventSource;
+  MsSource.prototype = Object.create(EventSource && EventSource.prototype);
+  MsSource.prototype.constructor = MsSource;
+  /**
+   * Creates a copy of the original event that will be used
+   * for the fake pointer event.
+   *
+   * @private
+   * @param {MSPointerEvent} inEvent The in event.
+   * @return {Object} The copied event.
+   */
+
+  MsSource.prototype.prepareEvent_ = function prepareEvent_(inEvent) {
+    /** @type {MSPointerEvent|Object} */
+    var e = inEvent;
+
+    if (typeof inEvent.pointerType === 'number') {
+      e = this.dispatcher.cloneEvent(inEvent, inEvent);
+      e.pointerType = POINTER_TYPES[inEvent.pointerType];
+    }
+
+    return e;
+  };
+  /**
+   * Remove this pointer from the list of active pointers.
+   * @param {number} pointerId Pointer identifier.
+   */
+
+
+  MsSource.prototype.cleanup = function cleanup(pointerId) {
+    delete this.pointerMap[pointerId.toString()];
+  };
+
+  return MsSource;
+}(_EventSource.default);
+
+var _default = MsSource;
+exports.default = _default;
+},{"./EventSource.js":"node_modules/ol/pointer/EventSource.js"}],"node_modules/ol/pointer/NativeSource.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _EventSource = _interopRequireDefault(require("./EventSource.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/pointer/NativeSource
+ */
+// Based on https://github.com/Polymer/PointerEvents
+// Copyright (c) 2013 The Polymer Authors. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+// * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+/**
+ * Handler for `pointerdown`.
+ *
+ * @this {NativeSource}
+ * @param {Event} inEvent The in event.
+ */
+function pointerDown(inEvent) {
+  this.dispatcher.fireNativeEvent(inEvent);
+}
+/**
+ * Handler for `pointermove`.
+ *
+ * @this {NativeSource}
+ * @param {Event} inEvent The in event.
+ */
+
+
+function pointerMove(inEvent) {
+  this.dispatcher.fireNativeEvent(inEvent);
+}
+/**
+ * Handler for `pointerup`.
+ *
+ * @this {NativeSource}
+ * @param {Event} inEvent The in event.
+ */
+
+
+function pointerUp(inEvent) {
+  this.dispatcher.fireNativeEvent(inEvent);
+}
+/**
+ * Handler for `pointerout`.
+ *
+ * @this {NativeSource}
+ * @param {Event} inEvent The in event.
+ */
+
+
+function pointerOut(inEvent) {
+  this.dispatcher.fireNativeEvent(inEvent);
+}
+/**
+ * Handler for `pointerover`.
+ *
+ * @this {NativeSource}
+ * @param {Event} inEvent The in event.
+ */
+
+
+function pointerOver(inEvent) {
+  this.dispatcher.fireNativeEvent(inEvent);
+}
+/**
+ * Handler for `pointercancel`.
+ *
+ * @this {NativeSource}
+ * @param {Event} inEvent The in event.
+ */
+
+
+function pointerCancel(inEvent) {
+  this.dispatcher.fireNativeEvent(inEvent);
+}
+/**
+ * Handler for `lostpointercapture`.
+ *
+ * @this {NativeSource}
+ * @param {Event} inEvent The in event.
+ */
+
+
+function lostPointerCapture(inEvent) {
+  this.dispatcher.fireNativeEvent(inEvent);
+}
+/**
+ * Handler for `gotpointercapture`.
+ *
+ * @this {NativeSource}
+ * @param {Event} inEvent The in event.
+ */
+
+
+function gotPointerCapture(inEvent) {
+  this.dispatcher.fireNativeEvent(inEvent);
+}
+
+var NativeSource =
+/*@__PURE__*/
+function (EventSource) {
+  function NativeSource(dispatcher) {
+    var mapping = {
+      'pointerdown': pointerDown,
+      'pointermove': pointerMove,
+      'pointerup': pointerUp,
+      'pointerout': pointerOut,
+      'pointerover': pointerOver,
+      'pointercancel': pointerCancel,
+      'gotpointercapture': gotPointerCapture,
+      'lostpointercapture': lostPointerCapture
+    };
+    EventSource.call(this, dispatcher, mapping);
+  }
+
+  if (EventSource) NativeSource.__proto__ = EventSource;
+  NativeSource.prototype = Object.create(EventSource && EventSource.prototype);
+  NativeSource.prototype.constructor = NativeSource;
+  return NativeSource;
+}(_EventSource.default);
+
+var _default = NativeSource;
+exports.default = _default;
+},{"./EventSource.js":"node_modules/ol/pointer/EventSource.js"}],"node_modules/ol/pointer/PointerEvent.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _Event2 = _interopRequireDefault(require("../events/Event.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/pointer/PointerEvent
+ */
+// Based on https://github.com/Polymer/PointerEvents
+// Copyright (c) 2013 The Polymer Authors. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+// * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+/**
+ * Is the `buttons` property supported?
+ * @type {boolean}
+ */
+var HAS_BUTTONS = false;
+
+var PointerEvent =
+/*@__PURE__*/
+function (_Event) {
+  function PointerEvent(type, originalEvent, opt_eventDict) {
+    _Event.call(this, type);
+    /**
+     * @const
+     * @type {Event}
+     */
+
+
+    this.originalEvent = originalEvent;
+    var eventDict = opt_eventDict ? opt_eventDict : {};
+    /**
+     * @type {number}
+     */
+
+    this.buttons = getButtons(eventDict);
+    /**
+     * @type {number}
+     */
+
+    this.pressure = getPressure(eventDict, this.buttons); // MouseEvent related properties
+
+    /**
+     * @type {boolean}
+     */
+
+    this.bubbles = 'bubbles' in eventDict ? eventDict['bubbles'] : false;
+    /**
+     * @type {boolean}
+     */
+
+    this.cancelable = 'cancelable' in eventDict ? eventDict['cancelable'] : false;
+    /**
+     * @type {Object}
+     */
+
+    this.view = 'view' in eventDict ? eventDict['view'] : null;
+    /**
+     * @type {number}
+     */
+
+    this.detail = 'detail' in eventDict ? eventDict['detail'] : null;
+    /**
+     * @type {number}
+     */
+
+    this.screenX = 'screenX' in eventDict ? eventDict['screenX'] : 0;
+    /**
+     * @type {number}
+     */
+
+    this.screenY = 'screenY' in eventDict ? eventDict['screenY'] : 0;
+    /**
+     * @type {number}
+     */
+
+    this.clientX = 'clientX' in eventDict ? eventDict['clientX'] : 0;
+    /**
+     * @type {number}
+     */
+
+    this.clientY = 'clientY' in eventDict ? eventDict['clientY'] : 0;
+    /**
+     * @type {boolean}
+     */
+
+    this.ctrlKey = 'ctrlKey' in eventDict ? eventDict['ctrlKey'] : false;
+    /**
+     * @type {boolean}
+     */
+
+    this.altKey = 'altKey' in eventDict ? eventDict['altKey'] : false;
+    /**
+     * @type {boolean}
+     */
+
+    this.shiftKey = 'shiftKey' in eventDict ? eventDict['shiftKey'] : false;
+    /**
+     * @type {boolean}
+     */
+
+    this.metaKey = 'metaKey' in eventDict ? eventDict['metaKey'] : false;
+    /**
+     * @type {number}
+     */
+
+    this.button = 'button' in eventDict ? eventDict['button'] : 0;
+    /**
+     * @type {Node}
+     */
+
+    this.relatedTarget = 'relatedTarget' in eventDict ? eventDict['relatedTarget'] : null; // PointerEvent related properties
+
+    /**
+     * @const
+     * @type {number}
+     */
+
+    this.pointerId = 'pointerId' in eventDict ? eventDict['pointerId'] : 0;
+    /**
+     * @type {number}
+     */
+
+    this.width = 'width' in eventDict ? eventDict['width'] : 0;
+    /**
+     * @type {number}
+     */
+
+    this.height = 'height' in eventDict ? eventDict['height'] : 0;
+    /**
+     * @type {number}
+     */
+
+    this.tiltX = 'tiltX' in eventDict ? eventDict['tiltX'] : 0;
+    /**
+     * @type {number}
+     */
+
+    this.tiltY = 'tiltY' in eventDict ? eventDict['tiltY'] : 0;
+    /**
+     * @type {string}
+     */
+
+    this.pointerType = 'pointerType' in eventDict ? eventDict['pointerType'] : '';
+    /**
+     * @type {number}
+     */
+
+    this.hwTimestamp = 'hwTimestamp' in eventDict ? eventDict['hwTimestamp'] : 0;
+    /**
+     * @type {boolean}
+     */
+
+    this.isPrimary = 'isPrimary' in eventDict ? eventDict['isPrimary'] : false; // keep the semantics of preventDefault
+
+    if (originalEvent.preventDefault) {
+      this.preventDefault = function () {
+        originalEvent.preventDefault();
+      };
+    }
+  }
+
+  if (_Event) PointerEvent.__proto__ = _Event;
+  PointerEvent.prototype = Object.create(_Event && _Event.prototype);
+  PointerEvent.prototype.constructor = PointerEvent;
+  return PointerEvent;
+}(_Event2.default);
+/**
+ * @param {Object<string, ?>} eventDict The event dictionary.
+ * @return {number} Button indicator.
+ */
+
+
+function getButtons(eventDict) {
+  // According to the w3c spec,
+  // http://www.w3.org/TR/DOM-Level-3-Events/#events-MouseEvent-button
+  // MouseEvent.button == 0 can mean either no mouse button depressed, or the
+  // left mouse button depressed.
+  //
+  // As of now, the only way to distinguish between the two states of
+  // MouseEvent.button is by using the deprecated MouseEvent.which property, as
+  // this maps mouse buttons to positive integers > 0, and uses 0 to mean that
+  // no mouse button is held.
+  //
+  // MouseEvent.which is derived from MouseEvent.button at MouseEvent creation,
+  // but initMouseEvent does not expose an argument with which to set
+  // MouseEvent.which. Calling initMouseEvent with a buttonArg of 0 will set
+  // MouseEvent.button == 0 and MouseEvent.which == 1, breaking the expectations
+  // of app developers.
+  //
+  // The only way to propagate the correct state of MouseEvent.which and
+  // MouseEvent.button to a new MouseEvent.button == 0 and MouseEvent.which == 0
+  // is to call initMouseEvent with a buttonArg value of -1.
+  //
+  // This is fixed with DOM Level 4's use of buttons
+  var buttons;
+
+  if (eventDict.buttons || HAS_BUTTONS) {
+    buttons = eventDict.buttons;
+  } else {
+    switch (eventDict.which) {
+      case 1:
+        buttons = 1;
+        break;
+
+      case 2:
+        buttons = 4;
+        break;
+
+      case 3:
+        buttons = 2;
+        break;
+
+      default:
+        buttons = 0;
+    }
+  }
+
+  return buttons;
+}
+/**
+ * @param {Object<string, ?>} eventDict The event dictionary.
+ * @param {number} buttons Button indicator.
+ * @return {number} The pressure.
+ */
+
+
+function getPressure(eventDict, buttons) {
+  // Spec requires that pointers without pressure specified use 0.5 for down
+  // state and 0 for up state.
+  var pressure = 0;
+
+  if (eventDict.pressure) {
+    pressure = eventDict.pressure;
+  } else {
+    pressure = buttons ? 0.5 : 0;
+  }
+
+  return pressure;
+}
+/**
+ * Checks if the `buttons` property is supported.
+ */
+
+
+(function () {
+  try {
+    var ev = new MouseEvent('click', {
+      buttons: 1
+    });
+    HAS_BUTTONS = ev.buttons === 1;
+  } catch (e) {// pass
+  }
+})();
+
+var _default = PointerEvent;
+exports.default = _default;
+},{"../events/Event.js":"node_modules/ol/events/Event.js"}],"node_modules/ol/pointer/TouchSource.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _array = require("../array.js");
+
+var _EventSource = _interopRequireDefault(require("./EventSource.js"));
+
+var _MouseSource = require("./MouseSource.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/pointer/TouchSource
+ */
+// Based on https://github.com/Polymer/PointerEvents
+// Copyright (c) 2013 The Polymer Authors. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+// * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+/**
+ * @type {number}
+ */
+var CLICK_COUNT_TIMEOUT = 200;
+/**
+ * @type {string}
+ */
+
+var POINTER_TYPE = 'touch';
+/**
+ * Handler for `touchstart`, triggers `pointerover`,
+ * `pointerenter` and `pointerdown` events.
+ *
+ * @this {TouchSource}
+ * @param {TouchEvent} inEvent The in event.
+ */
+
+function touchstart(inEvent) {
+  this.vacuumTouches_(inEvent);
+  this.setPrimaryTouch_(inEvent.changedTouches[0]);
+  this.dedupSynthMouse_(inEvent);
+  this.clickCount_++;
+  this.processTouches_(inEvent, this.overDown_);
+}
+/**
+ * Handler for `touchmove`.
+ *
+ * @this {TouchSource}
+ * @param {TouchEvent} inEvent The in event.
+ */
+
+
+function touchmove(inEvent) {
+  this.processTouches_(inEvent, this.moveOverOut_);
+}
+/**
+ * Handler for `touchend`, triggers `pointerup`,
+ * `pointerout` and `pointerleave` events.
+ *
+ * @this {TouchSource}
+ * @param {TouchEvent} inEvent The event.
+ */
+
+
+function touchend(inEvent) {
+  this.dedupSynthMouse_(inEvent);
+  this.processTouches_(inEvent, this.upOut_);
+}
+/**
+ * Handler for `touchcancel`, triggers `pointercancel`,
+ * `pointerout` and `pointerleave` events.
+ *
+ * @this {TouchSource}
+ * @param {TouchEvent} inEvent The in event.
+ */
+
+
+function touchcancel(inEvent) {
+  this.processTouches_(inEvent, this.cancelOut_);
+}
+
+var TouchSource =
+/*@__PURE__*/
+function (EventSource) {
+  function TouchSource(dispatcher, mouseSource) {
+    var mapping = {
+      'touchstart': touchstart,
+      'touchmove': touchmove,
+      'touchend': touchend,
+      'touchcancel': touchcancel
+    };
+    EventSource.call(this, dispatcher, mapping);
+    /**
+     * @const
+     * @type {!Object<string, Event|Object>}
+     */
+
+    this.pointerMap = dispatcher.pointerMap;
+    /**
+     * @const
+     * @type {import("./MouseSource.js").default}
+     */
+
+    this.mouseSource = mouseSource;
+    /**
+     * @private
+     * @type {number|undefined}
+     */
+
+    this.firstTouchId_ = undefined;
+    /**
+     * @private
+     * @type {number}
+     */
+
+    this.clickCount_ = 0;
+    /**
+     * @private
+     * @type {?}
+     */
+
+    this.resetId_;
+    /**
+     * Mouse event timeout: This should be long enough to
+     * ignore compat mouse events made by touch.
+     * @private
+     * @type {number}
+     */
+
+    this.dedupTimeout_ = 2500;
+  }
+
+  if (EventSource) TouchSource.__proto__ = EventSource;
+  TouchSource.prototype = Object.create(EventSource && EventSource.prototype);
+  TouchSource.prototype.constructor = TouchSource;
+  /**
+   * @private
+   * @param {Touch} inTouch The in touch.
+   * @return {boolean} True, if this is the primary touch.
+   */
+
+  TouchSource.prototype.isPrimaryTouch_ = function isPrimaryTouch_(inTouch) {
+    return this.firstTouchId_ === inTouch.identifier;
+  };
+  /**
+   * Set primary touch if there are no pointers, or the only pointer is the mouse.
+   * @param {Touch} inTouch The in touch.
+   * @private
+   */
+
+
+  TouchSource.prototype.setPrimaryTouch_ = function setPrimaryTouch_(inTouch) {
+    var count = Object.keys(this.pointerMap).length;
+
+    if (count === 0 || count === 1 && _MouseSource.POINTER_ID.toString() in this.pointerMap) {
+      this.firstTouchId_ = inTouch.identifier;
+      this.cancelResetClickCount_();
+    }
+  };
+  /**
+   * @private
+   * @param {PointerEvent} inPointer The in pointer object.
+   */
+
+
+  TouchSource.prototype.removePrimaryPointer_ = function removePrimaryPointer_(inPointer) {
+    if (inPointer.isPrimary) {
+      this.firstTouchId_ = undefined;
+      this.resetClickCount_();
+    }
+  };
+  /**
+   * @private
+   */
+
+
+  TouchSource.prototype.resetClickCount_ = function resetClickCount_() {
+    this.resetId_ = setTimeout(this.resetClickCountHandler_.bind(this), CLICK_COUNT_TIMEOUT);
+  };
+  /**
+   * @private
+   */
+
+
+  TouchSource.prototype.resetClickCountHandler_ = function resetClickCountHandler_() {
+    this.clickCount_ = 0;
+    this.resetId_ = undefined;
+  };
+  /**
+   * @private
+   */
+
+
+  TouchSource.prototype.cancelResetClickCount_ = function cancelResetClickCount_() {
+    if (this.resetId_ !== undefined) {
+      clearTimeout(this.resetId_);
+    }
+  };
+  /**
+   * @private
+   * @param {TouchEvent} browserEvent Browser event
+   * @param {Touch} inTouch Touch event
+   * @return {PointerEvent} A pointer object.
+   */
+
+
+  TouchSource.prototype.touchToPointer_ = function touchToPointer_(browserEvent, inTouch) {
+    var e = this.dispatcher.cloneEvent(browserEvent, inTouch); // Spec specifies that pointerId 1 is reserved for Mouse.
+    // Touch identifiers can start at 0.
+    // Add 2 to the touch identifier for compatibility.
+
+    e.pointerId = inTouch.identifier + 2; // TODO: check if this is necessary?
+    //e.target = findTarget(e);
+
+    e.bubbles = true;
+    e.cancelable = true;
+    e.detail = this.clickCount_;
+    e.button = 0;
+    e.buttons = 1;
+    e.width = inTouch.radiusX || 0;
+    e.height = inTouch.radiusY || 0;
+    e.pressure = inTouch.force || 0.5;
+    e.isPrimary = this.isPrimaryTouch_(inTouch);
+    e.pointerType = POINTER_TYPE; // make sure that the properties that are different for
+    // each `Touch` object are not copied from the BrowserEvent object
+
+    e.clientX = inTouch.clientX;
+    e.clientY = inTouch.clientY;
+    e.screenX = inTouch.screenX;
+    e.screenY = inTouch.screenY;
+    return e;
+  };
+  /**
+   * @private
+   * @param {TouchEvent} inEvent Touch event
+   * @param {function(TouchEvent, PointerEvent)} inFunction In function.
+   */
+
+
+  TouchSource.prototype.processTouches_ = function processTouches_(inEvent, inFunction) {
+    var touches = Array.prototype.slice.call(inEvent.changedTouches);
+    var count = touches.length;
+
+    function preventDefault() {
+      inEvent.preventDefault();
+    }
+
+    for (var i = 0; i < count; ++i) {
+      var pointer = this.touchToPointer_(inEvent, touches[i]); // forward touch preventDefaults
+
+      pointer.preventDefault = preventDefault;
+      inFunction.call(this, inEvent, pointer);
+    }
+  };
+  /**
+   * @private
+   * @param {TouchList} touchList The touch list.
+   * @param {number} searchId Search identifier.
+   * @return {boolean} True, if the `Touch` with the given id is in the list.
+   */
+
+
+  TouchSource.prototype.findTouch_ = function findTouch_(touchList, searchId) {
+    var l = touchList.length;
+
+    for (var i = 0; i < l; i++) {
+      var touch = touchList[i];
+
+      if (touch.identifier === searchId) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+  /**
+   * In some instances, a touchstart can happen without a touchend. This
+   * leaves the pointermap in a broken state.
+   * Therefore, on every touchstart, we remove the touches that did not fire a
+   * touchend event.
+   * To keep state globally consistent, we fire a pointercancel for
+   * this "abandoned" touch
+   *
+   * @private
+   * @param {TouchEvent} inEvent The in event.
+   */
+
+
+  TouchSource.prototype.vacuumTouches_ = function vacuumTouches_(inEvent) {
+    var touchList = inEvent.touches; // pointerMap.getCount() should be < touchList.length here,
+    // as the touchstart has not been processed yet.
+
+    var keys = Object.keys(this.pointerMap);
+    var count = keys.length;
+
+    if (count >= touchList.length) {
+      var d = [];
+
+      for (var i = 0; i < count; ++i) {
+        var key = Number(keys[i]);
+        var value = this.pointerMap[key]; // Never remove pointerId == 1, which is mouse.
+        // Touch identifiers are 2 smaller than their pointerId, which is the
+        // index in pointermap.
+
+        if (key != _MouseSource.POINTER_ID && !this.findTouch_(touchList, key - 2)) {
+          d.push(value.out);
+        }
+      }
+
+      for (var i$1 = 0; i$1 < d.length; ++i$1) {
+        this.cancelOut_(inEvent, d[i$1]);
+      }
+    }
+  };
+  /**
+   * @private
+   * @param {TouchEvent} browserEvent The event.
+   * @param {PointerEvent} inPointer The in pointer object.
+   */
+
+
+  TouchSource.prototype.overDown_ = function overDown_(browserEvent, inPointer) {
+    this.pointerMap[inPointer.pointerId] = {
+      target: inPointer.target,
+      out: inPointer,
+      outTarget: inPointer.target
+    };
+    this.dispatcher.over(inPointer, browserEvent);
+    this.dispatcher.enter(inPointer, browserEvent);
+    this.dispatcher.down(inPointer, browserEvent);
+  };
+  /**
+   * @private
+   * @param {TouchEvent} browserEvent The event.
+   * @param {PointerEvent} inPointer The in pointer.
+   */
+
+
+  TouchSource.prototype.moveOverOut_ = function moveOverOut_(browserEvent, inPointer) {
+    var event = inPointer;
+    var pointer = this.pointerMap[event.pointerId]; // a finger drifted off the screen, ignore it
+
+    if (!pointer) {
+      return;
+    }
+
+    var outEvent = pointer.out;
+    var outTarget = pointer.outTarget;
+    this.dispatcher.move(event, browserEvent);
+
+    if (outEvent && outTarget !== event.target) {
+      outEvent.relatedTarget = event.target;
+      /** @type {Object} */
+
+      event.relatedTarget = outTarget; // recover from retargeting by shadow
+
+      outEvent.target = outTarget;
+
+      if (event.target) {
+        this.dispatcher.leaveOut(outEvent, browserEvent);
+        this.dispatcher.enterOver(event, browserEvent);
+      } else {
+        // clean up case when finger leaves the screen
+
+        /** @type {Object} */
+        event.target = outTarget;
+        /** @type {Object} */
+
+        event.relatedTarget = null;
+        this.cancelOut_(browserEvent, event);
+      }
+    }
+
+    pointer.out = event;
+    pointer.outTarget = event.target;
+  };
+  /**
+   * @private
+   * @param {TouchEvent} browserEvent An event.
+   * @param {PointerEvent} inPointer The inPointer object.
+   */
+
+
+  TouchSource.prototype.upOut_ = function upOut_(browserEvent, inPointer) {
+    this.dispatcher.up(inPointer, browserEvent);
+    this.dispatcher.out(inPointer, browserEvent);
+    this.dispatcher.leave(inPointer, browserEvent);
+    this.cleanUpPointer_(inPointer);
+  };
+  /**
+   * @private
+   * @param {TouchEvent} browserEvent The event.
+   * @param {PointerEvent} inPointer The in pointer.
+   */
+
+
+  TouchSource.prototype.cancelOut_ = function cancelOut_(browserEvent, inPointer) {
+    this.dispatcher.cancel(inPointer, browserEvent);
+    this.dispatcher.out(inPointer, browserEvent);
+    this.dispatcher.leave(inPointer, browserEvent);
+    this.cleanUpPointer_(inPointer);
+  };
+  /**
+   * @private
+   * @param {PointerEvent} inPointer The inPointer object.
+   */
+
+
+  TouchSource.prototype.cleanUpPointer_ = function cleanUpPointer_(inPointer) {
+    delete this.pointerMap[inPointer.pointerId];
+    this.removePrimaryPointer_(inPointer);
+  };
+  /**
+   * Prevent synth mouse events from creating pointer events.
+   *
+   * @private
+   * @param {TouchEvent} inEvent The in event.
+   */
+
+
+  TouchSource.prototype.dedupSynthMouse_ = function dedupSynthMouse_(inEvent) {
+    var lts = this.mouseSource.lastTouches;
+    var t = inEvent.changedTouches[0]; // only the primary finger will synth mouse events
+
+    if (this.isPrimaryTouch_(t)) {
+      // remember x/y of last touch
+      var lt = [t.clientX, t.clientY];
+      lts.push(lt);
+      setTimeout(function () {
+        // remove touch after timeout
+        (0, _array.remove)(lts, lt);
+      }, this.dedupTimeout_);
+    }
+  };
+
+  return TouchSource;
+}(_EventSource.default);
+
+var _default = TouchSource;
+exports.default = _default;
+},{"../array.js":"node_modules/ol/array.js","./EventSource.js":"node_modules/ol/pointer/EventSource.js","./MouseSource.js":"node_modules/ol/pointer/MouseSource.js"}],"node_modules/ol/pointer/PointerEventHandler.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _events = require("../events.js");
+
+var _Target = _interopRequireDefault(require("../events/Target.js"));
+
+var _has = require("../has.js");
+
+var _EventType = _interopRequireDefault(require("./EventType.js"));
+
+var _MouseSource = _interopRequireWildcard(require("./MouseSource.js"));
+
+var _MsSource = _interopRequireDefault(require("./MsSource.js"));
+
+var _NativeSource = _interopRequireDefault(require("./NativeSource.js"));
+
+var _PointerEvent = _interopRequireDefault(require("./PointerEvent.js"));
+
+var _TouchSource = _interopRequireDefault(require("./TouchSource.js"));
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/pointer/PointerEventHandler
+ */
+// Based on https://github.com/Polymer/PointerEvents
+// Copyright (c) 2013 The Polymer Authors. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+// * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+// * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+/**
+ * Properties to copy when cloning an event, with default values.
+ * @type {Array<Array>}
+ */
+var CLONE_PROPS = [// MouseEvent
+['bubbles', false], ['cancelable', false], ['view', null], ['detail', null], ['screenX', 0], ['screenY', 0], ['clientX', 0], ['clientY', 0], ['ctrlKey', false], ['altKey', false], ['shiftKey', false], ['metaKey', false], ['button', 0], ['relatedTarget', null], // DOM Level 3
+['buttons', 0], // PointerEvent
+['pointerId', 0], ['width', 0], ['height', 0], ['pressure', 0], ['tiltX', 0], ['tiltY', 0], ['pointerType', ''], ['hwTimestamp', 0], ['isPrimary', false], // event instance
+['type', ''], ['target', null], ['currentTarget', null], ['which', 0]];
+
+var PointerEventHandler =
+/*@__PURE__*/
+function (EventTarget) {
+  function PointerEventHandler(element) {
+    EventTarget.call(this);
+    /**
+     * @const
+     * @private
+     * @type {Element|HTMLDocument}
+     */
+
+    this.element_ = element;
+    /**
+     * @const
+     * @type {!Object<string, Event|Object>}
+     */
+
+    this.pointerMap = {};
+    /**
+     * @type {Object<string, function(Event)>}
+     * @private
+     */
+
+    this.eventMap_ = {};
+    /**
+     * @type {Array<import("./EventSource.js").default>}
+     * @private
+     */
+
+    this.eventSourceList_ = [];
+    this.registerSources();
+  }
+
+  if (EventTarget) PointerEventHandler.__proto__ = EventTarget;
+  PointerEventHandler.prototype = Object.create(EventTarget && EventTarget.prototype);
+  PointerEventHandler.prototype.constructor = PointerEventHandler;
+  /**
+   * Set up the event sources (mouse, touch and native pointers)
+   * that generate pointer events.
+   */
+
+  PointerEventHandler.prototype.registerSources = function registerSources() {
+    if (_has.POINTER) {
+      this.registerSource('native', new _NativeSource.default(this));
+    } else if (_has.MSPOINTER) {
+      this.registerSource('ms', new _MsSource.default(this));
+    } else {
+      var mouseSource = new _MouseSource.default(this);
+      this.registerSource('mouse', mouseSource);
+
+      if (_has.TOUCH) {
+        this.registerSource('touch', new _TouchSource.default(this, mouseSource));
+      }
+    } // register events on the viewport element
+
+
+    this.register_();
+  };
+  /**
+   * Add a new event source that will generate pointer events.
+   *
+   * @param {string} name A name for the event source
+   * @param {import("./EventSource.js").default} source The source event.
+   */
+
+
+  PointerEventHandler.prototype.registerSource = function registerSource(name, source) {
+    var s = source;
+    var newEvents = s.getEvents();
+
+    if (newEvents) {
+      newEvents.forEach(function (e) {
+        var handler = s.getHandlerForEvent(e);
+
+        if (handler) {
+          this.eventMap_[e] = handler.bind(s);
+        }
+      }.bind(this));
+      this.eventSourceList_.push(s);
+    }
+  };
+  /**
+   * Set up the events for all registered event sources.
+   * @private
+   */
+
+
+  PointerEventHandler.prototype.register_ = function register_() {
+    var l = this.eventSourceList_.length;
+
+    for (var i = 0; i < l; i++) {
+      var eventSource = this.eventSourceList_[i];
+      this.addEvents_(eventSource.getEvents());
+    }
+  };
+  /**
+   * Remove all registered events.
+   * @private
+   */
+
+
+  PointerEventHandler.prototype.unregister_ = function unregister_() {
+    var l = this.eventSourceList_.length;
+
+    for (var i = 0; i < l; i++) {
+      var eventSource = this.eventSourceList_[i];
+      this.removeEvents_(eventSource.getEvents());
+    }
+  };
+  /**
+   * Calls the right handler for a new event.
+   * @private
+   * @param {Event} inEvent Browser event.
+   */
+
+
+  PointerEventHandler.prototype.eventHandler_ = function eventHandler_(inEvent) {
+    var type = inEvent.type;
+    var handler = this.eventMap_[type];
+
+    if (handler) {
+      handler(inEvent);
+    }
+  };
+  /**
+   * Setup listeners for the given events.
+   * @private
+   * @param {Array<string>} events List of events.
+   */
+
+
+  PointerEventHandler.prototype.addEvents_ = function addEvents_(events) {
+    events.forEach(function (eventName) {
+      (0, _events.listen)(this.element_, eventName, this.eventHandler_, this);
+    }.bind(this));
+  };
+  /**
+   * Unregister listeners for the given events.
+   * @private
+   * @param {Array<string>} events List of events.
+   */
+
+
+  PointerEventHandler.prototype.removeEvents_ = function removeEvents_(events) {
+    events.forEach(function (e) {
+      (0, _events.unlisten)(this.element_, e, this.eventHandler_, this);
+    }.bind(this));
+  };
+  /**
+   * Returns a snapshot of inEvent, with writable properties.
+   *
+   * @param {Event} event Browser event.
+   * @param {Event|Touch} inEvent An event that contains
+   *    properties to copy.
+   * @return {Object} An object containing shallow copies of
+   *    `inEvent`'s properties.
+   */
+
+
+  PointerEventHandler.prototype.cloneEvent = function cloneEvent(event, inEvent) {
+    var eventCopy = {};
+
+    for (var i = 0, ii = CLONE_PROPS.length; i < ii; i++) {
+      var p = CLONE_PROPS[i][0];
+      eventCopy[p] = event[p] || inEvent[p] || CLONE_PROPS[i][1];
+    }
+
+    return eventCopy;
+  }; // EVENTS
+
+  /**
+   * Triggers a 'pointerdown' event.
+   * @param {Object} data Pointer event data.
+   * @param {Event} event The event.
+   */
+
+
+  PointerEventHandler.prototype.down = function down(data, event) {
+    this.fireEvent(_EventType.default.POINTERDOWN, data, event);
+  };
+  /**
+   * Triggers a 'pointermove' event.
+   * @param {Object} data Pointer event data.
+   * @param {Event} event The event.
+   */
+
+
+  PointerEventHandler.prototype.move = function move(data, event) {
+    this.fireEvent(_EventType.default.POINTERMOVE, data, event);
+  };
+  /**
+   * Triggers a 'pointerup' event.
+   * @param {Object} data Pointer event data.
+   * @param {Event} event The event.
+   */
+
+
+  PointerEventHandler.prototype.up = function up(data, event) {
+    this.fireEvent(_EventType.default.POINTERUP, data, event);
+  };
+  /**
+   * Triggers a 'pointerenter' event.
+   * @param {Object} data Pointer event data.
+   * @param {Event} event The event.
+   */
+
+
+  PointerEventHandler.prototype.enter = function enter(data, event) {
+    data.bubbles = false;
+    this.fireEvent(_EventType.default.POINTERENTER, data, event);
+  };
+  /**
+   * Triggers a 'pointerleave' event.
+   * @param {Object} data Pointer event data.
+   * @param {Event} event The event.
+   */
+
+
+  PointerEventHandler.prototype.leave = function leave(data, event) {
+    data.bubbles = false;
+    this.fireEvent(_EventType.default.POINTERLEAVE, data, event);
+  };
+  /**
+   * Triggers a 'pointerover' event.
+   * @param {Object} data Pointer event data.
+   * @param {Event} event The event.
+   */
+
+
+  PointerEventHandler.prototype.over = function over(data, event) {
+    data.bubbles = true;
+    this.fireEvent(_EventType.default.POINTEROVER, data, event);
+  };
+  /**
+   * Triggers a 'pointerout' event.
+   * @param {Object} data Pointer event data.
+   * @param {Event} event The event.
+   */
+
+
+  PointerEventHandler.prototype.out = function out(data, event) {
+    data.bubbles = true;
+    this.fireEvent(_EventType.default.POINTEROUT, data, event);
+  };
+  /**
+   * Triggers a 'pointercancel' event.
+   * @param {Object} data Pointer event data.
+   * @param {Event} event The event.
+   */
+
+
+  PointerEventHandler.prototype.cancel = function cancel(data, event) {
+    this.fireEvent(_EventType.default.POINTERCANCEL, data, event);
+  };
+  /**
+   * Triggers a combination of 'pointerout' and 'pointerleave' events.
+   * @param {Object} data Pointer event data.
+   * @param {Event} event The event.
+   */
+
+
+  PointerEventHandler.prototype.leaveOut = function leaveOut(data, event) {
+    this.out(data, event);
+
+    if (!this.contains_(data.target, data.relatedTarget)) {
+      this.leave(data, event);
+    }
+  };
+  /**
+   * Triggers a combination of 'pointerover' and 'pointerevents' events.
+   * @param {Object} data Pointer event data.
+   * @param {Event} event The event.
+   */
+
+
+  PointerEventHandler.prototype.enterOver = function enterOver(data, event) {
+    this.over(data, event);
+
+    if (!this.contains_(data.target, data.relatedTarget)) {
+      this.enter(data, event);
+    }
+  };
+  /**
+   * @private
+   * @param {Element} container The container element.
+   * @param {Element} contained The contained element.
+   * @return {boolean} Returns true if the container element
+   *   contains the other element.
+   */
+
+
+  PointerEventHandler.prototype.contains_ = function contains_(container, contained) {
+    if (!container || !contained) {
+      return false;
+    }
+
+    return container.contains(contained);
+  }; // EVENT CREATION AND TRACKING
+
+  /**
+   * Creates a new Event of type `inType`, based on the information in
+   * `data`.
+   *
+   * @param {string} inType A string representing the type of event to create.
+   * @param {Object} data Pointer event data.
+   * @param {Event} event The event.
+   * @return {PointerEvent} A PointerEvent of type `inType`.
+   */
+
+
+  PointerEventHandler.prototype.makeEvent = function makeEvent(inType, data, event) {
+    return new _PointerEvent.default(inType, event, data);
+  };
+  /**
+   * Make and dispatch an event in one call.
+   * @param {string} inType A string representing the type of event.
+   * @param {Object} data Pointer event data.
+   * @param {Event} event The event.
+   */
+
+
+  PointerEventHandler.prototype.fireEvent = function fireEvent(inType, data, event) {
+    var e = this.makeEvent(inType, data, event);
+    this.dispatchEvent(e);
+  };
+  /**
+   * Creates a pointer event from a native pointer event
+   * and dispatches this event.
+   * @param {Event} event A platform event with a target.
+   */
+
+
+  PointerEventHandler.prototype.fireNativeEvent = function fireNativeEvent(event) {
+    var e = this.makeEvent(event.type, event, event);
+    this.dispatchEvent(e);
+  };
+  /**
+   * Wrap a native mouse event into a pointer event.
+   * This proxy method is required for the legacy IE support.
+   * @param {string} eventType The pointer event type.
+   * @param {Event} event The event.
+   * @return {PointerEvent} The wrapped event.
+   */
+
+
+  PointerEventHandler.prototype.wrapMouseEvent = function wrapMouseEvent(eventType, event) {
+    var pointerEvent = this.makeEvent(eventType, (0, _MouseSource.prepareEvent)(event, this), event);
+    return pointerEvent;
+  };
+  /**
+   * @inheritDoc
+   */
+
+
+  PointerEventHandler.prototype.disposeInternal = function disposeInternal() {
+    this.unregister_();
+    EventTarget.prototype.disposeInternal.call(this);
+  };
+
+  return PointerEventHandler;
+}(_Target.default);
+
+var _default = PointerEventHandler;
+exports.default = _default;
+},{"../events.js":"node_modules/ol/events.js","../events/Target.js":"node_modules/ol/events/Target.js","../has.js":"node_modules/ol/has.js","./EventType.js":"node_modules/ol/pointer/EventType.js","./MouseSource.js":"node_modules/ol/pointer/MouseSource.js","./MsSource.js":"node_modules/ol/pointer/MsSource.js","./NativeSource.js":"node_modules/ol/pointer/NativeSource.js","./PointerEvent.js":"node_modules/ol/pointer/PointerEvent.js","./TouchSource.js":"node_modules/ol/pointer/TouchSource.js"}],"node_modules/ol/MapBrowserEventHandler.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _has = require("./has.js");
+
+var _MapBrowserEventType = _interopRequireDefault(require("./MapBrowserEventType.js"));
+
+var _MapBrowserPointerEvent = _interopRequireDefault(require("./MapBrowserPointerEvent.js"));
+
+var _events = require("./events.js");
+
+var _Target = _interopRequireDefault(require("./events/Target.js"));
+
+var _EventType = _interopRequireDefault(require("./pointer/EventType.js"));
+
+var _PointerEventHandler = _interopRequireDefault(require("./pointer/PointerEventHandler.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/MapBrowserEventHandler
+ */
+var MapBrowserEventHandler =
+/*@__PURE__*/
+function (EventTarget) {
+  function MapBrowserEventHandler(map, moveTolerance) {
+    EventTarget.call(this);
+    /**
+     * This is the element that we will listen to the real events on.
+     * @type {import("./PluggableMap.js").default}
+     * @private
+     */
+
+    this.map_ = map;
+    /**
+     * @type {any}
+     * @private
+     */
+
+    this.clickTimeoutId_;
+    /**
+     * @type {boolean}
+     * @private
+     */
+
+    this.dragging_ = false;
+    /**
+     * @type {!Array<import("./events.js").EventsKey>}
+     * @private
+     */
+
+    this.dragListenerKeys_ = [];
+    /**
+     * @type {number}
+     * @private
+     */
+
+    this.moveTolerance_ = moveTolerance ? moveTolerance * _has.DEVICE_PIXEL_RATIO : _has.DEVICE_PIXEL_RATIO;
+    /**
+     * The most recent "down" type event (or null if none have occurred).
+     * Set on pointerdown.
+     * @type {import("./pointer/PointerEvent.js").default}
+     * @private
+     */
+
+    this.down_ = null;
+    var element = this.map_.getViewport();
+    /**
+     * @type {number}
+     * @private
+     */
+
+    this.activePointers_ = 0;
+    /**
+     * @type {!Object<number, boolean>}
+     * @private
+     */
+
+    this.trackedTouches_ = {};
+    /**
+     * Event handler which generates pointer events for
+     * the viewport element.
+     *
+     * @type {PointerEventHandler}
+     * @private
+     */
+
+    this.pointerEventHandler_ = new _PointerEventHandler.default(element);
+    /**
+     * Event handler which generates pointer events for
+     * the document (used when dragging).
+     *
+     * @type {PointerEventHandler}
+     * @private
+     */
+
+    this.documentPointerEventHandler_ = null;
+    /**
+     * @type {?import("./events.js").EventsKey}
+     * @private
+     */
+
+    this.pointerdownListenerKey_ = (0, _events.listen)(this.pointerEventHandler_, _EventType.default.POINTERDOWN, this.handlePointerDown_, this);
+    /**
+     * @type {?import("./events.js").EventsKey}
+     * @private
+     */
+
+    this.relayedListenerKey_ = (0, _events.listen)(this.pointerEventHandler_, _EventType.default.POINTERMOVE, this.relayEvent_, this);
+  }
+
+  if (EventTarget) MapBrowserEventHandler.__proto__ = EventTarget;
+  MapBrowserEventHandler.prototype = Object.create(EventTarget && EventTarget.prototype);
+  MapBrowserEventHandler.prototype.constructor = MapBrowserEventHandler;
+  /**
+   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
+   * event.
+   * @private
+   */
+
+  MapBrowserEventHandler.prototype.emulateClick_ = function emulateClick_(pointerEvent) {
+    var newEvent = new _MapBrowserPointerEvent.default(_MapBrowserEventType.default.CLICK, this.map_, pointerEvent);
+    this.dispatchEvent(newEvent);
+
+    if (this.clickTimeoutId_ !== undefined) {
+      // double-click
+      clearTimeout(this.clickTimeoutId_);
+      this.clickTimeoutId_ = undefined;
+      newEvent = new _MapBrowserPointerEvent.default(_MapBrowserEventType.default.DBLCLICK, this.map_, pointerEvent);
+      this.dispatchEvent(newEvent);
+    } else {
+      // click
+      this.clickTimeoutId_ = setTimeout(function () {
+        this.clickTimeoutId_ = undefined;
+        var newEvent = new _MapBrowserPointerEvent.default(_MapBrowserEventType.default.SINGLECLICK, this.map_, pointerEvent);
+        this.dispatchEvent(newEvent);
+      }.bind(this), 250);
+    }
+  };
+  /**
+   * Keeps track on how many pointers are currently active.
+   *
+   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
+   * event.
+   * @private
+   */
+
+
+  MapBrowserEventHandler.prototype.updateActivePointers_ = function updateActivePointers_(pointerEvent) {
+    var event = pointerEvent;
+
+    if (event.type == _MapBrowserEventType.default.POINTERUP || event.type == _MapBrowserEventType.default.POINTERCANCEL) {
+      delete this.trackedTouches_[event.pointerId];
+    } else if (event.type == _MapBrowserEventType.default.POINTERDOWN) {
+      this.trackedTouches_[event.pointerId] = true;
+    }
+
+    this.activePointers_ = Object.keys(this.trackedTouches_).length;
+  };
+  /**
+   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
+   * event.
+   * @private
+   */
+
+
+  MapBrowserEventHandler.prototype.handlePointerUp_ = function handlePointerUp_(pointerEvent) {
+    this.updateActivePointers_(pointerEvent);
+    var newEvent = new _MapBrowserPointerEvent.default(_MapBrowserEventType.default.POINTERUP, this.map_, pointerEvent);
+    this.dispatchEvent(newEvent); // We emulate click events on left mouse button click, touch contact, and pen
+    // contact. isMouseActionButton returns true in these cases (evt.button is set
+    // to 0).
+    // See http://www.w3.org/TR/pointerevents/#button-states
+    // We only fire click, singleclick, and doubleclick if nobody has called
+    // event.stopPropagation() or event.preventDefault().
+
+    if (!newEvent.propagationStopped && !this.dragging_ && this.isMouseActionButton_(pointerEvent)) {
+      this.emulateClick_(this.down_);
+    }
+
+    if (this.activePointers_ === 0) {
+      this.dragListenerKeys_.forEach(_events.unlistenByKey);
+      this.dragListenerKeys_.length = 0;
+      this.dragging_ = false;
+      this.down_ = null;
+      this.documentPointerEventHandler_.dispose();
+      this.documentPointerEventHandler_ = null;
+    }
+  };
+  /**
+   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
+   * event.
+   * @return {boolean} If the left mouse button was pressed.
+   * @private
+   */
+
+
+  MapBrowserEventHandler.prototype.isMouseActionButton_ = function isMouseActionButton_(pointerEvent) {
+    return pointerEvent.button === 0;
+  };
+  /**
+   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
+   * event.
+   * @private
+   */
+
+
+  MapBrowserEventHandler.prototype.handlePointerDown_ = function handlePointerDown_(pointerEvent) {
+    this.updateActivePointers_(pointerEvent);
+    var newEvent = new _MapBrowserPointerEvent.default(_MapBrowserEventType.default.POINTERDOWN, this.map_, pointerEvent);
+    this.dispatchEvent(newEvent);
+    this.down_ = pointerEvent;
+
+    if (this.dragListenerKeys_.length === 0) {
+      /* Set up a pointer event handler on the `document`,
+       * which is required when the pointer is moved outside
+       * the viewport when dragging.
+       */
+      this.documentPointerEventHandler_ = new _PointerEventHandler.default(document);
+      this.dragListenerKeys_.push((0, _events.listen)(this.documentPointerEventHandler_, _MapBrowserEventType.default.POINTERMOVE, this.handlePointerMove_, this), (0, _events.listen)(this.documentPointerEventHandler_, _MapBrowserEventType.default.POINTERUP, this.handlePointerUp_, this),
+      /* Note that the listener for `pointercancel is set up on
+       * `pointerEventHandler_` and not `documentPointerEventHandler_` like
+       * the `pointerup` and `pointermove` listeners.
+       *
+       * The reason for this is the following: `TouchSource.vacuumTouches_()`
+       * issues `pointercancel` events, when there was no `touchend` for a
+       * `touchstart`. Now, let's say a first `touchstart` is registered on
+       * `pointerEventHandler_`. The `documentPointerEventHandler_` is set up.
+       * But `documentPointerEventHandler_` doesn't know about the first
+       * `touchstart`. If there is no `touchend` for the `touchstart`, we can
+       * only receive a `touchcancel` from `pointerEventHandler_`, because it is
+       * only registered there.
+       */
+      (0, _events.listen)(this.pointerEventHandler_, _MapBrowserEventType.default.POINTERCANCEL, this.handlePointerUp_, this));
+    }
+  };
+  /**
+   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
+   * event.
+   * @private
+   */
+
+
+  MapBrowserEventHandler.prototype.handlePointerMove_ = function handlePointerMove_(pointerEvent) {
+    // Between pointerdown and pointerup, pointermove events are triggered.
+    // To avoid a 'false' touchmove event to be dispatched, we test if the pointer
+    // moved a significant distance.
+    if (this.isMoving_(pointerEvent)) {
+      this.dragging_ = true;
+      var newEvent = new _MapBrowserPointerEvent.default(_MapBrowserEventType.default.POINTERDRAG, this.map_, pointerEvent, this.dragging_);
+      this.dispatchEvent(newEvent);
+    } // Some native android browser triggers mousemove events during small period
+    // of time. See: https://code.google.com/p/android/issues/detail?id=5491 or
+    // https://code.google.com/p/android/issues/detail?id=19827
+    // ex: Galaxy Tab P3110 + Android 4.1.1
+
+
+    pointerEvent.preventDefault();
+  };
+  /**
+   * Wrap and relay a pointer event.  Note that this requires that the type
+   * string for the MapBrowserPointerEvent matches the PointerEvent type.
+   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
+   * event.
+   * @private
+   */
+
+
+  MapBrowserEventHandler.prototype.relayEvent_ = function relayEvent_(pointerEvent) {
+    var dragging = !!(this.down_ && this.isMoving_(pointerEvent));
+    this.dispatchEvent(new _MapBrowserPointerEvent.default(pointerEvent.type, this.map_, pointerEvent, dragging));
+  };
+  /**
+   * @param {import("./pointer/PointerEvent.js").default} pointerEvent Pointer
+   * event.
+   * @return {boolean} Is moving.
+   * @private
+   */
+
+
+  MapBrowserEventHandler.prototype.isMoving_ = function isMoving_(pointerEvent) {
+    return this.dragging_ || Math.abs(pointerEvent.clientX - this.down_.clientX) > this.moveTolerance_ || Math.abs(pointerEvent.clientY - this.down_.clientY) > this.moveTolerance_;
+  };
+  /**
+   * @inheritDoc
+   */
+
+
+  MapBrowserEventHandler.prototype.disposeInternal = function disposeInternal() {
+    if (this.relayedListenerKey_) {
+      (0, _events.unlistenByKey)(this.relayedListenerKey_);
+      this.relayedListenerKey_ = null;
+    }
+
+    if (this.pointerdownListenerKey_) {
+      (0, _events.unlistenByKey)(this.pointerdownListenerKey_);
+      this.pointerdownListenerKey_ = null;
+    }
+
+    this.dragListenerKeys_.forEach(_events.unlistenByKey);
+    this.dragListenerKeys_.length = 0;
+
+    if (this.documentPointerEventHandler_) {
+      this.documentPointerEventHandler_.dispose();
+      this.documentPointerEventHandler_ = null;
+    }
+
+    if (this.pointerEventHandler_) {
+      this.pointerEventHandler_.dispose();
+      this.pointerEventHandler_ = null;
+    }
+
+    EventTarget.prototype.disposeInternal.call(this);
+  };
+
+  return MapBrowserEventHandler;
+}(_Target.default);
+
+var _default = MapBrowserEventHandler;
+exports.default = _default;
+},{"./has.js":"node_modules/ol/has.js","./MapBrowserEventType.js":"node_modules/ol/MapBrowserEventType.js","./MapBrowserPointerEvent.js":"node_modules/ol/MapBrowserPointerEvent.js","./events.js":"node_modules/ol/events.js","./events/Target.js":"node_modules/ol/events/Target.js","./pointer/EventType.js":"node_modules/ol/pointer/EventType.js","./pointer/PointerEventHandler.js":"node_modules/ol/pointer/PointerEventHandler.js"}],"node_modules/ol/MapEventType.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/MapEventType
+ */
+
+/**
+ * @enum {string}
+ */
+var _default = {
+  /**
+   * Triggered after a map frame is rendered.
+   * @event module:ol/MapEvent~MapEvent#postrender
+   * @api
+   */
+  POSTRENDER: 'postrender',
+
+  /**
+   * Triggered when the map starts moving.
+   * @event module:ol/MapEvent~MapEvent#movestart
+   * @api
+   */
+  MOVESTART: 'movestart',
+
+  /**
+   * Triggered after the map is moved.
+   * @event module:ol/MapEvent~MapEvent#moveend
+   * @api
+   */
+  MOVEEND: 'moveend'
+};
+exports.default = _default;
+},{}],"node_modules/ol/MapProperty.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/MapProperty
+ */
+
+/**
+ * @enum {string}
+ */
+var _default = {
+  LAYERGROUP: 'layergroup',
+  SIZE: 'size',
+  TARGET: 'target',
+  VIEW: 'view'
+};
+exports.default = _default;
+},{}],"node_modules/ol/structs/PriorityQueue.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = exports.DROP = void 0;
+
+var _asserts = require("../asserts.js");
+
+var _obj = require("../obj.js");
+
+/**
+ * @module ol/structs/PriorityQueue
+ */
+
+/**
+ * @type {number}
+ */
+var DROP = Infinity;
+/**
+ * @classdesc
+ * Priority queue.
+ *
+ * The implementation is inspired from the Closure Library's Heap class and
+ * Python's heapq module.
+ *
+ * See http://closure-library.googlecode.com/svn/docs/closure_goog_structs_heap.js.source.html
+ * and http://hg.python.org/cpython/file/2.7/Lib/heapq.py.
+ *
+ * @template T
+ */
+
+exports.DROP = DROP;
+
+var PriorityQueue = function PriorityQueue(priorityFunction, keyFunction) {
+  /**
+   * @type {function(T): number}
+   * @private
+   */
+  this.priorityFunction_ = priorityFunction;
+  /**
+   * @type {function(T): string}
+   * @private
+   */
+
+  this.keyFunction_ = keyFunction;
+  /**
+   * @type {Array<T>}
+   * @private
+   */
+
+  this.elements_ = [];
+  /**
+   * @type {Array<number>}
+   * @private
+   */
+
+  this.priorities_ = [];
+  /**
+   * @type {!Object<string, boolean>}
+   * @private
+   */
+
+  this.queuedElements_ = {};
+};
+/**
+ * FIXME empty description for jsdoc
+ */
+
+
+PriorityQueue.prototype.clear = function clear$1() {
+  this.elements_.length = 0;
+  this.priorities_.length = 0;
+  (0, _obj.clear)(this.queuedElements_);
+};
+/**
+ * Remove and return the highest-priority element. O(log N).
+ * @return {T} Element.
+ */
+
+
+PriorityQueue.prototype.dequeue = function dequeue() {
+  var elements = this.elements_;
+  var priorities = this.priorities_;
+  var element = elements[0];
+
+  if (elements.length == 1) {
+    elements.length = 0;
+    priorities.length = 0;
+  } else {
+    elements[0] = elements.pop();
+    priorities[0] = priorities.pop();
+    this.siftUp_(0);
+  }
+
+  var elementKey = this.keyFunction_(element);
+  delete this.queuedElements_[elementKey];
+  return element;
+};
+/**
+ * Enqueue an element. O(log N).
+ * @param {T} element Element.
+ * @return {boolean} The element was added to the queue.
+ */
+
+
+PriorityQueue.prototype.enqueue = function enqueue(element) {
+  (0, _asserts.assert)(!(this.keyFunction_(element) in this.queuedElements_), 31); // Tried to enqueue an `element` that was already added to the queue
+
+  var priority = this.priorityFunction_(element);
+
+  if (priority != DROP) {
+    this.elements_.push(element);
+    this.priorities_.push(priority);
+    this.queuedElements_[this.keyFunction_(element)] = true;
+    this.siftDown_(0, this.elements_.length - 1);
+    return true;
+  }
+
+  return false;
+};
+/**
+ * @return {number} Count.
+ */
+
+
+PriorityQueue.prototype.getCount = function getCount() {
+  return this.elements_.length;
+};
+/**
+ * Gets the index of the left child of the node at the given index.
+ * @param {number} index The index of the node to get the left child for.
+ * @return {number} The index of the left child.
+ * @private
+ */
+
+
+PriorityQueue.prototype.getLeftChildIndex_ = function getLeftChildIndex_(index) {
+  return index * 2 + 1;
+};
+/**
+ * Gets the index of the right child of the node at the given index.
+ * @param {number} index The index of the node to get the right child for.
+ * @return {number} The index of the right child.
+ * @private
+ */
+
+
+PriorityQueue.prototype.getRightChildIndex_ = function getRightChildIndex_(index) {
+  return index * 2 + 2;
+};
+/**
+ * Gets the index of the parent of the node at the given index.
+ * @param {number} index The index of the node to get the parent for.
+ * @return {number} The index of the parent.
+ * @private
+ */
+
+
+PriorityQueue.prototype.getParentIndex_ = function getParentIndex_(index) {
+  return index - 1 >> 1;
+};
+/**
+ * Make this a heap. O(N).
+ * @private
+ */
+
+
+PriorityQueue.prototype.heapify_ = function heapify_() {
+  var i;
+
+  for (i = (this.elements_.length >> 1) - 1; i >= 0; i--) {
+    this.siftUp_(i);
+  }
+};
+/**
+ * @return {boolean} Is empty.
+ */
+
+
+PriorityQueue.prototype.isEmpty = function isEmpty() {
+  return this.elements_.length === 0;
+};
+/**
+ * @param {string} key Key.
+ * @return {boolean} Is key queued.
+ */
+
+
+PriorityQueue.prototype.isKeyQueued = function isKeyQueued(key) {
+  return key in this.queuedElements_;
+};
+/**
+ * @param {T} element Element.
+ * @return {boolean} Is queued.
+ */
+
+
+PriorityQueue.prototype.isQueued = function isQueued(element) {
+  return this.isKeyQueued(this.keyFunction_(element));
+};
+/**
+ * @param {number} index The index of the node to move down.
+ * @private
+ */
+
+
+PriorityQueue.prototype.siftUp_ = function siftUp_(index) {
+  var elements = this.elements_;
+  var priorities = this.priorities_;
+  var count = elements.length;
+  var element = elements[index];
+  var priority = priorities[index];
+  var startIndex = index;
+
+  while (index < count >> 1) {
+    var lIndex = this.getLeftChildIndex_(index);
+    var rIndex = this.getRightChildIndex_(index);
+    var smallerChildIndex = rIndex < count && priorities[rIndex] < priorities[lIndex] ? rIndex : lIndex;
+    elements[index] = elements[smallerChildIndex];
+    priorities[index] = priorities[smallerChildIndex];
+    index = smallerChildIndex;
+  }
+
+  elements[index] = element;
+  priorities[index] = priority;
+  this.siftDown_(startIndex, index);
+};
+/**
+ * @param {number} startIndex The index of the root.
+ * @param {number} index The index of the node to move up.
+ * @private
+ */
+
+
+PriorityQueue.prototype.siftDown_ = function siftDown_(startIndex, index) {
+  var elements = this.elements_;
+  var priorities = this.priorities_;
+  var element = elements[index];
+  var priority = priorities[index];
+
+  while (index > startIndex) {
+    var parentIndex = this.getParentIndex_(index);
+
+    if (priorities[parentIndex] > priority) {
+      elements[index] = elements[parentIndex];
+      priorities[index] = priorities[parentIndex];
+      index = parentIndex;
+    } else {
+      break;
+    }
+  }
+
+  elements[index] = element;
+  priorities[index] = priority;
+};
+/**
+ * FIXME empty description for jsdoc
+ */
+
+
+PriorityQueue.prototype.reprioritize = function reprioritize() {
+  var priorityFunction = this.priorityFunction_;
+  var elements = this.elements_;
+  var priorities = this.priorities_;
+  var index = 0;
+  var n = elements.length;
+  var element, i, priority;
+
+  for (i = 0; i < n; ++i) {
+    element = elements[i];
+    priority = priorityFunction(element);
+
+    if (priority == DROP) {
+      delete this.queuedElements_[this.keyFunction_(element)];
+    } else {
+      priorities[index] = priority;
+      elements[index++] = element;
+    }
+  }
+
+  elements.length = index;
+  priorities.length = index;
+  this.heapify_();
+};
+
+var _default = PriorityQueue;
+exports.default = _default;
+},{"../asserts.js":"node_modules/ol/asserts.js","../obj.js":"node_modules/ol/obj.js"}],"node_modules/ol/TileQueue.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _TileState = _interopRequireDefault(require("./TileState.js"));
+
+var _events = require("./events.js");
+
+var _EventType = _interopRequireDefault(require("./events/EventType.js"));
+
+var _PriorityQueue = _interopRequireDefault(require("./structs/PriorityQueue.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/TileQueue
+ */
+
+/**
+ * @typedef {function(import("./Tile.js").default, string, import("./coordinate.js").Coordinate, number): number} PriorityFunction
+ */
+var TileQueue =
+/*@__PURE__*/
+function (PriorityQueue) {
+  function TileQueue(tilePriorityFunction, tileChangeCallback) {
+    PriorityQueue.call(
+    /**
+     * @param {Array} element Element.
+     * @return {number} Priority.
+     */
+    this, function (element) {
+      return tilePriorityFunction.apply(null, element);
+    },
+    /**
+     * @param {Array} element Element.
+     * @return {string} Key.
+     */
+    function (element) {
+      return (
+        /** @type {import("./Tile.js").default} */
+        element[0].getKey()
+      );
+    });
+    /**
+     * @private
+     * @type {function(): ?}
+     */
+
+    this.tileChangeCallback_ = tileChangeCallback;
+    /**
+     * @private
+     * @type {number}
+     */
+
+    this.tilesLoading_ = 0;
+    /**
+     * @private
+     * @type {!Object<string,boolean>}
+     */
+
+    this.tilesLoadingKeys_ = {};
+  }
+
+  if (PriorityQueue) TileQueue.__proto__ = PriorityQueue;
+  TileQueue.prototype = Object.create(PriorityQueue && PriorityQueue.prototype);
+  TileQueue.prototype.constructor = TileQueue;
+  /**
+   * @inheritDoc
+   */
+
+  TileQueue.prototype.enqueue = function enqueue(element) {
+    var added = PriorityQueue.prototype.enqueue.call(this, element);
+
+    if (added) {
+      var tile = element[0];
+      (0, _events.listen)(tile, _EventType.default.CHANGE, this.handleTileChange, this);
+    }
+
+    return added;
+  };
+  /**
+   * @return {number} Number of tiles loading.
+   */
+
+
+  TileQueue.prototype.getTilesLoading = function getTilesLoading() {
+    return this.tilesLoading_;
+  };
+  /**
+   * @param {import("./events/Event.js").default} event Event.
+   * @protected
+   */
+
+
+  TileQueue.prototype.handleTileChange = function handleTileChange(event) {
+    var tile =
+    /** @type {import("./Tile.js").default} */
+    event.target;
+    var state = tile.getState();
+
+    if (state === _TileState.default.LOADED || state === _TileState.default.ERROR || state === _TileState.default.EMPTY || state === _TileState.default.ABORT) {
+      (0, _events.unlisten)(tile, _EventType.default.CHANGE, this.handleTileChange, this);
+      var tileKey = tile.getKey();
+
+      if (tileKey in this.tilesLoadingKeys_) {
+        delete this.tilesLoadingKeys_[tileKey];
+        --this.tilesLoading_;
+      }
+
+      this.tileChangeCallback_();
+    }
+  };
+  /**
+   * @param {number} maxTotalLoading Maximum number tiles to load simultaneously.
+   * @param {number} maxNewLoads Maximum number of new tiles to load.
+   */
+
+
+  TileQueue.prototype.loadMoreTiles = function loadMoreTiles(maxTotalLoading, maxNewLoads) {
+    var newLoads = 0;
+    var abortedTiles = false;
+    var state, tile, tileKey;
+
+    while (this.tilesLoading_ < maxTotalLoading && newLoads < maxNewLoads && this.getCount() > 0) {
+      tile =
+      /** @type {import("./Tile.js").default} */
+      this.dequeue()[0];
+      tileKey = tile.getKey();
+      state = tile.getState();
+
+      if (state === _TileState.default.ABORT) {
+        abortedTiles = true;
+      } else if (state === _TileState.default.IDLE && !(tileKey in this.tilesLoadingKeys_)) {
+        this.tilesLoadingKeys_[tileKey] = true;
+        ++this.tilesLoading_;
+        ++newLoads;
+        tile.load();
+      }
+    }
+
+    if (newLoads === 0 && abortedTiles) {
+      // Do not stop the render loop when all wanted tiles were aborted due to
+      // a small, saturated tile cache.
+      this.tileChangeCallback_();
+    }
+  };
+
+  return TileQueue;
+}(_PriorityQueue.default);
+
+var _default = TileQueue;
+exports.default = _default;
+},{"./TileState.js":"node_modules/ol/TileState.js","./events.js":"node_modules/ol/events.js","./events/EventType.js":"node_modules/ol/events/EventType.js","./structs/PriorityQueue.js":"node_modules/ol/structs/PriorityQueue.js"}],"node_modules/ol/tilegrid/common.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.DEFAULT_TILE_SIZE = exports.DEFAULT_MAX_ZOOM = void 0;
+
+/**
+ * @module ol/tilegrid/common
+ */
+
+/**
+ * Default maximum zoom for default tile grids.
+ * @type {number}
+ */
+var DEFAULT_MAX_ZOOM = 42;
+/**
+ * Default tile size.
+ * @type {number}
+ */
+
+exports.DEFAULT_MAX_ZOOM = DEFAULT_MAX_ZOOM;
+var DEFAULT_TILE_SIZE = 256;
+exports.DEFAULT_TILE_SIZE = DEFAULT_TILE_SIZE;
+},{}],"node_modules/ol/centerconstraint.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createExtent = createExtent;
+exports.none = none;
+
+var _math = require("./math.js");
+
+/**
+ * @module ol/centerconstraint
+ */
+
+/**
+ * @typedef {function((import("./coordinate.js").Coordinate|undefined)): (import("./coordinate.js").Coordinate|undefined)} Type
+ */
+
+/**
+ * @param {import("./extent.js").Extent} extent Extent.
+ * @return {Type} The constraint.
+ */
+function createExtent(extent) {
+  return (
+    /**
+     * @param {import("./coordinate.js").Coordinate=} center Center.
+     * @return {import("./coordinate.js").Coordinate|undefined} Center.
+     */
+    function (center) {
+      if (center) {
+        return [(0, _math.clamp)(center[0], extent[0], extent[2]), (0, _math.clamp)(center[1], extent[1], extent[3])];
+      } else {
+        return undefined;
+      }
+    }
+  );
+}
+/**
+ * @param {import("./coordinate.js").Coordinate=} center Center.
+ * @return {import("./coordinate.js").Coordinate|undefined} Center.
+ */
+
+
+function none(center) {
+  return center;
+}
+},{"./math.js":"node_modules/ol/math.js"}],"node_modules/ol/resolutionconstraint.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createSnapToResolutions = createSnapToResolutions;
+exports.createSnapToPower = createSnapToPower;
+
+var _array = require("./array.js");
+
+var _math = require("./math.js");
+
+/**
+ * @module ol/resolutionconstraint
+ */
+
+/**
+ * @typedef {function((number|undefined), number, number): (number|undefined)} Type
+ */
+
+/**
+ * @param {Array<number>} resolutions Resolutions.
+ * @return {Type} Zoom function.
+ */
+function createSnapToResolutions(resolutions) {
+  return (
+    /**
+     * @param {number|undefined} resolution Resolution.
+     * @param {number} delta Delta.
+     * @param {number} direction Direction.
+     * @return {number|undefined} Resolution.
+     */
+    function (resolution, delta, direction) {
+      if (resolution !== undefined) {
+        var z = (0, _array.linearFindNearest)(resolutions, resolution, direction);
+        z = (0, _math.clamp)(z + delta, 0, resolutions.length - 1);
+        var index = Math.floor(z);
+
+        if (z != index && index < resolutions.length - 1) {
+          var power = resolutions[index] / resolutions[index + 1];
+          return resolutions[index] / Math.pow(power, z - index);
+        } else {
+          return resolutions[index];
+        }
+      } else {
+        return undefined;
+      }
+    }
+  );
+}
+/**
+ * @param {number} power Power.
+ * @param {number} maxResolution Maximum resolution.
+ * @param {number=} opt_maxLevel Maximum level.
+ * @return {Type} Zoom function.
+ */
+
+
+function createSnapToPower(power, maxResolution, opt_maxLevel) {
+  return (
+    /**
+     * @param {number|undefined} resolution Resolution.
+     * @param {number} delta Delta.
+     * @param {number} direction Direction.
+     * @return {number|undefined} Resolution.
+     */
+    function (resolution, delta, direction) {
+      if (resolution !== undefined) {
+        var offset = -direction / 2 + 0.5;
+        var oldLevel = Math.floor(Math.log(maxResolution / resolution) / Math.log(power) + offset);
+        var newLevel = Math.max(oldLevel + delta, 0);
+
+        if (opt_maxLevel !== undefined) {
+          newLevel = Math.min(newLevel, opt_maxLevel);
+        }
+
+        return maxResolution / Math.pow(power, newLevel);
+      } else {
+        return undefined;
+      }
+    }
+  );
+}
+},{"./array.js":"node_modules/ol/array.js","./math.js":"node_modules/ol/math.js"}],"node_modules/ol/rotationconstraint.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.disable = disable;
+exports.none = none;
+exports.createSnapToN = createSnapToN;
+exports.createSnapToZero = createSnapToZero;
+
+var _math = require("./math.js");
+
+/**
+ * @module ol/rotationconstraint
+ */
+
+/**
+ * @typedef {function((number|undefined), number): (number|undefined)} Type
+ */
+
+/**
+ * @param {number|undefined} rotation Rotation.
+ * @param {number} delta Delta.
+ * @return {number|undefined} Rotation.
+ */
+function disable(rotation, delta) {
+  if (rotation !== undefined) {
+    return 0;
+  } else {
+    return undefined;
+  }
+}
+/**
+ * @param {number|undefined} rotation Rotation.
+ * @param {number} delta Delta.
+ * @return {number|undefined} Rotation.
+ */
+
+
+function none(rotation, delta) {
+  if (rotation !== undefined) {
+    return rotation + delta;
+  } else {
+    return undefined;
+  }
+}
+/**
+ * @param {number} n N.
+ * @return {Type} Rotation constraint.
+ */
+
+
+function createSnapToN(n) {
+  var theta = 2 * Math.PI / n;
+  return (
+    /**
+     * @param {number|undefined} rotation Rotation.
+     * @param {number} delta Delta.
+     * @return {number|undefined} Rotation.
+     */
+    function (rotation, delta) {
+      if (rotation !== undefined) {
+        rotation = Math.floor((rotation + delta) / theta + 0.5) * theta;
+        return rotation;
+      } else {
+        return undefined;
+      }
+    }
+  );
+}
+/**
+ * @param {number=} opt_tolerance Tolerance.
+ * @return {Type} Rotation constraint.
+ */
+
+
+function createSnapToZero(opt_tolerance) {
+  var tolerance = opt_tolerance || (0, _math.toRadians)(5);
+  return (
+    /**
+     * @param {number|undefined} rotation Rotation.
+     * @param {number} delta Delta.
+     * @return {number|undefined} Rotation.
+     */
+    function (rotation, delta) {
+      if (rotation !== undefined) {
+        if (Math.abs(rotation + delta) <= tolerance) {
+          return 0;
+        } else {
+          return rotation + delta;
+        }
+      } else {
+        return undefined;
+      }
+    }
+  );
+}
+},{"./math.js":"node_modules/ol/math.js"}],"node_modules/ol/ViewHint.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/ViewHint
+ */
+
+/**
+ * @enum {number}
+ */
+var _default = {
+  ANIMATING: 0,
+  INTERACTING: 1
+};
+exports.default = _default;
+},{}],"node_modules/ol/ViewProperty.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/ViewProperty
+ */
+
+/**
+ * @enum {string}
+ */
+var _default = {
+  CENTER: 'center',
+  RESOLUTION: 'resolution',
+  ROTATION: 'rotation'
+};
+exports.default = _default;
+},{}],"node_modules/ol/View.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16246,7 +18922,361 @@ function isNoopAnimation(animation) {
 
 var _default = View;
 exports.default = _default;
-},{"./tilegrid/common.js":"node_modules/ol/tilegrid/common.js","./util.js":"node_modules/ol/util.js","./functions.js":"node_modules/ol/functions.js","./centerconstraint.js":"node_modules/ol/centerconstraint.js","./Object.js":"node_modules/ol/Object.js","./resolutionconstraint.js":"node_modules/ol/resolutionconstraint.js","./rotationconstraint.js":"node_modules/ol/rotationconstraint.js","./ViewHint.js":"node_modules/ol/ViewHint.js","./ViewProperty.js":"node_modules/ol/ViewProperty.js","./array.js":"node_modules/ol/array.js","./asserts.js":"node_modules/ol/asserts.js","./coordinate.js":"node_modules/ol/coordinate.js","./easing.js":"node_modules/ol/easing.js","./extent.js":"node_modules/ol/extent.js","./geom/GeometryType.js":"node_modules/ol/geom/GeometryType.js","./geom/Polygon.js":"node_modules/ol/geom/Polygon.js","./math.js":"node_modules/ol/math.js","./obj.js":"node_modules/ol/obj.js","./proj.js":"node_modules/ol/proj.js","./proj/Units.js":"node_modules/ol/proj/Units.js"}],"node_modules/ol/layer/Group.js":[function(require,module,exports) {
+},{"./tilegrid/common.js":"node_modules/ol/tilegrid/common.js","./util.js":"node_modules/ol/util.js","./functions.js":"node_modules/ol/functions.js","./centerconstraint.js":"node_modules/ol/centerconstraint.js","./Object.js":"node_modules/ol/Object.js","./resolutionconstraint.js":"node_modules/ol/resolutionconstraint.js","./rotationconstraint.js":"node_modules/ol/rotationconstraint.js","./ViewHint.js":"node_modules/ol/ViewHint.js","./ViewProperty.js":"node_modules/ol/ViewProperty.js","./array.js":"node_modules/ol/array.js","./asserts.js":"node_modules/ol/asserts.js","./coordinate.js":"node_modules/ol/coordinate.js","./easing.js":"node_modules/ol/easing.js","./extent.js":"node_modules/ol/extent.js","./geom/GeometryType.js":"node_modules/ol/geom/GeometryType.js","./geom/Polygon.js":"node_modules/ol/geom/Polygon.js","./math.js":"node_modules/ol/math.js","./obj.js":"node_modules/ol/obj.js","./proj.js":"node_modules/ol/proj.js","./proj/Units.js":"node_modules/ol/proj/Units.js"}],"node_modules/ol/layer/Property.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/layer/Property
+ */
+
+/**
+ * @enum {string}
+ */
+var _default = {
+  OPACITY: 'opacity',
+  VISIBLE: 'visible',
+  EXTENT: 'extent',
+  Z_INDEX: 'zIndex',
+  MAX_RESOLUTION: 'maxResolution',
+  MIN_RESOLUTION: 'minResolution',
+  SOURCE: 'source'
+};
+exports.default = _default;
+},{}],"node_modules/ol/layer/Base.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _util = require("../util.js");
+
+var _Object = _interopRequireDefault(require("../Object.js"));
+
+var _Property = _interopRequireDefault(require("./Property.js"));
+
+var _math = require("../math.js");
+
+var _obj = require("../obj.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/layer/Base
+ */
+
+/**
+ * @typedef {Object} Options
+ * @property {number} [opacity=1] Opacity (0, 1).
+ * @property {boolean} [visible=true] Visibility.
+ * @property {import("../extent.js").Extent} [extent] The bounding extent for layer rendering.  The layer will not be
+ * rendered outside of this extent.
+ * @property {number} [zIndex] The z-index for layer rendering.  At rendering time, the layers
+ * will be ordered, first by Z-index and then by position. When `undefined`, a `zIndex` of 0 is assumed
+ * for layers that are added to the map's `layers` collection, or `Infinity` when the layer's `setMap()`
+ * method was used.
+ * @property {number} [minResolution] The minimum resolution (inclusive) at which this layer will be
+ * visible.
+ * @property {number} [maxResolution] The maximum resolution (exclusive) below which this layer will
+ * be visible.
+ */
+
+/**
+ * @classdesc
+ * Abstract base class; normally only used for creating subclasses and not
+ * instantiated in apps.
+ * Note that with {@link module:ol/layer/Base} and all its subclasses, any property set in
+ * the options is set as a {@link module:ol/Object} property on the layer object, so
+ * is observable, and has get/set accessors.
+ *
+ * @api
+ */
+var BaseLayer =
+/*@__PURE__*/
+function (BaseObject) {
+  function BaseLayer(options) {
+    BaseObject.call(this);
+    /**
+     * @type {Object<string, *>}
+     */
+
+    var properties = (0, _obj.assign)({}, options);
+    properties[_Property.default.OPACITY] = options.opacity !== undefined ? options.opacity : 1;
+    properties[_Property.default.VISIBLE] = options.visible !== undefined ? options.visible : true;
+    properties[_Property.default.Z_INDEX] = options.zIndex;
+    properties[_Property.default.MAX_RESOLUTION] = options.maxResolution !== undefined ? options.maxResolution : Infinity;
+    properties[_Property.default.MIN_RESOLUTION] = options.minResolution !== undefined ? options.minResolution : 0;
+    this.setProperties(properties);
+    /**
+     * @type {import("./Layer.js").State}
+     * @private
+     */
+
+    this.state_ = null;
+    /**
+     * The layer type.
+     * @type {import("../LayerType.js").default}
+     * @protected;
+     */
+
+    this.type;
+  }
+
+  if (BaseObject) BaseLayer.__proto__ = BaseObject;
+  BaseLayer.prototype = Object.create(BaseObject && BaseObject.prototype);
+  BaseLayer.prototype.constructor = BaseLayer;
+  /**
+   * Get the layer type (used when creating a layer renderer).
+   * @return {import("../LayerType.js").default} The layer type.
+   */
+
+  BaseLayer.prototype.getType = function getType() {
+    return this.type;
+  };
+  /**
+   * @return {import("./Layer.js").State} Layer state.
+   */
+
+
+  BaseLayer.prototype.getLayerState = function getLayerState() {
+    /** @type {import("./Layer.js").State} */
+    var state = this.state_ ||
+    /** @type {?} */
+    {
+      layer: this,
+      managed: true
+    };
+    state.opacity = (0, _math.clamp)(this.getOpacity(), 0, 1);
+    state.sourceState = this.getSourceState();
+    state.visible = this.getVisible();
+    state.extent = this.getExtent();
+    state.zIndex = this.getZIndex() || 0;
+    state.maxResolution = this.getMaxResolution();
+    state.minResolution = Math.max(this.getMinResolution(), 0);
+    this.state_ = state;
+    return state;
+  };
+  /**
+   * @abstract
+   * @param {Array<import("./Layer.js").default>=} opt_array Array of layers (to be
+   *     modified in place).
+   * @return {Array<import("./Layer.js").default>} Array of layers.
+   */
+
+
+  BaseLayer.prototype.getLayersArray = function getLayersArray(opt_array) {
+    return (0, _util.abstract)();
+  };
+  /**
+   * @abstract
+   * @param {Array<import("./Layer.js").State>=} opt_states Optional list of layer
+   *     states (to be modified in place).
+   * @return {Array<import("./Layer.js").State>} List of layer states.
+   */
+
+
+  BaseLayer.prototype.getLayerStatesArray = function getLayerStatesArray(opt_states) {
+    return (0, _util.abstract)();
+  };
+  /**
+   * Return the {@link module:ol/extent~Extent extent} of the layer or `undefined` if it
+   * will be visible regardless of extent.
+   * @return {import("../extent.js").Extent|undefined} The layer extent.
+   * @observable
+   * @api
+   */
+
+
+  BaseLayer.prototype.getExtent = function getExtent() {
+    return (
+      /** @type {import("../extent.js").Extent|undefined} */
+      this.get(_Property.default.EXTENT)
+    );
+  };
+  /**
+   * Return the maximum resolution of the layer.
+   * @return {number} The maximum resolution of the layer.
+   * @observable
+   * @api
+   */
+
+
+  BaseLayer.prototype.getMaxResolution = function getMaxResolution() {
+    return (
+      /** @type {number} */
+      this.get(_Property.default.MAX_RESOLUTION)
+    );
+  };
+  /**
+   * Return the minimum resolution of the layer.
+   * @return {number} The minimum resolution of the layer.
+   * @observable
+   * @api
+   */
+
+
+  BaseLayer.prototype.getMinResolution = function getMinResolution() {
+    return (
+      /** @type {number} */
+      this.get(_Property.default.MIN_RESOLUTION)
+    );
+  };
+  /**
+   * Return the opacity of the layer (between 0 and 1).
+   * @return {number} The opacity of the layer.
+   * @observable
+   * @api
+   */
+
+
+  BaseLayer.prototype.getOpacity = function getOpacity() {
+    return (
+      /** @type {number} */
+      this.get(_Property.default.OPACITY)
+    );
+  };
+  /**
+   * @abstract
+   * @return {import("../source/State.js").default} Source state.
+   */
+
+
+  BaseLayer.prototype.getSourceState = function getSourceState() {
+    return (0, _util.abstract)();
+  };
+  /**
+   * Return the visibility of the layer (`true` or `false`).
+   * @return {boolean} The visibility of the layer.
+   * @observable
+   * @api
+   */
+
+
+  BaseLayer.prototype.getVisible = function getVisible() {
+    return (
+      /** @type {boolean} */
+      this.get(_Property.default.VISIBLE)
+    );
+  };
+  /**
+   * Return the Z-index of the layer, which is used to order layers before
+   * rendering. The default Z-index is 0.
+   * @return {number} The Z-index of the layer.
+   * @observable
+   * @api
+   */
+
+
+  BaseLayer.prototype.getZIndex = function getZIndex() {
+    return (
+      /** @type {number} */
+      this.get(_Property.default.Z_INDEX)
+    );
+  };
+  /**
+   * Set the extent at which the layer is visible.  If `undefined`, the layer
+   * will be visible at all extents.
+   * @param {import("../extent.js").Extent|undefined} extent The extent of the layer.
+   * @observable
+   * @api
+   */
+
+
+  BaseLayer.prototype.setExtent = function setExtent(extent) {
+    this.set(_Property.default.EXTENT, extent);
+  };
+  /**
+   * Set the maximum resolution at which the layer is visible.
+   * @param {number} maxResolution The maximum resolution of the layer.
+   * @observable
+   * @api
+   */
+
+
+  BaseLayer.prototype.setMaxResolution = function setMaxResolution(maxResolution) {
+    this.set(_Property.default.MAX_RESOLUTION, maxResolution);
+  };
+  /**
+   * Set the minimum resolution at which the layer is visible.
+   * @param {number} minResolution The minimum resolution of the layer.
+   * @observable
+   * @api
+   */
+
+
+  BaseLayer.prototype.setMinResolution = function setMinResolution(minResolution) {
+    this.set(_Property.default.MIN_RESOLUTION, minResolution);
+  };
+  /**
+   * Set the opacity of the layer, allowed values range from 0 to 1.
+   * @param {number} opacity The opacity of the layer.
+   * @observable
+   * @api
+   */
+
+
+  BaseLayer.prototype.setOpacity = function setOpacity(opacity) {
+    this.set(_Property.default.OPACITY, opacity);
+  };
+  /**
+   * Set the visibility of the layer (`true` or `false`).
+   * @param {boolean} visible The visibility of the layer.
+   * @observable
+   * @api
+   */
+
+
+  BaseLayer.prototype.setVisible = function setVisible(visible) {
+    this.set(_Property.default.VISIBLE, visible);
+  };
+  /**
+   * Set Z-index of the layer, which is used to order layers before rendering.
+   * The default Z-index is 0.
+   * @param {number} zindex The z-index of the layer.
+   * @observable
+   * @api
+   */
+
+
+  BaseLayer.prototype.setZIndex = function setZIndex(zindex) {
+    this.set(_Property.default.Z_INDEX, zindex);
+  };
+
+  return BaseLayer;
+}(_Object.default);
+
+var _default = BaseLayer;
+exports.default = _default;
+},{"../util.js":"node_modules/ol/util.js","../Object.js":"node_modules/ol/Object.js","./Property.js":"node_modules/ol/layer/Property.js","../math.js":"node_modules/ol/math.js","../obj.js":"node_modules/ol/obj.js"}],"node_modules/ol/source/State.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/source/State
+ */
+
+/**
+ * @enum {string}
+ * State of the source, one of 'undefined', 'loading', 'ready' or 'error'.
+ */
+var _default = {
+  UNDEFINED: 'undefined',
+  LOADING: 'loading',
+  READY: 'ready',
+  ERROR: 'error'
+};
+exports.default = _default;
+},{}],"node_modules/ol/layer/Group.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18136,7 +21166,912 @@ function getLoading(layers) {
 
   return false;
 }
-},{"./util.js":"node_modules/ol/util.js","./Collection.js":"node_modules/ol/Collection.js","./CollectionEventType.js":"node_modules/ol/CollectionEventType.js","./MapBrowserEvent.js":"node_modules/ol/MapBrowserEvent.js","./MapBrowserEventHandler.js":"node_modules/ol/MapBrowserEventHandler.js","./MapBrowserEventType.js":"node_modules/ol/MapBrowserEventType.js","./MapEvent.js":"node_modules/ol/MapEvent.js","./MapEventType.js":"node_modules/ol/MapEventType.js","./MapProperty.js":"node_modules/ol/MapProperty.js","./render/EventType.js":"node_modules/ol/render/EventType.js","./Object.js":"node_modules/ol/Object.js","./ObjectEventType.js":"node_modules/ol/ObjectEventType.js","./TileQueue.js":"node_modules/ol/TileQueue.js","./View.js":"node_modules/ol/View.js","./ViewHint.js":"node_modules/ol/ViewHint.js","./asserts.js":"node_modules/ol/asserts.js","./dom.js":"node_modules/ol/dom.js","./events.js":"node_modules/ol/events.js","./events/Event.js":"node_modules/ol/events/Event.js","./events/EventType.js":"node_modules/ol/events/EventType.js","./extent.js":"node_modules/ol/extent.js","./functions.js":"node_modules/ol/functions.js","./has.js":"node_modules/ol/has.js","./layer/Group.js":"node_modules/ol/layer/Group.js","./size.js":"node_modules/ol/size.js","./structs/PriorityQueue.js":"node_modules/ol/structs/PriorityQueue.js","./transform.js":"node_modules/ol/transform.js"}],"node_modules/ol/control/Rotate.js":[function(require,module,exports) {
+},{"./util.js":"node_modules/ol/util.js","./Collection.js":"node_modules/ol/Collection.js","./CollectionEventType.js":"node_modules/ol/CollectionEventType.js","./MapBrowserEvent.js":"node_modules/ol/MapBrowserEvent.js","./MapBrowserEventHandler.js":"node_modules/ol/MapBrowserEventHandler.js","./MapBrowserEventType.js":"node_modules/ol/MapBrowserEventType.js","./MapEvent.js":"node_modules/ol/MapEvent.js","./MapEventType.js":"node_modules/ol/MapEventType.js","./MapProperty.js":"node_modules/ol/MapProperty.js","./render/EventType.js":"node_modules/ol/render/EventType.js","./Object.js":"node_modules/ol/Object.js","./ObjectEventType.js":"node_modules/ol/ObjectEventType.js","./TileQueue.js":"node_modules/ol/TileQueue.js","./View.js":"node_modules/ol/View.js","./ViewHint.js":"node_modules/ol/ViewHint.js","./asserts.js":"node_modules/ol/asserts.js","./dom.js":"node_modules/ol/dom.js","./events.js":"node_modules/ol/events.js","./events/Event.js":"node_modules/ol/events/Event.js","./events/EventType.js":"node_modules/ol/events/EventType.js","./extent.js":"node_modules/ol/extent.js","./functions.js":"node_modules/ol/functions.js","./has.js":"node_modules/ol/has.js","./layer/Group.js":"node_modules/ol/layer/Group.js","./size.js":"node_modules/ol/size.js","./structs/PriorityQueue.js":"node_modules/ol/structs/PriorityQueue.js","./transform.js":"node_modules/ol/transform.js"}],"node_modules/ol/control/Control.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _functions = require("../functions.js");
+
+var _MapEventType = _interopRequireDefault(require("../MapEventType.js"));
+
+var _Object = _interopRequireDefault(require("../Object.js"));
+
+var _dom = require("../dom.js");
+
+var _events = require("../events.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/control/Control
+ */
+
+/**
+ * @typedef {Object} Options
+ * @property {HTMLElement} [element] The element is the control's
+ * container element. This only needs to be specified if you're developing
+ * a custom control.
+ * @property {function(import("../MapEvent.js").default)} [render] Function called when
+ * the control should be re-rendered. This is called in a `requestAnimationFrame`
+ * callback.
+ * @property {HTMLElement|string} [target] Specify a target if you want
+ * the control to be rendered outside of the map's viewport.
+ */
+
+/**
+ * @classdesc
+ * A control is a visible widget with a DOM element in a fixed position on the
+ * screen. They can involve user input (buttons), or be informational only;
+ * the position is determined using CSS. By default these are placed in the
+ * container with CSS class name `ol-overlaycontainer-stopevent`, but can use
+ * any outside DOM element.
+ *
+ * This is the base class for controls. You can use it for simple custom
+ * controls by creating the element with listeners, creating an instance:
+ * ```js
+ * var myControl = new Control({element: myElement});
+ * ```
+ * and then adding this to the map.
+ *
+ * The main advantage of having this as a control rather than a simple separate
+ * DOM element is that preventing propagation is handled for you. Controls
+ * will also be objects in a {@link module:ol/Collection~Collection}, so you can use their methods.
+ *
+ * You can also extend this base for your own control class. See
+ * examples/custom-controls for an example of how to do this.
+ *
+ * @api
+ */
+var Control =
+/*@__PURE__*/
+function (BaseObject) {
+  function Control(options) {
+    BaseObject.call(this);
+    /**
+     * @protected
+     * @type {HTMLElement}
+     */
+
+    this.element = options.element ? options.element : null;
+    /**
+     * @private
+     * @type {HTMLElement}
+     */
+
+    this.target_ = null;
+    /**
+     * @private
+     * @type {import("../PluggableMap.js").default}
+     */
+
+    this.map_ = null;
+    /**
+     * @protected
+     * @type {!Array<import("../events.js").EventsKey>}
+     */
+
+    this.listenerKeys = [];
+    /**
+     * @type {function(import("../MapEvent.js").default)}
+     */
+
+    this.render = options.render ? options.render : _functions.VOID;
+
+    if (options.target) {
+      this.setTarget(options.target);
+    }
+  }
+
+  if (BaseObject) Control.__proto__ = BaseObject;
+  Control.prototype = Object.create(BaseObject && BaseObject.prototype);
+  Control.prototype.constructor = Control;
+  /**
+   * @inheritDoc
+   */
+
+  Control.prototype.disposeInternal = function disposeInternal() {
+    (0, _dom.removeNode)(this.element);
+    BaseObject.prototype.disposeInternal.call(this);
+  };
+  /**
+   * Get the map associated with this control.
+   * @return {import("../PluggableMap.js").default} Map.
+   * @api
+   */
+
+
+  Control.prototype.getMap = function getMap() {
+    return this.map_;
+  };
+  /**
+   * Remove the control from its current map and attach it to the new map.
+   * Subclasses may set up event handlers to get notified about changes to
+   * the map here.
+   * @param {import("../PluggableMap.js").default} map Map.
+   * @api
+   */
+
+
+  Control.prototype.setMap = function setMap(map) {
+    if (this.map_) {
+      (0, _dom.removeNode)(this.element);
+    }
+
+    for (var i = 0, ii = this.listenerKeys.length; i < ii; ++i) {
+      (0, _events.unlistenByKey)(this.listenerKeys[i]);
+    }
+
+    this.listenerKeys.length = 0;
+    this.map_ = map;
+
+    if (this.map_) {
+      var target = this.target_ ? this.target_ : map.getOverlayContainerStopEvent();
+      target.appendChild(this.element);
+
+      if (this.render !== _functions.VOID) {
+        this.listenerKeys.push((0, _events.listen)(map, _MapEventType.default.POSTRENDER, this.render, this));
+      }
+
+      map.render();
+    }
+  };
+  /**
+   * This function is used to set a target element for the control. It has no
+   * effect if it is called after the control has been added to the map (i.e.
+   * after `setMap` is called on the control). If no `target` is set in the
+   * options passed to the control constructor and if `setTarget` is not called
+   * then the control is added to the map's overlay container.
+   * @param {HTMLElement|string} target Target.
+   * @api
+   */
+
+
+  Control.prototype.setTarget = function setTarget(target) {
+    this.target_ = typeof target === 'string' ? document.getElementById(target) : target;
+  };
+
+  return Control;
+}(_Object.default);
+
+var _default = Control;
+exports.default = _default;
+},{"../functions.js":"node_modules/ol/functions.js","../MapEventType.js":"node_modules/ol/MapEventType.js","../Object.js":"node_modules/ol/Object.js","../dom.js":"node_modules/ol/dom.js","../events.js":"node_modules/ol/events.js"}],"node_modules/ol/css.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getFontFamilies = exports.CLASS_COLLAPSED = exports.CLASS_CONTROL = exports.CLASS_UNSUPPORTED = exports.CLASS_UNSELECTABLE = exports.CLASS_SELECTABLE = exports.CLASS_HIDDEN = void 0;
+
+/**
+ * @module ol/css
+ */
+
+/**
+ * The CSS class for hidden feature.
+ *
+ * @const
+ * @type {string}
+ */
+var CLASS_HIDDEN = 'ol-hidden';
+/**
+ * The CSS class that we'll give the DOM elements to have them selectable.
+ *
+ * @const
+ * @type {string}
+ */
+
+exports.CLASS_HIDDEN = CLASS_HIDDEN;
+var CLASS_SELECTABLE = 'ol-selectable';
+/**
+ * The CSS class that we'll give the DOM elements to have them unselectable.
+ *
+ * @const
+ * @type {string}
+ */
+
+exports.CLASS_SELECTABLE = CLASS_SELECTABLE;
+var CLASS_UNSELECTABLE = 'ol-unselectable';
+/**
+ * The CSS class for unsupported feature.
+ *
+ * @const
+ * @type {string}
+ */
+
+exports.CLASS_UNSELECTABLE = CLASS_UNSELECTABLE;
+var CLASS_UNSUPPORTED = 'ol-unsupported';
+/**
+ * The CSS class for controls.
+ *
+ * @const
+ * @type {string}
+ */
+
+exports.CLASS_UNSUPPORTED = CLASS_UNSUPPORTED;
+var CLASS_CONTROL = 'ol-control';
+/**
+ * The CSS class that we'll give the DOM elements that are collapsed, i.e.
+ * to those elements which usually can be expanded.
+ *
+ * @const
+ * @type {string}
+ */
+
+exports.CLASS_CONTROL = CLASS_CONTROL;
+var CLASS_COLLAPSED = 'ol-collapsed';
+/**
+ * Get the list of font families from a font spec.  Note that this doesn't work
+ * for font families that have commas in them.
+ * @param {string} The CSS font property.
+ * @return {Object<string>} The font families (or null if the input spec is invalid).
+ */
+
+exports.CLASS_COLLAPSED = CLASS_COLLAPSED;
+
+var getFontFamilies = function () {
+  var style;
+  var cache = {};
+  return function (font) {
+    if (!style) {
+      style = document.createElement('div').style;
+    }
+
+    if (!(font in cache)) {
+      style.font = font;
+      var family = style.fontFamily;
+      style.font = '';
+
+      if (!family) {
+        return null;
+      }
+
+      cache[font] = family.split(/,\s?/);
+    }
+
+    return cache[font];
+  };
+}();
+
+exports.getFontFamilies = getFontFamilies;
+},{}],"node_modules/ol/layer/Layer.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.visibleAtResolution = visibleAtResolution;
+exports.default = void 0;
+
+var _events = require("../events.js");
+
+var _EventType = _interopRequireDefault(require("../events/EventType.js"));
+
+var _util = require("../util.js");
+
+var _Object = require("../Object.js");
+
+var _Base = _interopRequireDefault(require("./Base.js"));
+
+var _Property = _interopRequireDefault(require("./Property.js"));
+
+var _obj = require("../obj.js");
+
+var _EventType2 = _interopRequireDefault(require("../render/EventType.js"));
+
+var _State = _interopRequireDefault(require("../source/State.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/layer/Layer
+ */
+
+/**
+ * @typedef {Object} Options
+ * @property {number} [opacity=1] Opacity (0, 1).
+ * @property {boolean} [visible=true] Visibility.
+ * @property {import("../extent.js").Extent} [extent] The bounding extent for layer rendering.  The layer will not be
+ * rendered outside of this extent.
+ * @property {number} [zIndex] The z-index for layer rendering.  At rendering time, the layers
+ * will be ordered, first by Z-index and then by position. When `undefined`, a `zIndex` of 0 is assumed
+ * for layers that are added to the map's `layers` collection, or `Infinity` when the layer's `setMap()`
+ * method was used.
+ * @property {number} [minResolution] The minimum resolution (inclusive) at which this layer will be
+ * visible.
+ * @property {number} [maxResolution] The maximum resolution (exclusive) below which this layer will
+ * be visible.
+ * @property {import("../source/Source.js").default} [source] Source for this layer.  If not provided to the constructor,
+ * the source can be set by calling {@link module:ol/layer/Layer#setSource layer.setSource(source)} after
+ * construction.
+ * @property {import("../PluggableMap.js").default} [map] Map.
+ */
+
+/**
+ * @typedef {Object} State
+ * @property {import("./Base.js").default} layer
+ * @property {number} opacity
+ * @property {SourceState} sourceState
+ * @property {boolean} visible
+ * @property {boolean} managed
+ * @property {import("../extent.js").Extent} [extent]
+ * @property {number} zIndex
+ * @property {number} maxResolution
+ * @property {number} minResolution
+ */
+
+/**
+ * @classdesc
+ * Abstract base class; normally only used for creating subclasses and not
+ * instantiated in apps.
+ * A visual representation of raster or vector map data.
+ * Layers group together those properties that pertain to how the data is to be
+ * displayed, irrespective of the source of that data.
+ *
+ * Layers are usually added to a map with {@link module:ol/Map#addLayer}. Components
+ * like {@link module:ol/interaction/Select~Select} use unmanaged layers
+ * internally. These unmanaged layers are associated with the map using
+ * {@link module:ol/layer/Layer~Layer#setMap} instead.
+ *
+ * A generic `change` event is fired when the state of the source changes.
+ *
+ * @fires import("../render/Event.js").RenderEvent
+ */
+var Layer =
+/*@__PURE__*/
+function (BaseLayer) {
+  function Layer(options) {
+    var baseOptions = (0, _obj.assign)({}, options);
+    delete baseOptions.source;
+    BaseLayer.call(this, baseOptions);
+    /**
+     * @private
+     * @type {?import("../events.js").EventsKey}
+     */
+
+    this.mapPrecomposeKey_ = null;
+    /**
+     * @private
+     * @type {?import("../events.js").EventsKey}
+     */
+
+    this.mapRenderKey_ = null;
+    /**
+     * @private
+     * @type {?import("../events.js").EventsKey}
+     */
+
+    this.sourceChangeKey_ = null;
+
+    if (options.map) {
+      this.setMap(options.map);
+    }
+
+    (0, _events.listen)(this, (0, _Object.getChangeEventType)(_Property.default.SOURCE), this.handleSourcePropertyChange_, this);
+    var source = options.source ? options.source : null;
+    this.setSource(source);
+  }
+
+  if (BaseLayer) Layer.__proto__ = BaseLayer;
+  Layer.prototype = Object.create(BaseLayer && BaseLayer.prototype);
+  Layer.prototype.constructor = Layer;
+  /**
+   * @inheritDoc
+   */
+
+  Layer.prototype.getLayersArray = function getLayersArray(opt_array) {
+    var array = opt_array ? opt_array : [];
+    array.push(this);
+    return array;
+  };
+  /**
+   * @inheritDoc
+   */
+
+
+  Layer.prototype.getLayerStatesArray = function getLayerStatesArray(opt_states) {
+    var states = opt_states ? opt_states : [];
+    states.push(this.getLayerState());
+    return states;
+  };
+  /**
+   * Get the layer source.
+   * @return {import("../source/Source.js").default} The layer source (or `null` if not yet set).
+   * @observable
+   * @api
+   */
+
+
+  Layer.prototype.getSource = function getSource() {
+    var source = this.get(_Property.default.SOURCE);
+    return (
+      /** @type {import("../source/Source.js").default} */
+      source || null
+    );
+  };
+  /**
+    * @inheritDoc
+    */
+
+
+  Layer.prototype.getSourceState = function getSourceState() {
+    var source = this.getSource();
+    return !source ? _State.default.UNDEFINED : source.getState();
+  };
+  /**
+   * @private
+   */
+
+
+  Layer.prototype.handleSourceChange_ = function handleSourceChange_() {
+    this.changed();
+  };
+  /**
+   * @private
+   */
+
+
+  Layer.prototype.handleSourcePropertyChange_ = function handleSourcePropertyChange_() {
+    if (this.sourceChangeKey_) {
+      (0, _events.unlistenByKey)(this.sourceChangeKey_);
+      this.sourceChangeKey_ = null;
+    }
+
+    var source = this.getSource();
+
+    if (source) {
+      this.sourceChangeKey_ = (0, _events.listen)(source, _EventType.default.CHANGE, this.handleSourceChange_, this);
+    }
+
+    this.changed();
+  };
+  /**
+   * Sets the layer to be rendered on top of other layers on a map. The map will
+   * not manage this layer in its layers collection, and the callback in
+   * {@link module:ol/Map#forEachLayerAtPixel} will receive `null` as layer. This
+   * is useful for temporary layers. To remove an unmanaged layer from the map,
+   * use `#setMap(null)`.
+   *
+   * To add the layer to a map and have it managed by the map, use
+   * {@link module:ol/Map#addLayer} instead.
+   * @param {import("../PluggableMap.js").default} map Map.
+   * @api
+   */
+
+
+  Layer.prototype.setMap = function setMap(map) {
+    if (this.mapPrecomposeKey_) {
+      (0, _events.unlistenByKey)(this.mapPrecomposeKey_);
+      this.mapPrecomposeKey_ = null;
+    }
+
+    if (!map) {
+      this.changed();
+    }
+
+    if (this.mapRenderKey_) {
+      (0, _events.unlistenByKey)(this.mapRenderKey_);
+      this.mapRenderKey_ = null;
+    }
+
+    if (map) {
+      this.mapPrecomposeKey_ = (0, _events.listen)(map, _EventType2.default.PRECOMPOSE, function (evt) {
+        var renderEvent =
+        /** @type {import("../render/Event.js").default} */
+        evt;
+        var layerState = this.getLayerState();
+        layerState.managed = false;
+
+        if (this.getZIndex() === undefined) {
+          layerState.zIndex = Infinity;
+        }
+
+        renderEvent.frameState.layerStatesArray.push(layerState);
+        renderEvent.frameState.layerStates[(0, _util.getUid)(this)] = layerState;
+      }, this);
+      this.mapRenderKey_ = (0, _events.listen)(this, _EventType.default.CHANGE, map.render, map);
+      this.changed();
+    }
+  };
+  /**
+   * Set the layer source.
+   * @param {import("../source/Source.js").default} source The layer source.
+   * @observable
+   * @api
+   */
+
+
+  Layer.prototype.setSource = function setSource(source) {
+    this.set(_Property.default.SOURCE, source);
+  };
+
+  return Layer;
+}(_Base.default);
+/**
+ * Return `true` if the layer is visible, and if the passed resolution is
+ * between the layer's minResolution and maxResolution. The comparison is
+ * inclusive for `minResolution` and exclusive for `maxResolution`.
+ * @param {State} layerState Layer state.
+ * @param {number} resolution Resolution.
+ * @return {boolean} The layer is visible at the given resolution.
+ */
+
+
+function visibleAtResolution(layerState, resolution) {
+  return layerState.visible && resolution >= layerState.minResolution && resolution < layerState.maxResolution;
+}
+
+var _default = Layer;
+exports.default = _default;
+},{"../events.js":"node_modules/ol/events.js","../events/EventType.js":"node_modules/ol/events/EventType.js","../util.js":"node_modules/ol/util.js","../Object.js":"node_modules/ol/Object.js","./Base.js":"node_modules/ol/layer/Base.js","./Property.js":"node_modules/ol/layer/Property.js","../obj.js":"node_modules/ol/obj.js","../render/EventType.js":"node_modules/ol/render/EventType.js","../source/State.js":"node_modules/ol/source/State.js"}],"node_modules/ol/control/Attribution.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.render = render;
+exports.default = void 0;
+
+var _array = require("../array.js");
+
+var _Control = _interopRequireDefault(require("./Control.js"));
+
+var _css = require("../css.js");
+
+var _dom = require("../dom.js");
+
+var _events = require("../events.js");
+
+var _EventType = _interopRequireDefault(require("../events/EventType.js"));
+
+var _Layer = require("../layer/Layer.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/control/Attribution
+ */
+
+/**
+ * @typedef {Object} Options
+ * @property {string} [className='ol-attribution'] CSS class name.
+ * @property {HTMLElement|string} [target] Specify a target if you
+ * want the control to be rendered outside of the map's
+ * viewport.
+ * @property {boolean} [collapsible] Specify if attributions can
+ * be collapsed. If not specified, sources control this behavior with their
+ * `attributionsCollapsible` setting.
+ * @property {boolean} [collapsed=true] Specify if attributions should
+ * be collapsed at startup.
+ * @property {string} [tipLabel='Attributions'] Text label to use for the button tip.
+ * @property {string} [label='i'] Text label to use for the
+ * collapsed attributions button.
+ * Instead of text, also an element (e.g. a `span` element) can be used.
+ * @property {string|HTMLElement} [collapseLabel='»'] Text label to use
+ * for the expanded attributions button.
+ * Instead of text, also an element (e.g. a `span` element) can be used.
+ * @property {function(import("../MapEvent.js").default)} [render] Function called when
+ * the control should be re-rendered. This is called in a `requestAnimationFrame`
+ * callback.
+ */
+
+/**
+ * @classdesc
+ * Control to show all the attributions associated with the layer sources
+ * in the map. This control is one of the default controls included in maps.
+ * By default it will show in the bottom right portion of the map, but this can
+ * be changed by using a css selector for `.ol-attribution`.
+ *
+ * @api
+ */
+var Attribution =
+/*@__PURE__*/
+function (Control) {
+  function Attribution(opt_options) {
+    var options = opt_options ? opt_options : {};
+    Control.call(this, {
+      element: document.createElement('div'),
+      render: options.render || render,
+      target: options.target
+    });
+    /**
+     * @private
+     * @type {HTMLElement}
+     */
+
+    this.ulElement_ = document.createElement('ul');
+    /**
+     * @private
+     * @type {boolean}
+     */
+
+    this.collapsed_ = options.collapsed !== undefined ? options.collapsed : true;
+    /**
+     * @private
+     * @type {boolean}
+     */
+
+    this.overrideCollapsible_ = options.collapsible !== undefined;
+    /**
+     * @private
+     * @type {boolean}
+     */
+
+    this.collapsible_ = options.collapsible !== undefined ? options.collapsible : true;
+
+    if (!this.collapsible_) {
+      this.collapsed_ = false;
+    }
+
+    var className = options.className !== undefined ? options.className : 'ol-attribution';
+    var tipLabel = options.tipLabel !== undefined ? options.tipLabel : 'Attributions';
+    var collapseLabel = options.collapseLabel !== undefined ? options.collapseLabel : '\u00BB';
+
+    if (typeof collapseLabel === 'string') {
+      /**
+       * @private
+       * @type {HTMLElement}
+       */
+      this.collapseLabel_ = document.createElement('span');
+      this.collapseLabel_.textContent = collapseLabel;
+    } else {
+      this.collapseLabel_ = collapseLabel;
+    }
+
+    var label = options.label !== undefined ? options.label : 'i';
+
+    if (typeof label === 'string') {
+      /**
+       * @private
+       * @type {HTMLElement}
+       */
+      this.label_ = document.createElement('span');
+      this.label_.textContent = label;
+    } else {
+      this.label_ = label;
+    }
+
+    var activeLabel = this.collapsible_ && !this.collapsed_ ? this.collapseLabel_ : this.label_;
+    var button = document.createElement('button');
+    button.setAttribute('type', 'button');
+    button.title = tipLabel;
+    button.appendChild(activeLabel);
+    (0, _events.listen)(button, _EventType.default.CLICK, this.handleClick_, this);
+    var cssClasses = className + ' ' + _css.CLASS_UNSELECTABLE + ' ' + _css.CLASS_CONTROL + (this.collapsed_ && this.collapsible_ ? ' ' + _css.CLASS_COLLAPSED : '') + (this.collapsible_ ? '' : ' ol-uncollapsible');
+    var element = this.element;
+    element.className = cssClasses;
+    element.appendChild(this.ulElement_);
+    element.appendChild(button);
+    /**
+     * A list of currently rendered resolutions.
+     * @type {Array<string>}
+     * @private
+     */
+
+    this.renderedAttributions_ = [];
+    /**
+     * @private
+     * @type {boolean}
+     */
+
+    this.renderedVisible_ = true;
+  }
+
+  if (Control) Attribution.__proto__ = Control;
+  Attribution.prototype = Object.create(Control && Control.prototype);
+  Attribution.prototype.constructor = Attribution;
+  /**
+   * Collect a list of visible attributions and set the collapsible state.
+   * @param {import("../PluggableMap.js").FrameState} frameState Frame state.
+   * @return {Array<string>} Attributions.
+   * @private
+   */
+
+  Attribution.prototype.collectSourceAttributions_ = function collectSourceAttributions_(frameState) {
+    /**
+     * Used to determine if an attribution already exists.
+     * @type {!Object<string, boolean>}
+     */
+    var lookup = {};
+    /**
+     * A list of visible attributions.
+     * @type {Array<string>}
+     */
+
+    var visibleAttributions = [];
+    var layerStatesArray = frameState.layerStatesArray;
+    var resolution = frameState.viewState.resolution;
+
+    for (var i = 0, ii = layerStatesArray.length; i < ii; ++i) {
+      var layerState = layerStatesArray[i];
+
+      if (!(0, _Layer.visibleAtResolution)(layerState, resolution)) {
+        continue;
+      }
+
+      var source =
+      /** @type {import("../layer/Layer.js").default} */
+      layerState.layer.getSource();
+
+      if (!source) {
+        continue;
+      }
+
+      var attributionGetter = source.getAttributions();
+
+      if (!attributionGetter) {
+        continue;
+      }
+
+      var attributions = attributionGetter(frameState);
+
+      if (!attributions) {
+        continue;
+      }
+
+      if (!this.overrideCollapsible_ && source.getAttributionsCollapsible() === false) {
+        this.setCollapsible(false);
+      }
+
+      if (Array.isArray(attributions)) {
+        for (var j = 0, jj = attributions.length; j < jj; ++j) {
+          if (!(attributions[j] in lookup)) {
+            visibleAttributions.push(attributions[j]);
+            lookup[attributions[j]] = true;
+          }
+        }
+      } else {
+        if (!(attributions in lookup)) {
+          visibleAttributions.push(attributions);
+          lookup[attributions] = true;
+        }
+      }
+    }
+
+    return visibleAttributions;
+  };
+  /**
+   * @private
+   * @param {?import("../PluggableMap.js").FrameState} frameState Frame state.
+   */
+
+
+  Attribution.prototype.updateElement_ = function updateElement_(frameState) {
+    if (!frameState) {
+      if (this.renderedVisible_) {
+        this.element.style.display = 'none';
+        this.renderedVisible_ = false;
+      }
+
+      return;
+    }
+
+    var attributions = this.collectSourceAttributions_(frameState);
+    var visible = attributions.length > 0;
+
+    if (this.renderedVisible_ != visible) {
+      this.element.style.display = visible ? '' : 'none';
+      this.renderedVisible_ = visible;
+    }
+
+    if ((0, _array.equals)(attributions, this.renderedAttributions_)) {
+      return;
+    }
+
+    (0, _dom.removeChildren)(this.ulElement_); // append the attributions
+
+    for (var i = 0, ii = attributions.length; i < ii; ++i) {
+      var element = document.createElement('li');
+      element.innerHTML = attributions[i];
+      this.ulElement_.appendChild(element);
+    }
+
+    this.renderedAttributions_ = attributions;
+  };
+  /**
+   * @param {MouseEvent} event The event to handle
+   * @private
+   */
+
+
+  Attribution.prototype.handleClick_ = function handleClick_(event) {
+    event.preventDefault();
+    this.handleToggle_();
+  };
+  /**
+   * @private
+   */
+
+
+  Attribution.prototype.handleToggle_ = function handleToggle_() {
+    this.element.classList.toggle(_css.CLASS_COLLAPSED);
+
+    if (this.collapsed_) {
+      (0, _dom.replaceNode)(this.collapseLabel_, this.label_);
+    } else {
+      (0, _dom.replaceNode)(this.label_, this.collapseLabel_);
+    }
+
+    this.collapsed_ = !this.collapsed_;
+  };
+  /**
+   * Return `true` if the attribution is collapsible, `false` otherwise.
+   * @return {boolean} True if the widget is collapsible.
+   * @api
+   */
+
+
+  Attribution.prototype.getCollapsible = function getCollapsible() {
+    return this.collapsible_;
+  };
+  /**
+   * Set whether the attribution should be collapsible.
+   * @param {boolean} collapsible True if the widget is collapsible.
+   * @api
+   */
+
+
+  Attribution.prototype.setCollapsible = function setCollapsible(collapsible) {
+    if (this.collapsible_ === collapsible) {
+      return;
+    }
+
+    this.collapsible_ = collapsible;
+    this.element.classList.toggle('ol-uncollapsible');
+
+    if (!collapsible && this.collapsed_) {
+      this.handleToggle_();
+    }
+  };
+  /**
+   * Collapse or expand the attribution according to the passed parameter. Will
+   * not do anything if the attribution isn't collapsible or if the current
+   * collapsed state is already the one requested.
+   * @param {boolean} collapsed True if the widget is collapsed.
+   * @api
+   */
+
+
+  Attribution.prototype.setCollapsed = function setCollapsed(collapsed) {
+    if (!this.collapsible_ || this.collapsed_ === collapsed) {
+      return;
+    }
+
+    this.handleToggle_();
+  };
+  /**
+   * Return `true` when the attribution is currently collapsed or `false`
+   * otherwise.
+   * @return {boolean} True if the widget is collapsed.
+   * @api
+   */
+
+
+  Attribution.prototype.getCollapsed = function getCollapsed() {
+    return this.collapsed_;
+  };
+
+  return Attribution;
+}(_Control.default);
+/**
+ * Update the attribution element.
+ * @param {import("../MapEvent.js").default} mapEvent Map event.
+ * @this {Attribution}
+ * @api
+ */
+
+
+function render(mapEvent) {
+  this.updateElement_(mapEvent.frameState);
+}
+
+var _default = Attribution;
+exports.default = _default;
+},{"../array.js":"node_modules/ol/array.js","./Control.js":"node_modules/ol/control/Control.js","../css.js":"node_modules/ol/css.js","../dom.js":"node_modules/ol/dom.js","../events.js":"node_modules/ol/events.js","../events/EventType.js":"node_modules/ol/events/EventType.js","../layer/Layer.js":"node_modules/ol/layer/Layer.js"}],"node_modules/ol/control/Rotate.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18554,142 +22489,7 @@ function defaults(opt_options) {
 
   return controls;
 }
-},{"../Collection.js":"node_modules/ol/Collection.js","./Attribution.js":"node_modules/ol/control/Attribution.js","./Rotate.js":"node_modules/ol/control/Rotate.js","./Zoom.js":"node_modules/ol/control/Zoom.js"}],"node_modules/ol/Kinetic.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/Kinetic
- */
-
-/**
- * @classdesc
- * Implementation of inertial deceleration for map movement.
- *
- * @api
- */
-var Kinetic = function Kinetic(decay, minVelocity, delay) {
-  /**
-   * @private
-   * @type {number}
-   */
-  this.decay_ = decay;
-  /**
-   * @private
-   * @type {number}
-   */
-
-  this.minVelocity_ = minVelocity;
-  /**
-   * @private
-   * @type {number}
-   */
-
-  this.delay_ = delay;
-  /**
-   * @private
-   * @type {Array<number>}
-   */
-
-  this.points_ = [];
-  /**
-   * @private
-   * @type {number}
-   */
-
-  this.angle_ = 0;
-  /**
-   * @private
-   * @type {number}
-   */
-
-  this.initialVelocity_ = 0;
-};
-/**
- * FIXME empty description for jsdoc
- */
-
-
-Kinetic.prototype.begin = function begin() {
-  this.points_.length = 0;
-  this.angle_ = 0;
-  this.initialVelocity_ = 0;
-};
-/**
- * @param {number} x X.
- * @param {number} y Y.
- */
-
-
-Kinetic.prototype.update = function update(x, y) {
-  this.points_.push(x, y, Date.now());
-};
-/**
- * @return {boolean} Whether we should do kinetic animation.
- */
-
-
-Kinetic.prototype.end = function end() {
-  if (this.points_.length < 6) {
-    // at least 2 points are required (i.e. there must be at least 6 elements
-    // in the array)
-    return false;
-  }
-
-  var delay = Date.now() - this.delay_;
-  var lastIndex = this.points_.length - 3;
-
-  if (this.points_[lastIndex + 2] < delay) {
-    // the last tracked point is too old, which means that the user stopped
-    // panning before releasing the map
-    return false;
-  } // get the first point which still falls into the delay time
-
-
-  var firstIndex = lastIndex - 3;
-
-  while (firstIndex > 0 && this.points_[firstIndex + 2] > delay) {
-    firstIndex -= 3;
-  }
-
-  var duration = this.points_[lastIndex + 2] - this.points_[firstIndex + 2]; // we don't want a duration of 0 (divide by zero)
-  // we also make sure the user panned for a duration of at least one frame
-  // (1/60s) to compute sane displacement values
-
-  if (duration < 1000 / 60) {
-    return false;
-  }
-
-  var dx = this.points_[lastIndex] - this.points_[firstIndex];
-  var dy = this.points_[lastIndex + 1] - this.points_[firstIndex + 1];
-  this.angle_ = Math.atan2(dy, dx);
-  this.initialVelocity_ = Math.sqrt(dx * dx + dy * dy) / duration;
-  return this.initialVelocity_ > this.minVelocity_;
-};
-/**
- * @return {number} Total distance travelled (pixels).
- */
-
-
-Kinetic.prototype.getDistance = function getDistance() {
-  return (this.minVelocity_ - this.initialVelocity_) / this.decay_;
-};
-/**
- * @return {number} Angle of the kinetic panning animation (radians).
- */
-
-
-Kinetic.prototype.getAngle = function getAngle() {
-  return this.angle_;
-};
-
-var _default = Kinetic;
-exports.default = _default;
-},{}],"node_modules/ol/interaction/Property.js":[function(require,module,exports) {
+},{"../Collection.js":"node_modules/ol/Collection.js","./Attribution.js":"node_modules/ol/control/Attribution.js","./Rotate.js":"node_modules/ol/control/Rotate.js","./Zoom.js":"node_modules/ol/control/Zoom.js"}],"node_modules/ol/interaction/Property.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21914,354 +25714,7 @@ function (PointerInteraction) {
 
 var _default = DragRotateAndZoom;
 exports.default = _default;
-},{"../rotationconstraint.js":"node_modules/ol/rotationconstraint.js","../ViewHint.js":"node_modules/ol/ViewHint.js","../events/condition.js":"node_modules/ol/events/condition.js","./Interaction.js":"node_modules/ol/interaction/Interaction.js","./Pointer.js":"node_modules/ol/interaction/Pointer.js"}],"node_modules/ol/Feature.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createStyleFunction = createStyleFunction;
-exports.default = void 0;
-
-var _asserts = require("./asserts.js");
-
-var _events = require("./events.js");
-
-var _EventType = _interopRequireDefault(require("./events/EventType.js"));
-
-var _Object = _interopRequireWildcard(require("./Object.js"));
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/Feature
- */
-
-/**
- * @typedef {typeof Feature|typeof import("./render/Feature.js").default} FeatureClass
- */
-
-/**
- * @typedef {Feature|import("./render/Feature.js").default} FeatureLike
- */
-
-/**
- * @classdesc
- * A vector object for geographic features with a geometry and other
- * attribute properties, similar to the features in vector file formats like
- * GeoJSON.
- *
- * Features can be styled individually with `setStyle`; otherwise they use the
- * style of their vector layer.
- *
- * Note that attribute properties are set as {@link module:ol/Object} properties on
- * the feature object, so they are observable, and have get/set accessors.
- *
- * Typically, a feature has a single geometry property. You can set the
- * geometry using the `setGeometry` method and get it with `getGeometry`.
- * It is possible to store more than one geometry on a feature using attribute
- * properties. By default, the geometry used for rendering is identified by
- * the property name `geometry`. If you want to use another geometry property
- * for rendering, use the `setGeometryName` method to change the attribute
- * property associated with the geometry for the feature.  For example:
- *
- * ```js
- *
- * import Feature from 'ol/Feature';
- * import Polygon from 'ol/geom/Polygon';
- * import Point from 'ol/geom/Point';
- *
- * var feature = new Feature({
- *   geometry: new Polygon(polyCoords),
- *   labelPoint: new Point(labelCoords),
- *   name: 'My Polygon'
- * });
- *
- * // get the polygon geometry
- * var poly = feature.getGeometry();
- *
- * // Render the feature as a point using the coordinates from labelPoint
- * feature.setGeometryName('labelPoint');
- *
- * // get the point geometry
- * var point = feature.getGeometry();
- * ```
- *
- * @api
- */
-var Feature =
-/*@__PURE__*/
-function (BaseObject) {
-  function Feature(opt_geometryOrProperties) {
-    BaseObject.call(this);
-    /**
-     * @private
-     * @type {number|string|undefined}
-     */
-
-    this.id_ = undefined;
-    /**
-     * @type {string}
-     * @private
-     */
-
-    this.geometryName_ = 'geometry';
-    /**
-     * User provided style.
-     * @private
-     * @type {import("./style/Style.js").StyleLike}
-     */
-
-    this.style_ = null;
-    /**
-     * @private
-     * @type {import("./style/Style.js").StyleFunction|undefined}
-     */
-
-    this.styleFunction_ = undefined;
-    /**
-     * @private
-     * @type {?import("./events.js").EventsKey}
-     */
-
-    this.geometryChangeKey_ = null;
-    (0, _events.listen)(this, (0, _Object.getChangeEventType)(this.geometryName_), this.handleGeometryChanged_, this);
-
-    if (opt_geometryOrProperties) {
-      if (typeof
-      /** @type {?} */
-      opt_geometryOrProperties.getSimplifiedGeometry === 'function') {
-        var geometry =
-        /** @type {import("./geom/Geometry.js").default} */
-        opt_geometryOrProperties;
-        this.setGeometry(geometry);
-      } else {
-        /** @type {Object<string, *>} */
-        var properties = opt_geometryOrProperties;
-        this.setProperties(properties);
-      }
-    }
-  }
-
-  if (BaseObject) Feature.__proto__ = BaseObject;
-  Feature.prototype = Object.create(BaseObject && BaseObject.prototype);
-  Feature.prototype.constructor = Feature;
-  /**
-   * Clone this feature. If the original feature has a geometry it
-   * is also cloned. The feature id is not set in the clone.
-   * @return {Feature} The clone.
-   * @api
-   */
-
-  Feature.prototype.clone = function clone() {
-    var clone = new Feature(this.getProperties());
-    clone.setGeometryName(this.getGeometryName());
-    var geometry = this.getGeometry();
-
-    if (geometry) {
-      clone.setGeometry(geometry.clone());
-    }
-
-    var style = this.getStyle();
-
-    if (style) {
-      clone.setStyle(style);
-    }
-
-    return clone;
-  };
-  /**
-   * Get the feature's default geometry.  A feature may have any number of named
-   * geometries.  The "default" geometry (the one that is rendered by default) is
-   * set when calling {@link module:ol/Feature~Feature#setGeometry}.
-   * @return {import("./geom/Geometry.js").default|undefined} The default geometry for the feature.
-   * @api
-   * @observable
-   */
-
-
-  Feature.prototype.getGeometry = function getGeometry() {
-    return (
-      /** @type {import("./geom/Geometry.js").default|undefined} */
-      this.get(this.geometryName_)
-    );
-  };
-  /**
-   * Get the feature identifier.  This is a stable identifier for the feature and
-   * is either set when reading data from a remote source or set explicitly by
-   * calling {@link module:ol/Feature~Feature#setId}.
-   * @return {number|string|undefined} Id.
-   * @api
-   */
-
-
-  Feature.prototype.getId = function getId() {
-    return this.id_;
-  };
-  /**
-   * Get the name of the feature's default geometry.  By default, the default
-   * geometry is named `geometry`.
-   * @return {string} Get the property name associated with the default geometry
-   *     for this feature.
-   * @api
-   */
-
-
-  Feature.prototype.getGeometryName = function getGeometryName() {
-    return this.geometryName_;
-  };
-  /**
-   * Get the feature's style. Will return what was provided to the
-   * {@link module:ol/Feature~Feature#setStyle} method.
-   * @return {import("./style/Style.js").StyleLike} The feature style.
-   * @api
-   */
-
-
-  Feature.prototype.getStyle = function getStyle() {
-    return this.style_;
-  };
-  /**
-   * Get the feature's style function.
-   * @return {import("./style/Style.js").StyleFunction|undefined} Return a function
-   * representing the current style of this feature.
-   * @api
-   */
-
-
-  Feature.prototype.getStyleFunction = function getStyleFunction() {
-    return this.styleFunction_;
-  };
-  /**
-   * @private
-   */
-
-
-  Feature.prototype.handleGeometryChange_ = function handleGeometryChange_() {
-    this.changed();
-  };
-  /**
-   * @private
-   */
-
-
-  Feature.prototype.handleGeometryChanged_ = function handleGeometryChanged_() {
-    if (this.geometryChangeKey_) {
-      (0, _events.unlistenByKey)(this.geometryChangeKey_);
-      this.geometryChangeKey_ = null;
-    }
-
-    var geometry = this.getGeometry();
-
-    if (geometry) {
-      this.geometryChangeKey_ = (0, _events.listen)(geometry, _EventType.default.CHANGE, this.handleGeometryChange_, this);
-    }
-
-    this.changed();
-  };
-  /**
-   * Set the default geometry for the feature.  This will update the property
-   * with the name returned by {@link module:ol/Feature~Feature#getGeometryName}.
-   * @param {import("./geom/Geometry.js").default|undefined} geometry The new geometry.
-   * @api
-   * @observable
-   */
-
-
-  Feature.prototype.setGeometry = function setGeometry(geometry) {
-    this.set(this.geometryName_, geometry);
-  };
-  /**
-   * Set the style for the feature.  This can be a single style object, an array
-   * of styles, or a function that takes a resolution and returns an array of
-   * styles. If it is `null` the feature has no style (a `null` style).
-   * @param {import("./style/Style.js").StyleLike} style Style for this feature.
-   * @api
-   * @fires module:ol/events/Event~Event#event:change
-   */
-
-
-  Feature.prototype.setStyle = function setStyle(style) {
-    this.style_ = style;
-    this.styleFunction_ = !style ? undefined : createStyleFunction(style);
-    this.changed();
-  };
-  /**
-   * Set the feature id.  The feature id is considered stable and may be used when
-   * requesting features or comparing identifiers returned from a remote source.
-   * The feature id can be used with the
-   * {@link module:ol/source/Vector~VectorSource#getFeatureById} method.
-   * @param {number|string|undefined} id The feature id.
-   * @api
-   * @fires module:ol/events/Event~Event#event:change
-   */
-
-
-  Feature.prototype.setId = function setId(id) {
-    this.id_ = id;
-    this.changed();
-  };
-  /**
-   * Set the property name to be used when getting the feature's default geometry.
-   * When calling {@link module:ol/Feature~Feature#getGeometry}, the value of the property with
-   * this name will be returned.
-   * @param {string} name The property name of the default geometry.
-   * @api
-   */
-
-
-  Feature.prototype.setGeometryName = function setGeometryName(name) {
-    (0, _events.unlisten)(this, (0, _Object.getChangeEventType)(this.geometryName_), this.handleGeometryChanged_, this);
-    this.geometryName_ = name;
-    (0, _events.listen)(this, (0, _Object.getChangeEventType)(this.geometryName_), this.handleGeometryChanged_, this);
-    this.handleGeometryChanged_();
-  };
-
-  return Feature;
-}(_Object.default);
-/**
- * Convert the provided object into a feature style function.  Functions passed
- * through unchanged.  Arrays of Style or single style objects wrapped
- * in a new feature style function.
- * @param {!import("./style/Style.js").StyleFunction|!Array<import("./style/Style.js").default>|!import("./style/Style.js").default} obj
- *     A feature style function, a single style, or an array of styles.
- * @return {import("./style/Style.js").StyleFunction} A style function.
- */
-
-
-function createStyleFunction(obj) {
-  if (typeof obj === 'function') {
-    return obj;
-  } else {
-    /**
-     * @type {Array<import("./style/Style.js").default>}
-     */
-    var styles;
-
-    if (Array.isArray(obj)) {
-      styles = obj;
-    } else {
-      (0, _asserts.assert)(typeof
-      /** @type {?} */
-      obj.getZIndex === 'function', 41); // Expected an `import("./style/Style.js").Style` or an array of `import("./style/Style.js").Style`
-
-      var style =
-      /** @type {import("./style/Style.js").default} */
-      obj;
-      styles = [style];
-    }
-
-    return function () {
-      return styles;
-    };
-  }
-}
-
-var _default = Feature;
-exports.default = _default;
-},{"./asserts.js":"node_modules/ol/asserts.js","./events.js":"node_modules/ol/events.js","./events/EventType.js":"node_modules/ol/events/EventType.js","./Object.js":"node_modules/ol/Object.js"}],"node_modules/ol/geom/Circle.js":[function(require,module,exports) {
+},{"../rotationconstraint.js":"node_modules/ol/rotationconstraint.js","../ViewHint.js":"node_modules/ol/ViewHint.js","../events/condition.js":"node_modules/ol/events/condition.js","./Interaction.js":"node_modules/ol/interaction/Interaction.js","./Pointer.js":"node_modules/ol/interaction/Pointer.js"}],"node_modules/ol/geom/Circle.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22539,536 +25992,7 @@ function (SimpleGeometry) {
 Circle.prototype.transform;
 var _default = Circle;
 exports.default = _default;
-},{"../extent.js":"node_modules/ol/extent.js","./GeometryType.js":"node_modules/ol/geom/GeometryType.js","./SimpleGeometry.js":"node_modules/ol/geom/SimpleGeometry.js","./flat/deflate.js":"node_modules/ol/geom/flat/deflate.js"}],"node_modules/ol/geom/flat/interpolate.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.interpolatePoint = interpolatePoint;
-exports.lineStringCoordinateAtM = lineStringCoordinateAtM;
-exports.lineStringsCoordinateAtM = lineStringsCoordinateAtM;
-
-var _array = require("../../array.js");
-
-var _math = require("../../math.js");
-
-/**
- * @module ol/geom/flat/interpolate
- */
-
-/**
- * @param {Array<number>} flatCoordinates Flat coordinates.
- * @param {number} offset Offset.
- * @param {number} end End.
- * @param {number} stride Stride.
- * @param {number} fraction Fraction.
- * @param {Array<number>=} opt_dest Destination.
- * @return {Array<number>} Destination.
- */
-function interpolatePoint(flatCoordinates, offset, end, stride, fraction, opt_dest) {
-  var pointX = NaN;
-  var pointY = NaN;
-  var n = (end - offset) / stride;
-
-  if (n === 1) {
-    pointX = flatCoordinates[offset];
-    pointY = flatCoordinates[offset + 1];
-  } else if (n == 2) {
-    pointX = (1 - fraction) * flatCoordinates[offset] + fraction * flatCoordinates[offset + stride];
-    pointY = (1 - fraction) * flatCoordinates[offset + 1] + fraction * flatCoordinates[offset + stride + 1];
-  } else if (n !== 0) {
-    var x1 = flatCoordinates[offset];
-    var y1 = flatCoordinates[offset + 1];
-    var length = 0;
-    var cumulativeLengths = [0];
-
-    for (var i = offset + stride; i < end; i += stride) {
-      var x2 = flatCoordinates[i];
-      var y2 = flatCoordinates[i + 1];
-      length += Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-      cumulativeLengths.push(length);
-      x1 = x2;
-      y1 = y2;
-    }
-
-    var target = fraction * length;
-    var index = (0, _array.binarySearch)(cumulativeLengths, target);
-
-    if (index < 0) {
-      var t = (target - cumulativeLengths[-index - 2]) / (cumulativeLengths[-index - 1] - cumulativeLengths[-index - 2]);
-      var o = offset + (-index - 2) * stride;
-      pointX = (0, _math.lerp)(flatCoordinates[o], flatCoordinates[o + stride], t);
-      pointY = (0, _math.lerp)(flatCoordinates[o + 1], flatCoordinates[o + stride + 1], t);
-    } else {
-      pointX = flatCoordinates[offset + index * stride];
-      pointY = flatCoordinates[offset + index * stride + 1];
-    }
-  }
-
-  if (opt_dest) {
-    opt_dest[0] = pointX;
-    opt_dest[1] = pointY;
-    return opt_dest;
-  } else {
-    return [pointX, pointY];
-  }
-}
-/**
- * @param {Array<number>} flatCoordinates Flat coordinates.
- * @param {number} offset Offset.
- * @param {number} end End.
- * @param {number} stride Stride.
- * @param {number} m M.
- * @param {boolean} extrapolate Extrapolate.
- * @return {import("../../coordinate.js").Coordinate} Coordinate.
- */
-
-
-function lineStringCoordinateAtM(flatCoordinates, offset, end, stride, m, extrapolate) {
-  if (end == offset) {
-    return null;
-  }
-
-  var coordinate;
-
-  if (m < flatCoordinates[offset + stride - 1]) {
-    if (extrapolate) {
-      coordinate = flatCoordinates.slice(offset, offset + stride);
-      coordinate[stride - 1] = m;
-      return coordinate;
-    } else {
-      return null;
-    }
-  } else if (flatCoordinates[end - 1] < m) {
-    if (extrapolate) {
-      coordinate = flatCoordinates.slice(end - stride, end);
-      coordinate[stride - 1] = m;
-      return coordinate;
-    } else {
-      return null;
-    }
-  } // FIXME use O(1) search
-
-
-  if (m == flatCoordinates[offset + stride - 1]) {
-    return flatCoordinates.slice(offset, offset + stride);
-  }
-
-  var lo = offset / stride;
-  var hi = end / stride;
-
-  while (lo < hi) {
-    var mid = lo + hi >> 1;
-
-    if (m < flatCoordinates[(mid + 1) * stride - 1]) {
-      hi = mid;
-    } else {
-      lo = mid + 1;
-    }
-  }
-
-  var m0 = flatCoordinates[lo * stride - 1];
-
-  if (m == m0) {
-    return flatCoordinates.slice((lo - 1) * stride, (lo - 1) * stride + stride);
-  }
-
-  var m1 = flatCoordinates[(lo + 1) * stride - 1];
-  var t = (m - m0) / (m1 - m0);
-  coordinate = [];
-
-  for (var i = 0; i < stride - 1; ++i) {
-    coordinate.push((0, _math.lerp)(flatCoordinates[(lo - 1) * stride + i], flatCoordinates[lo * stride + i], t));
-  }
-
-  coordinate.push(m);
-  return coordinate;
-}
-/**
- * @param {Array<number>} flatCoordinates Flat coordinates.
- * @param {number} offset Offset.
- * @param {Array<number>} ends Ends.
- * @param {number} stride Stride.
- * @param {number} m M.
- * @param {boolean} extrapolate Extrapolate.
- * @param {boolean} interpolate Interpolate.
- * @return {import("../../coordinate.js").Coordinate} Coordinate.
- */
-
-
-function lineStringsCoordinateAtM(flatCoordinates, offset, ends, stride, m, extrapolate, interpolate) {
-  if (interpolate) {
-    return lineStringCoordinateAtM(flatCoordinates, offset, ends[ends.length - 1], stride, m, extrapolate);
-  }
-
-  var coordinate;
-
-  if (m < flatCoordinates[stride - 1]) {
-    if (extrapolate) {
-      coordinate = flatCoordinates.slice(0, stride);
-      coordinate[stride - 1] = m;
-      return coordinate;
-    } else {
-      return null;
-    }
-  }
-
-  if (flatCoordinates[flatCoordinates.length - 1] < m) {
-    if (extrapolate) {
-      coordinate = flatCoordinates.slice(flatCoordinates.length - stride);
-      coordinate[stride - 1] = m;
-      return coordinate;
-    } else {
-      return null;
-    }
-  }
-
-  for (var i = 0, ii = ends.length; i < ii; ++i) {
-    var end = ends[i];
-
-    if (offset == end) {
-      continue;
-    }
-
-    if (m < flatCoordinates[offset + stride - 1]) {
-      return null;
-    } else if (m <= flatCoordinates[end - 1]) {
-      return lineStringCoordinateAtM(flatCoordinates, offset, end, stride, m, false);
-    }
-
-    offset = end;
-  }
-
-  return null;
-}
-},{"../../array.js":"node_modules/ol/array.js","../../math.js":"node_modules/ol/math.js"}],"node_modules/ol/geom/flat/length.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.lineStringLength = lineStringLength;
-exports.linearRingLength = linearRingLength;
-
-/**
- * @module ol/geom/flat/length
- */
-
-/**
- * @param {Array<number>} flatCoordinates Flat coordinates.
- * @param {number} offset Offset.
- * @param {number} end End.
- * @param {number} stride Stride.
- * @return {number} Length.
- */
-function lineStringLength(flatCoordinates, offset, end, stride) {
-  var x1 = flatCoordinates[offset];
-  var y1 = flatCoordinates[offset + 1];
-  var length = 0;
-
-  for (var i = offset + stride; i < end; i += stride) {
-    var x2 = flatCoordinates[i];
-    var y2 = flatCoordinates[i + 1];
-    length += Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-    x1 = x2;
-    y1 = y2;
-  }
-
-  return length;
-}
-/**
- * @param {Array<number>} flatCoordinates Flat coordinates.
- * @param {number} offset Offset.
- * @param {number} end End.
- * @param {number} stride Stride.
- * @return {number} Perimeter.
- */
-
-
-function linearRingLength(flatCoordinates, offset, end, stride) {
-  var perimeter = lineStringLength(flatCoordinates, offset, end, stride);
-  var dx = flatCoordinates[end - stride] - flatCoordinates[offset];
-  var dy = flatCoordinates[end - stride + 1] - flatCoordinates[offset + 1];
-  perimeter += Math.sqrt(dx * dx + dy * dy);
-  return perimeter;
-}
-},{}],"node_modules/ol/geom/LineString.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _array = require("../array.js");
-
-var _extent = require("../extent.js");
-
-var _GeometryLayout = _interopRequireDefault(require("./GeometryLayout.js"));
-
-var _GeometryType = _interopRequireDefault(require("./GeometryType.js"));
-
-var _SimpleGeometry = _interopRequireDefault(require("./SimpleGeometry.js"));
-
-var _closest = require("./flat/closest.js");
-
-var _deflate = require("./flat/deflate.js");
-
-var _inflate = require("./flat/inflate.js");
-
-var _interpolate = require("./flat/interpolate.js");
-
-var _intersectsextent = require("./flat/intersectsextent.js");
-
-var _length = require("./flat/length.js");
-
-var _segments = require("./flat/segments.js");
-
-var _simplify = require("./flat/simplify.js");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/geom/LineString
- */
-
-/**
- * @classdesc
- * Linestring geometry.
- *
- * @api
- */
-var LineString =
-/*@__PURE__*/
-function (SimpleGeometry) {
-  function LineString(coordinates, opt_layout) {
-    SimpleGeometry.call(this);
-    /**
-     * @private
-     * @type {import("../coordinate.js").Coordinate}
-     */
-
-    this.flatMidpoint_ = null;
-    /**
-     * @private
-     * @type {number}
-     */
-
-    this.flatMidpointRevision_ = -1;
-    /**
-     * @private
-     * @type {number}
-     */
-
-    this.maxDelta_ = -1;
-    /**
-     * @private
-     * @type {number}
-     */
-
-    this.maxDeltaRevision_ = -1;
-
-    if (opt_layout !== undefined && !Array.isArray(coordinates[0])) {
-      this.setFlatCoordinates(opt_layout,
-      /** @type {Array<number>} */
-      coordinates);
-    } else {
-      this.setCoordinates(
-      /** @type {Array<import("../coordinate.js").Coordinate>} */
-      coordinates, opt_layout);
-    }
-  }
-
-  if (SimpleGeometry) LineString.__proto__ = SimpleGeometry;
-  LineString.prototype = Object.create(SimpleGeometry && SimpleGeometry.prototype);
-  LineString.prototype.constructor = LineString;
-  /**
-   * Append the passed coordinate to the coordinates of the linestring.
-   * @param {import("../coordinate.js").Coordinate} coordinate Coordinate.
-   * @api
-   */
-
-  LineString.prototype.appendCoordinate = function appendCoordinate(coordinate) {
-    if (!this.flatCoordinates) {
-      this.flatCoordinates = coordinate.slice();
-    } else {
-      (0, _array.extend)(this.flatCoordinates, coordinate);
-    }
-
-    this.changed();
-  };
-  /**
-   * Make a complete copy of the geometry.
-   * @return {!LineString} Clone.
-   * @override
-   * @api
-   */
-
-
-  LineString.prototype.clone = function clone() {
-    return new LineString(this.flatCoordinates.slice(), this.layout);
-  };
-  /**
-   * @inheritDoc
-   */
-
-
-  LineString.prototype.closestPointXY = function closestPointXY(x, y, closestPoint, minSquaredDistance) {
-    if (minSquaredDistance < (0, _extent.closestSquaredDistanceXY)(this.getExtent(), x, y)) {
-      return minSquaredDistance;
-    }
-
-    if (this.maxDeltaRevision_ != this.getRevision()) {
-      this.maxDelta_ = Math.sqrt((0, _closest.maxSquaredDelta)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride, 0));
-      this.maxDeltaRevision_ = this.getRevision();
-    }
-
-    return (0, _closest.assignClosestPoint)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride, this.maxDelta_, false, x, y, closestPoint, minSquaredDistance);
-  };
-  /**
-   * Iterate over each segment, calling the provided callback.
-   * If the callback returns a truthy value the function returns that
-   * value immediately. Otherwise the function returns `false`.
-   *
-   * @param {function(this: S, import("../coordinate.js").Coordinate, import("../coordinate.js").Coordinate): T} callback Function
-   *     called for each segment.
-   * @return {T|boolean} Value.
-   * @template T,S
-   * @api
-   */
-
-
-  LineString.prototype.forEachSegment = function forEachSegment$1(callback) {
-    return (0, _segments.forEach)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride, callback);
-  };
-  /**
-   * Returns the coordinate at `m` using linear interpolation, or `null` if no
-   * such coordinate exists.
-   *
-   * `opt_extrapolate` controls extrapolation beyond the range of Ms in the
-   * MultiLineString. If `opt_extrapolate` is `true` then Ms less than the first
-   * M will return the first coordinate and Ms greater than the last M will
-   * return the last coordinate.
-   *
-   * @param {number} m M.
-   * @param {boolean=} opt_extrapolate Extrapolate. Default is `false`.
-   * @return {import("../coordinate.js").Coordinate} Coordinate.
-   * @api
-   */
-
-
-  LineString.prototype.getCoordinateAtM = function getCoordinateAtM(m, opt_extrapolate) {
-    if (this.layout != _GeometryLayout.default.XYM && this.layout != _GeometryLayout.default.XYZM) {
-      return null;
-    }
-
-    var extrapolate = opt_extrapolate !== undefined ? opt_extrapolate : false;
-    return (0, _interpolate.lineStringCoordinateAtM)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride, m, extrapolate);
-  };
-  /**
-   * Return the coordinates of the linestring.
-   * @return {Array<import("../coordinate.js").Coordinate>} Coordinates.
-   * @override
-   * @api
-   */
-
-
-  LineString.prototype.getCoordinates = function getCoordinates() {
-    return (0, _inflate.inflateCoordinates)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride);
-  };
-  /**
-   * Return the coordinate at the provided fraction along the linestring.
-   * The `fraction` is a number between 0 and 1, where 0 is the start of the
-   * linestring and 1 is the end.
-   * @param {number} fraction Fraction.
-   * @param {import("../coordinate.js").Coordinate=} opt_dest Optional coordinate whose values will
-   *     be modified. If not provided, a new coordinate will be returned.
-   * @return {import("../coordinate.js").Coordinate} Coordinate of the interpolated point.
-   * @api
-   */
-
-
-  LineString.prototype.getCoordinateAt = function getCoordinateAt(fraction, opt_dest) {
-    return (0, _interpolate.interpolatePoint)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride, fraction, opt_dest);
-  };
-  /**
-   * Return the length of the linestring on projected plane.
-   * @return {number} Length (on projected plane).
-   * @api
-   */
-
-
-  LineString.prototype.getLength = function getLength() {
-    return (0, _length.lineStringLength)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride);
-  };
-  /**
-   * @return {Array<number>} Flat midpoint.
-   */
-
-
-  LineString.prototype.getFlatMidpoint = function getFlatMidpoint() {
-    if (this.flatMidpointRevision_ != this.getRevision()) {
-      this.flatMidpoint_ = this.getCoordinateAt(0.5, this.flatMidpoint_);
-      this.flatMidpointRevision_ = this.getRevision();
-    }
-
-    return this.flatMidpoint_;
-  };
-  /**
-   * @inheritDoc
-   */
-
-
-  LineString.prototype.getSimplifiedGeometryInternal = function getSimplifiedGeometryInternal(squaredTolerance) {
-    var simplifiedFlatCoordinates = [];
-    simplifiedFlatCoordinates.length = (0, _simplify.douglasPeucker)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride, squaredTolerance, simplifiedFlatCoordinates, 0);
-    return new LineString(simplifiedFlatCoordinates, _GeometryLayout.default.XY);
-  };
-  /**
-   * @inheritDoc
-   * @api
-   */
-
-
-  LineString.prototype.getType = function getType() {
-    return _GeometryType.default.LINE_STRING;
-  };
-  /**
-   * @inheritDoc
-   * @api
-   */
-
-
-  LineString.prototype.intersectsExtent = function intersectsExtent(extent) {
-    return (0, _intersectsextent.intersectsLineString)(this.flatCoordinates, 0, this.flatCoordinates.length, this.stride, extent);
-  };
-  /**
-   * Set the coordinates of the linestring.
-   * @param {!Array<import("../coordinate.js").Coordinate>} coordinates Coordinates.
-   * @param {GeometryLayout=} opt_layout Layout.
-   * @override
-   * @api
-   */
-
-
-  LineString.prototype.setCoordinates = function setCoordinates(coordinates, opt_layout) {
-    this.setLayout(opt_layout, coordinates, 1);
-
-    if (!this.flatCoordinates) {
-      this.flatCoordinates = [];
-    }
-
-    this.flatCoordinates.length = (0, _deflate.deflateCoordinates)(this.flatCoordinates, 0, coordinates, this.stride);
-    this.changed();
-  };
-
-  return LineString;
-}(_SimpleGeometry.default);
-
-var _default = LineString;
-exports.default = _default;
-},{"../array.js":"node_modules/ol/array.js","../extent.js":"node_modules/ol/extent.js","./GeometryLayout.js":"node_modules/ol/geom/GeometryLayout.js","./GeometryType.js":"node_modules/ol/geom/GeometryType.js","./SimpleGeometry.js":"node_modules/ol/geom/SimpleGeometry.js","./flat/closest.js":"node_modules/ol/geom/flat/closest.js","./flat/deflate.js":"node_modules/ol/geom/flat/deflate.js","./flat/inflate.js":"node_modules/ol/geom/flat/inflate.js","./flat/interpolate.js":"node_modules/ol/geom/flat/interpolate.js","./flat/intersectsextent.js":"node_modules/ol/geom/flat/intersectsextent.js","./flat/length.js":"node_modules/ol/geom/flat/length.js","./flat/segments.js":"node_modules/ol/geom/flat/segments.js","./flat/simplify.js":"node_modules/ol/geom/flat/simplify.js"}],"node_modules/ol/geom/MultiLineString.js":[function(require,module,exports) {
+},{"../extent.js":"node_modules/ol/extent.js","./GeometryType.js":"node_modules/ol/geom/GeometryType.js","./SimpleGeometry.js":"node_modules/ol/geom/SimpleGeometry.js","./flat/deflate.js":"node_modules/ol/geom/flat/deflate.js"}],"node_modules/ol/geom/MultiLineString.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24121,265 +27045,7 @@ var _default = {
   VECTOR: 'vector'
 };
 exports.default = _default;
-},{}],"node_modules/ol/color.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.asString = asString;
-exports.asArray = asArray;
-exports.normalize = normalize;
-exports.toString = toString;
-exports.fromString = void 0;
-
-var _asserts = require("./asserts.js");
-
-var _math = require("./math.js");
-
-/**
- * @module ol/color
- */
-
-/**
- * A color represented as a short array [red, green, blue, alpha].
- * red, green, and blue should be integers in the range 0..255 inclusive.
- * alpha should be a float in the range 0..1 inclusive. If no alpha value is
- * given then `1` will be used.
- * @typedef {Array<number>} Color
- * @api
- */
-
-/**
- * This RegExp matches # followed by 3, 4, 6, or 8 hex digits.
- * @const
- * @type {RegExp}
- * @private
- */
-var HEX_COLOR_RE_ = /^#([a-f0-9]{3}|[a-f0-9]{4}(?:[a-f0-9]{2}){0,2})$/i;
-/**
- * Regular expression for matching potential named color style strings.
- * @const
- * @type {RegExp}
- * @private
- */
-
-var NAMED_COLOR_RE_ = /^([a-z]*)$/i;
-/**
- * Return the color as an rgba string.
- * @param {Color|string} color Color.
- * @return {string} Rgba string.
- * @api
- */
-
-function asString(color) {
-  if (typeof color === 'string') {
-    return color;
-  } else {
-    return toString(color);
-  }
-}
-/**
- * Return named color as an rgba string.
- * @param {string} color Named color.
- * @return {string} Rgb string.
- */
-
-
-function fromNamed(color) {
-  var el = document.createElement('div');
-  el.style.color = color;
-
-  if (el.style.color !== '') {
-    document.body.appendChild(el);
-    var rgb = getComputedStyle(el).color;
-    document.body.removeChild(el);
-    return rgb;
-  } else {
-    return '';
-  }
-}
-/**
- * @param {string} s String.
- * @return {Color} Color.
- */
-
-
-var fromString = function () {
-  // We maintain a small cache of parsed strings.  To provide cheap LRU-like
-  // semantics, whenever the cache grows too large we simply delete an
-  // arbitrary 25% of the entries.
-
-  /**
-   * @const
-   * @type {number}
-   */
-  var MAX_CACHE_SIZE = 1024;
-  /**
-   * @type {Object<string, Color>}
-   */
-
-  var cache = {};
-  /**
-   * @type {number}
-   */
-
-  var cacheSize = 0;
-  return (
-    /**
-     * @param {string} s String.
-     * @return {Color} Color.
-     */
-    function (s) {
-      var color;
-
-      if (cache.hasOwnProperty(s)) {
-        color = cache[s];
-      } else {
-        if (cacheSize >= MAX_CACHE_SIZE) {
-          var i = 0;
-
-          for (var key in cache) {
-            if ((i++ & 3) === 0) {
-              delete cache[key];
-              --cacheSize;
-            }
-          }
-        }
-
-        color = fromStringInternal_(s);
-        cache[s] = color;
-        ++cacheSize;
-      }
-
-      return color;
-    }
-  );
-}();
-/**
- * Return the color as an array. This function maintains a cache of calculated
- * arrays which means the result should not be modified.
- * @param {Color|string} color Color.
- * @return {Color} Color.
- * @api
- */
-
-
-exports.fromString = fromString;
-
-function asArray(color) {
-  if (Array.isArray(color)) {
-    return color;
-  } else {
-    return fromString(color);
-  }
-}
-/**
- * @param {string} s String.
- * @private
- * @return {Color} Color.
- */
-
-
-function fromStringInternal_(s) {
-  var r, g, b, a, color;
-
-  if (NAMED_COLOR_RE_.exec(s)) {
-    s = fromNamed(s);
-  }
-
-  if (HEX_COLOR_RE_.exec(s)) {
-    // hex
-    var n = s.length - 1; // number of hex digits
-
-    var d; // number of digits per channel
-
-    if (n <= 4) {
-      d = 1;
-    } else {
-      d = 2;
-    }
-
-    var hasAlpha = n === 4 || n === 8;
-    r = parseInt(s.substr(1 + 0 * d, d), 16);
-    g = parseInt(s.substr(1 + 1 * d, d), 16);
-    b = parseInt(s.substr(1 + 2 * d, d), 16);
-
-    if (hasAlpha) {
-      a = parseInt(s.substr(1 + 3 * d, d), 16);
-    } else {
-      a = 255;
-    }
-
-    if (d == 1) {
-      r = (r << 4) + r;
-      g = (g << 4) + g;
-      b = (b << 4) + b;
-
-      if (hasAlpha) {
-        a = (a << 4) + a;
-      }
-    }
-
-    color = [r, g, b, a / 255];
-  } else if (s.indexOf('rgba(') == 0) {
-    // rgba()
-    color = s.slice(5, -1).split(',').map(Number);
-    normalize(color);
-  } else if (s.indexOf('rgb(') == 0) {
-    // rgb()
-    color = s.slice(4, -1).split(',').map(Number);
-    color.push(1);
-    normalize(color);
-  } else {
-    (0, _asserts.assert)(false, 14); // Invalid color
-  }
-
-  return color;
-}
-/**
- * TODO this function is only used in the test, we probably shouldn't export it
- * @param {Color} color Color.
- * @return {Color} Clamped color.
- */
-
-
-function normalize(color) {
-  color[0] = (0, _math.clamp)(color[0] + 0.5 | 0, 0, 255);
-  color[1] = (0, _math.clamp)(color[1] + 0.5 | 0, 0, 255);
-  color[2] = (0, _math.clamp)(color[2] + 0.5 | 0, 0, 255);
-  color[3] = (0, _math.clamp)(color[3], 0, 1);
-  return color;
-}
-/**
- * @param {Color} color Color.
- * @return {string} String.
- */
-
-
-function toString(color) {
-  var r = color[0];
-
-  if (r != (r | 0)) {
-    r = r + 0.5 | 0;
-  }
-
-  var g = color[1];
-
-  if (g != (g | 0)) {
-    g = g + 0.5 | 0;
-  }
-
-  var b = color[2];
-
-  if (b != (b | 0)) {
-    b = b + 0.5 | 0;
-  }
-
-  var a = color[3] === undefined ? 1 : color[3];
-  return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
-}
-},{"./asserts.js":"node_modules/ol/asserts.js","./math.js":"node_modules/ol/math.js"}],"node_modules/ol/colorlike.js":[function(require,module,exports) {
+},{}],"node_modules/ol/colorlike.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24417,29 +27083,7 @@ function asColorLike(color) {
     return color;
   }
 }
-},{"./color.js":"node_modules/ol/color.js"}],"node_modules/ol/ImageState.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/ImageState
- */
-
-/**
- * @enum {number}
- */
-var _default = {
-  IDLE: 0,
-  LOADING: 1,
-  LOADED: 2,
-  ERROR: 3
-};
-exports.default = _default;
-},{}],"node_modules/ol/structs/LRUCache.js":[function(require,module,exports) {
+},{"./color.js":"node_modules/ol/color.js"}],"node_modules/ol/structs/LRUCache.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26186,406 +28830,7 @@ function (RegularShape) {
 
 var _default = CircleStyle;
 exports.default = _default;
-},{"./RegularShape.js":"node_modules/ol/style/RegularShape.js"}],"node_modules/ol/style/Fill.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _util = require("../util.js");
-
-var _color = require("../color.js");
-
-/**
- * @module ol/style/Fill
- */
-
-/**
- * @typedef {Object} Options
- * @property {import("../color.js").Color|import("../colorlike.js").ColorLike} [color] A color, gradient or pattern.
- * See {@link module:ol/color~Color} and {@link module:ol/colorlike~ColorLike} for possible formats.
- * Default null; if null, the Canvas/renderer default black will be used.
- */
-
-/**
- * @classdesc
- * Set fill style for vector features.
- * @api
- */
-var Fill = function Fill(opt_options) {
-  var options = opt_options || {};
-  /**
-   * @private
-   * @type {import("../color.js").Color|import("../colorlike.js").ColorLike}
-   */
-
-  this.color_ = options.color !== undefined ? options.color : null;
-  /**
-   * @private
-   * @type {string|undefined}
-   */
-
-  this.checksum_ = undefined;
-};
-/**
- * Clones the style. The color is not cloned if it is an {@link module:ol/colorlike~ColorLike}.
- * @return {Fill} The cloned style.
- * @api
- */
-
-
-Fill.prototype.clone = function clone() {
-  var color = this.getColor();
-  return new Fill({
-    color: Array.isArray(color) ? color.slice() : color || undefined
-  });
-};
-/**
- * Get the fill color.
- * @return {import("../color.js").Color|import("../colorlike.js").ColorLike} Color.
- * @api
- */
-
-
-Fill.prototype.getColor = function getColor() {
-  return this.color_;
-};
-/**
- * Set the color.
- *
- * @param {import("../color.js").Color|import("../colorlike.js").ColorLike} color Color.
- * @api
- */
-
-
-Fill.prototype.setColor = function setColor(color) {
-  this.color_ = color;
-  this.checksum_ = undefined;
-};
-/**
- * @return {string} The checksum.
- */
-
-
-Fill.prototype.getChecksum = function getChecksum() {
-  if (this.checksum_ === undefined) {
-    var color = this.color_;
-
-    if (color) {
-      if (Array.isArray(color) || typeof color == 'string') {
-        this.checksum_ = 'f' + (0, _color.asString)(
-        /** @type {import("../color.js").Color|string} */
-        color);
-      } else {
-        this.checksum_ = (0, _util.getUid)(this.color_);
-      }
-    } else {
-      this.checksum_ = 'f-';
-    }
-  }
-
-  return this.checksum_;
-};
-
-var _default = Fill;
-exports.default = _default;
-},{"../util.js":"node_modules/ol/util.js","../color.js":"node_modules/ol/color.js"}],"node_modules/ol/style/Stroke.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _util = require("../util.js");
-
-/**
- * @module ol/style/Stroke
- */
-
-/**
- * @typedef {Object} Options
- * @property {import("../color.js").Color|import("../colorlike.js").ColorLike} [color] A color, gradient or pattern.
- * See {@link module:ol/color~Color} and {@link module:ol/colorlike~ColorLike} for possible formats.
- * Default null; if null, the Canvas/renderer default black will be used.
- * @property {string} [lineCap='round'] Line cap style: `butt`, `round`, or `square`.
- * @property {string} [lineJoin='round'] Line join style: `bevel`, `round`, or `miter`.
- * @property {Array<number>} [lineDash] Line dash pattern. Default is `undefined` (no dash).
- * Please note that Internet Explorer 10 and lower do not support the `setLineDash` method on
- * the `CanvasRenderingContext2D` and therefore this option will have no visual effect in these browsers.
- * @property {number} [lineDashOffset=0] Line dash offset.
- * @property {number} [miterLimit=10] Miter limit.
- * @property {number} [width] Width.
- */
-
-/**
- * @classdesc
- * Set stroke style for vector features.
- * Note that the defaults given are the Canvas defaults, which will be used if
- * option is not defined. The `get` functions return whatever was entered in
- * the options; they will not return the default.
- * @api
- */
-var Stroke = function Stroke(opt_options) {
-  var options = opt_options || {};
-  /**
-   * @private
-   * @type {import("../color.js").Color|import("../colorlike.js").ColorLike}
-   */
-
-  this.color_ = options.color !== undefined ? options.color : null;
-  /**
-   * @private
-   * @type {string|undefined}
-   */
-
-  this.lineCap_ = options.lineCap;
-  /**
-   * @private
-   * @type {Array<number>}
-   */
-
-  this.lineDash_ = options.lineDash !== undefined ? options.lineDash : null;
-  /**
-   * @private
-   * @type {number|undefined}
-   */
-
-  this.lineDashOffset_ = options.lineDashOffset;
-  /**
-   * @private
-   * @type {string|undefined}
-   */
-
-  this.lineJoin_ = options.lineJoin;
-  /**
-   * @private
-   * @type {number|undefined}
-   */
-
-  this.miterLimit_ = options.miterLimit;
-  /**
-   * @private
-   * @type {number|undefined}
-   */
-
-  this.width_ = options.width;
-  /**
-   * @private
-   * @type {string|undefined}
-   */
-
-  this.checksum_ = undefined;
-};
-/**
- * Clones the style.
- * @return {Stroke} The cloned style.
- * @api
- */
-
-
-Stroke.prototype.clone = function clone() {
-  var color = this.getColor();
-  return new Stroke({
-    color: Array.isArray(color) ? color.slice() : color || undefined,
-    lineCap: this.getLineCap(),
-    lineDash: this.getLineDash() ? this.getLineDash().slice() : undefined,
-    lineDashOffset: this.getLineDashOffset(),
-    lineJoin: this.getLineJoin(),
-    miterLimit: this.getMiterLimit(),
-    width: this.getWidth()
-  });
-};
-/**
- * Get the stroke color.
- * @return {import("../color.js").Color|import("../colorlike.js").ColorLike} Color.
- * @api
- */
-
-
-Stroke.prototype.getColor = function getColor() {
-  return this.color_;
-};
-/**
- * Get the line cap type for the stroke.
- * @return {string|undefined} Line cap.
- * @api
- */
-
-
-Stroke.prototype.getLineCap = function getLineCap() {
-  return this.lineCap_;
-};
-/**
- * Get the line dash style for the stroke.
- * @return {Array<number>} Line dash.
- * @api
- */
-
-
-Stroke.prototype.getLineDash = function getLineDash() {
-  return this.lineDash_;
-};
-/**
- * Get the line dash offset for the stroke.
- * @return {number|undefined} Line dash offset.
- * @api
- */
-
-
-Stroke.prototype.getLineDashOffset = function getLineDashOffset() {
-  return this.lineDashOffset_;
-};
-/**
- * Get the line join type for the stroke.
- * @return {string|undefined} Line join.
- * @api
- */
-
-
-Stroke.prototype.getLineJoin = function getLineJoin() {
-  return this.lineJoin_;
-};
-/**
- * Get the miter limit for the stroke.
- * @return {number|undefined} Miter limit.
- * @api
- */
-
-
-Stroke.prototype.getMiterLimit = function getMiterLimit() {
-  return this.miterLimit_;
-};
-/**
- * Get the stroke width.
- * @return {number|undefined} Width.
- * @api
- */
-
-
-Stroke.prototype.getWidth = function getWidth() {
-  return this.width_;
-};
-/**
- * Set the color.
- *
- * @param {import("../color.js").Color|import("../colorlike.js").ColorLike} color Color.
- * @api
- */
-
-
-Stroke.prototype.setColor = function setColor(color) {
-  this.color_ = color;
-  this.checksum_ = undefined;
-};
-/**
- * Set the line cap.
- *
- * @param {string|undefined} lineCap Line cap.
- * @api
- */
-
-
-Stroke.prototype.setLineCap = function setLineCap(lineCap) {
-  this.lineCap_ = lineCap;
-  this.checksum_ = undefined;
-};
-/**
- * Set the line dash.
- *
- * Please note that Internet Explorer 10 and lower [do not support][mdn] the
- * `setLineDash` method on the `CanvasRenderingContext2D` and therefore this
- * property will have no visual effect in these browsers.
- *
- * [mdn]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setLineDash#Browser_compatibility
- *
- * @param {Array<number>} lineDash Line dash.
- * @api
- */
-
-
-Stroke.prototype.setLineDash = function setLineDash(lineDash) {
-  this.lineDash_ = lineDash;
-  this.checksum_ = undefined;
-};
-/**
- * Set the line dash offset.
- *
- * @param {number|undefined} lineDashOffset Line dash offset.
- * @api
- */
-
-
-Stroke.prototype.setLineDashOffset = function setLineDashOffset(lineDashOffset) {
-  this.lineDashOffset_ = lineDashOffset;
-  this.checksum_ = undefined;
-};
-/**
- * Set the line join.
- *
- * @param {string|undefined} lineJoin Line join.
- * @api
- */
-
-
-Stroke.prototype.setLineJoin = function setLineJoin(lineJoin) {
-  this.lineJoin_ = lineJoin;
-  this.checksum_ = undefined;
-};
-/**
- * Set the miter limit.
- *
- * @param {number|undefined} miterLimit Miter limit.
- * @api
- */
-
-
-Stroke.prototype.setMiterLimit = function setMiterLimit(miterLimit) {
-  this.miterLimit_ = miterLimit;
-  this.checksum_ = undefined;
-};
-/**
- * Set the width.
- *
- * @param {number|undefined} width Width.
- * @api
- */
-
-
-Stroke.prototype.setWidth = function setWidth(width) {
-  this.width_ = width;
-  this.checksum_ = undefined;
-};
-/**
- * @return {string} The checksum.
- */
-
-
-Stroke.prototype.getChecksum = function getChecksum() {
-  if (this.checksum_ === undefined) {
-    this.checksum_ = 's';
-
-    if (this.color_) {
-      if (typeof this.color_ === 'string') {
-        this.checksum_ += this.color_;
-      } else {
-        this.checksum_ += (0, _util.getUid)(this.color_);
-      }
-    } else {
-      this.checksum_ += '-';
-    }
-
-    this.checksum_ += ',' + (this.lineCap_ !== undefined ? this.lineCap_.toString() : '-') + ',' + (this.lineDash_ ? this.lineDash_.toString() : '-') + ',' + (this.lineDashOffset_ !== undefined ? this.lineDashOffset_ : '-') + ',' + (this.lineJoin_ !== undefined ? this.lineJoin_ : '-') + ',' + (this.miterLimit_ !== undefined ? this.miterLimit_.toString() : '-') + ',' + (this.width_ !== undefined ? this.width_.toString() : '-');
-  }
-
-  return this.checksum_;
-};
-
-var _default = Stroke;
-exports.default = _default;
-},{"../util.js":"node_modules/ol/util.js"}],"node_modules/ol/style/Style.js":[function(require,module,exports) {
+},{"./RegularShape.js":"node_modules/ol/style/RegularShape.js"}],"node_modules/ol/style/Style.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34938,237 +37183,7 @@ var ERROR_THRESHOLD = 0.5;
 exports.ERROR_THRESHOLD = ERROR_THRESHOLD;
 var ENABLE_RASTER_REPROJECTION = true;
 exports.ENABLE_RASTER_REPROJECTION = ENABLE_RASTER_REPROJECTION;
-},{}],"node_modules/ol/ImageBase.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _util = require("./util.js");
-
-var _Target = _interopRequireDefault(require("./events/Target.js"));
-
-var _EventType = _interopRequireDefault(require("./events/EventType.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/ImageBase
- */
-
-/**
- * @abstract
- */
-var ImageBase =
-/*@__PURE__*/
-function (EventTarget) {
-  function ImageBase(extent, resolution, pixelRatio, state) {
-    EventTarget.call(this);
-    /**
-     * @protected
-     * @type {import("./extent.js").Extent}
-     */
-
-    this.extent = extent;
-    /**
-     * @private
-     * @type {number}
-     */
-
-    this.pixelRatio_ = pixelRatio;
-    /**
-     * @protected
-     * @type {number|undefined}
-     */
-
-    this.resolution = resolution;
-    /**
-     * @protected
-     * @type {import("./ImageState.js").default}
-     */
-
-    this.state = state;
-  }
-
-  if (EventTarget) ImageBase.__proto__ = EventTarget;
-  ImageBase.prototype = Object.create(EventTarget && EventTarget.prototype);
-  ImageBase.prototype.constructor = ImageBase;
-  /**
-   * @protected
-   */
-
-  ImageBase.prototype.changed = function changed() {
-    this.dispatchEvent(_EventType.default.CHANGE);
-  };
-  /**
-   * @return {import("./extent.js").Extent} Extent.
-   */
-
-
-  ImageBase.prototype.getExtent = function getExtent() {
-    return this.extent;
-  };
-  /**
-   * @abstract
-   * @return {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} Image.
-   */
-
-
-  ImageBase.prototype.getImage = function getImage() {
-    return (0, _util.abstract)();
-  };
-  /**
-   * @return {number} PixelRatio.
-   */
-
-
-  ImageBase.prototype.getPixelRatio = function getPixelRatio() {
-    return this.pixelRatio_;
-  };
-  /**
-   * @return {number} Resolution.
-   */
-
-
-  ImageBase.prototype.getResolution = function getResolution() {
-    return (
-      /** @type {number} */
-      this.resolution
-    );
-  };
-  /**
-   * @return {import("./ImageState.js").default} State.
-   */
-
-
-  ImageBase.prototype.getState = function getState() {
-    return this.state;
-  };
-  /**
-   * Load not yet loaded URI.
-   * @abstract
-   */
-
-
-  ImageBase.prototype.load = function load() {
-    (0, _util.abstract)();
-  };
-
-  return ImageBase;
-}(_Target.default);
-
-var _default = ImageBase;
-exports.default = _default;
-},{"./util.js":"node_modules/ol/util.js","./events/Target.js":"node_modules/ol/events/Target.js","./events/EventType.js":"node_modules/ol/events/EventType.js"}],"node_modules/ol/ImageCanvas.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _ImageBase = _interopRequireDefault(require("./ImageBase.js"));
-
-var _ImageState = _interopRequireDefault(require("./ImageState.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/ImageCanvas
- */
-
-/**
- * A function that is called to trigger asynchronous canvas drawing.  It is
- * called with a "done" callback that should be called when drawing is done.
- * If any error occurs during drawing, the "done" callback should be called with
- * that error.
- *
- * @typedef {function(function(Error=))} Loader
- */
-var ImageCanvas =
-/*@__PURE__*/
-function (ImageBase) {
-  function ImageCanvas(extent, resolution, pixelRatio, canvas, opt_loader) {
-    var state = opt_loader !== undefined ? _ImageState.default.IDLE : _ImageState.default.LOADED;
-    ImageBase.call(this, extent, resolution, pixelRatio, state);
-    /**
-     * Optional canvas loader function.
-     * @type {?Loader}
-     * @private
-     */
-
-    this.loader_ = opt_loader !== undefined ? opt_loader : null;
-    /**
-     * @private
-     * @type {HTMLCanvasElement}
-     */
-
-    this.canvas_ = canvas;
-    /**
-     * @private
-     * @type {Error}
-     */
-
-    this.error_ = null;
-  }
-
-  if (ImageBase) ImageCanvas.__proto__ = ImageBase;
-  ImageCanvas.prototype = Object.create(ImageBase && ImageBase.prototype);
-  ImageCanvas.prototype.constructor = ImageCanvas;
-  /**
-   * Get any error associated with asynchronous rendering.
-   * @return {Error} Any error that occurred during rendering.
-   */
-
-  ImageCanvas.prototype.getError = function getError() {
-    return this.error_;
-  };
-  /**
-   * Handle async drawing complete.
-   * @param {Error=} err Any error during drawing.
-   * @private
-   */
-
-
-  ImageCanvas.prototype.handleLoad_ = function handleLoad_(err) {
-    if (err) {
-      this.error_ = err;
-      this.state = _ImageState.default.ERROR;
-    } else {
-      this.state = _ImageState.default.LOADED;
-    }
-
-    this.changed();
-  };
-  /**
-   * @inheritDoc
-   */
-
-
-  ImageCanvas.prototype.load = function load() {
-    if (this.state == _ImageState.default.IDLE) {
-      this.state = _ImageState.default.LOADING;
-      this.changed();
-      this.loader_(this.handleLoad_.bind(this));
-    }
-  };
-  /**
-   * @return {HTMLCanvasElement} Canvas element.
-   */
-
-
-  ImageCanvas.prototype.getImage = function getImage() {
-    return this.canvas_;
-  };
-
-  return ImageCanvas;
-}(_ImageBase.default);
-
-var _default = ImageCanvas;
-exports.default = _default;
-},{"./ImageBase.js":"node_modules/ol/ImageBase.js","./ImageState.js":"node_modules/ol/ImageState.js"}],"node_modules/ol/render/Event.js":[function(require,module,exports) {
+},{}],"node_modules/ol/render/Event.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40855,30 +42870,6 @@ function matchingChunk(maxAngle, flatCoordinates, offset, end, stride) {
   m += m23;
   return m > chunkM ? [start, i] : [chunkStart, chunkEnd];
 }
-},{}],"node_modules/ol/style/TextPlacement.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/style/TextPlacement
- */
-
-/**
- * Text placement. One of `'point'`, `'line'`. Default is `'point'`. Note that
- * `'line'` requires the underlying geometry to be a {@link module:ol/geom/LineString~LineString},
- * {@link module:ol/geom/Polygon~Polygon}, {@link module:ol/geom/MultiLineString~MultiLineString} or
- * {@link module:ol/geom/MultiPolygon~MultiPolygon}.
- * @enum {string}
- */
-var _default = {
-  POINT: 'point',
-  LINE: 'line'
-};
-exports.default = _default;
 },{}],"node_modules/ol/render/canvas/TextReplay.js":[function(require,module,exports) {
 "use strict";
 
@@ -44269,7 +46260,1428 @@ function (BaseObject) {
 
 var _default = Overlay;
 exports.default = _default;
-},{"./MapEventType.js":"node_modules/ol/MapEventType.js","./Object.js":"node_modules/ol/Object.js","./OverlayPositioning.js":"node_modules/ol/OverlayPositioning.js","./css.js":"node_modules/ol/css.js","./dom.js":"node_modules/ol/dom.js","./events.js":"node_modules/ol/events.js","./extent.js":"node_modules/ol/extent.js"}],"node_modules/ol/control/OverviewMap.js":[function(require,module,exports) {
+},{"./MapEventType.js":"node_modules/ol/MapEventType.js","./Object.js":"node_modules/ol/Object.js","./OverlayPositioning.js":"node_modules/ol/OverlayPositioning.js","./css.js":"node_modules/ol/css.js","./dom.js":"node_modules/ol/dom.js","./events.js":"node_modules/ol/events.js","./extent.js":"node_modules/ol/extent.js"}],"node_modules/ol/tilecoord.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createOrUpdate = createOrUpdate;
+exports.getKeyZXY = getKeyZXY;
+exports.getKey = getKey;
+exports.fromKey = fromKey;
+exports.hash = hash;
+exports.quadKey = quadKey;
+exports.withinExtentAndZ = withinExtentAndZ;
+
+/**
+ * @module ol/tilecoord
+ */
+
+/**
+ * An array of three numbers representing the location of a tile in a tile
+ * grid. The order is `z`, `x`, and `y`. `z` is the zoom level.
+ * @typedef {Array<number>} TileCoord
+ * @api
+ */
+
+/**
+ * @param {number} z Z.
+ * @param {number} x X.
+ * @param {number} y Y.
+ * @param {TileCoord=} opt_tileCoord Tile coordinate.
+ * @return {TileCoord} Tile coordinate.
+ */
+function createOrUpdate(z, x, y, opt_tileCoord) {
+  if (opt_tileCoord !== undefined) {
+    opt_tileCoord[0] = z;
+    opt_tileCoord[1] = x;
+    opt_tileCoord[2] = y;
+    return opt_tileCoord;
+  } else {
+    return [z, x, y];
+  }
+}
+/**
+ * @param {number} z Z.
+ * @param {number} x X.
+ * @param {number} y Y.
+ * @return {string} Key.
+ */
+
+
+function getKeyZXY(z, x, y) {
+  return z + '/' + x + '/' + y;
+}
+/**
+ * Get the key for a tile coord.
+ * @param {TileCoord} tileCoord The tile coord.
+ * @return {string} Key.
+ */
+
+
+function getKey(tileCoord) {
+  return getKeyZXY(tileCoord[0], tileCoord[1], tileCoord[2]);
+}
+/**
+ * Get a tile coord given a key.
+ * @param {string} key The tile coord key.
+ * @return {TileCoord} The tile coord.
+ */
+
+
+function fromKey(key) {
+  return key.split('/').map(Number);
+}
+/**
+ * @param {TileCoord} tileCoord Tile coord.
+ * @return {number} Hash.
+ */
+
+
+function hash(tileCoord) {
+  return (tileCoord[1] << tileCoord[0]) + tileCoord[2];
+}
+/**
+ * @param {TileCoord} tileCoord Tile coord.
+ * @return {string} Quad key.
+ */
+
+
+function quadKey(tileCoord) {
+  var z = tileCoord[0];
+  var digits = new Array(z);
+  var mask = 1 << z - 1;
+  var i, charCode;
+
+  for (i = 0; i < z; ++i) {
+    // 48 is charCode for 0 - '0'.charCodeAt(0)
+    charCode = 48;
+
+    if (tileCoord[1] & mask) {
+      charCode += 1;
+    }
+
+    if (tileCoord[2] & mask) {
+      charCode += 2;
+    }
+
+    digits[i] = String.fromCharCode(charCode);
+    mask >>= 1;
+  }
+
+  return digits.join('');
+}
+/**
+ * @param {TileCoord} tileCoord Tile coordinate.
+ * @param {!import("./tilegrid/TileGrid.js").default} tileGrid Tile grid.
+ * @return {boolean} Tile coordinate is within extent and zoom level range.
+ */
+
+
+function withinExtentAndZ(tileCoord, tileGrid) {
+  var z = tileCoord[0];
+  var x = tileCoord[1];
+  var y = tileCoord[2];
+
+  if (tileGrid.getMinZoom() > z || z > tileGrid.getMaxZoom()) {
+    return false;
+  }
+
+  var extent = tileGrid.getExtent();
+  var tileRange;
+
+  if (!extent) {
+    tileRange = tileGrid.getFullTileRange(z);
+  } else {
+    tileRange = tileGrid.getTileRangeForExtentAndZ(extent, z);
+  }
+
+  if (!tileRange) {
+    return true;
+  } else {
+    return tileRange.containsXY(x, y);
+  }
+}
+},{}],"node_modules/ol/TileCache.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _LRUCache = _interopRequireDefault(require("./structs/LRUCache.js"));
+
+var _tilecoord = require("./tilecoord.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/TileCache
+ */
+var TileCache =
+/*@__PURE__*/
+function (LRUCache) {
+  function TileCache(opt_highWaterMark) {
+    LRUCache.call(this, opt_highWaterMark);
+  }
+
+  if (LRUCache) TileCache.__proto__ = LRUCache;
+  TileCache.prototype = Object.create(LRUCache && LRUCache.prototype);
+  TileCache.prototype.constructor = TileCache;
+  /**
+   * @param {!Object<string, import("./TileRange.js").default>} usedTiles Used tiles.
+   */
+
+  TileCache.prototype.expireCache = function expireCache(usedTiles) {
+    while (this.canExpireCache()) {
+      var tile = this.peekLast();
+      var zKey = tile.tileCoord[0].toString();
+
+      if (zKey in usedTiles && usedTiles[zKey].contains(tile.tileCoord)) {
+        break;
+      } else {
+        this.pop().dispose();
+      }
+    }
+  };
+  /**
+   * Prune all tiles from the cache that don't have the same z as the newest tile.
+   */
+
+
+  TileCache.prototype.pruneExceptNewestZ = function pruneExceptNewestZ() {
+    if (this.getCount() === 0) {
+      return;
+    }
+
+    var key = this.peekFirstKey();
+    var tileCoord = (0, _tilecoord.fromKey)(key);
+    var z = tileCoord[0];
+    this.forEach(function (tile) {
+      if (tile.tileCoord[0] !== z) {
+        this.remove((0, _tilecoord.getKey)(tile.tileCoord));
+        tile.dispose();
+      }
+    }, this);
+  };
+
+  return TileCache;
+}(_LRUCache.default);
+
+var _default = TileCache;
+exports.default = _default;
+},{"./structs/LRUCache.js":"node_modules/ol/structs/LRUCache.js","./tilecoord.js":"node_modules/ol/tilecoord.js"}],"node_modules/ol/VectorImageTile.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.defaultLoadFunction = defaultLoadFunction;
+exports.default = void 0;
+
+var _util = require("./util.js");
+
+var _Tile = _interopRequireDefault(require("./Tile.js"));
+
+var _TileState = _interopRequireDefault(require("./TileState.js"));
+
+var _dom = require("./dom.js");
+
+var _events = require("./events.js");
+
+var _extent = require("./extent.js");
+
+var _EventType = _interopRequireDefault(require("./events/EventType.js"));
+
+var _featureloader = require("./featureloader.js");
+
+var _functions = require("./functions.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/VectorImageTile
+ */
+
+/**
+ * @typedef {Object} ReplayState
+ * @property {boolean} dirty
+ * @property {null|import("./render.js").OrderFunction} renderedRenderOrder
+ * @property {number} renderedTileRevision
+ * @property {number} renderedRevision
+ */
+var VectorImageTile =
+/*@__PURE__*/
+function (Tile) {
+  function VectorImageTile(tileCoord, state, sourceRevision, format, tileLoadFunction, urlTileCoord, tileUrlFunction, sourceTileGrid, tileGrid, sourceTiles, pixelRatio, projection, tileClass, handleTileChange, zoom) {
+    Tile.call(this, tileCoord, state, {
+      transition: 0
+    });
+    /**
+     * @private
+     * @type {!Object<string, CanvasRenderingContext2D>}
+     */
+
+    this.context_ = {};
+    /**
+     * @private
+     * @type {import("./featureloader.js").FeatureLoader}
+     */
+
+    this.loader_;
+    /**
+     * @private
+     * @type {!Object<string, ReplayState>}
+     */
+
+    this.replayState_ = {};
+    /**
+     * @private
+     * @type {Object<string, import("./VectorTile.js").default>}
+     */
+
+    this.sourceTiles_ = sourceTiles;
+    /**
+     * Keys of source tiles used by this tile. Use with {@link #getTile}.
+     * @type {Array<string>}
+     */
+
+    this.tileKeys = [];
+    /**
+     * @type {import("./extent.js").Extent}
+     */
+
+    this.extent = null;
+    /**
+     * @type {number}
+     */
+
+    this.sourceRevision_ = sourceRevision;
+    /**
+     * @type {import("./tilecoord.js").TileCoord}
+     */
+
+    this.wrappedTileCoord = urlTileCoord;
+    /**
+     * @type {Array<import("./events.js").EventsKey>}
+     */
+
+    this.loadListenerKeys_ = [];
+    /**
+     * @type {Array<import("./events.js").EventsKey>}
+     */
+
+    this.sourceTileListenerKeys_ = [];
+
+    if (urlTileCoord) {
+      var extent = this.extent = tileGrid.getTileCoordExtent(urlTileCoord);
+      var resolution = tileGrid.getResolution(zoom);
+      var sourceZ = sourceTileGrid.getZForResolution(resolution);
+      var useLoadedOnly = zoom != tileCoord[0];
+      var loadCount = 0;
+      sourceTileGrid.forEachTileCoord(extent, sourceZ, function (sourceTileCoord) {
+        var sharedExtent = (0, _extent.getIntersection)(extent, sourceTileGrid.getTileCoordExtent(sourceTileCoord));
+        var sourceExtent = sourceTileGrid.getExtent();
+
+        if (sourceExtent) {
+          sharedExtent = (0, _extent.getIntersection)(sharedExtent, sourceExtent, sharedExtent);
+        }
+
+        if ((0, _extent.getWidth)(sharedExtent) / resolution >= 0.5 && (0, _extent.getHeight)(sharedExtent) / resolution >= 0.5) {
+          // only include source tile if overlap is at least 1 pixel
+          ++loadCount;
+          var sourceTileKey = sourceTileCoord.toString();
+          var sourceTile = sourceTiles[sourceTileKey];
+
+          if (!sourceTile && !useLoadedOnly) {
+            var tileUrl = tileUrlFunction(sourceTileCoord, pixelRatio, projection);
+            sourceTile = sourceTiles[sourceTileKey] = new tileClass(sourceTileCoord, tileUrl == undefined ? _TileState.default.EMPTY : _TileState.default.IDLE, tileUrl == undefined ? '' : tileUrl, format, tileLoadFunction);
+            this.sourceTileListenerKeys_.push((0, _events.listen)(sourceTile, _EventType.default.CHANGE, handleTileChange));
+          }
+
+          if (sourceTile && (!useLoadedOnly || sourceTile.getState() == _TileState.default.LOADED)) {
+            sourceTile.consumers++;
+            this.tileKeys.push(sourceTileKey);
+          }
+        }
+      }.bind(this));
+
+      if (useLoadedOnly && loadCount == this.tileKeys.length) {
+        this.finishLoading_();
+      }
+
+      if (zoom <= tileCoord[0] && this.state != _TileState.default.LOADED) {
+        while (zoom > tileGrid.getMinZoom()) {
+          var tile = new VectorImageTile(tileCoord, state, sourceRevision, format, tileLoadFunction, urlTileCoord, tileUrlFunction, sourceTileGrid, tileGrid, sourceTiles, pixelRatio, projection, tileClass, _functions.VOID, --zoom);
+
+          if (tile.state == _TileState.default.LOADED) {
+            this.interimTile = tile;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  if (Tile) VectorImageTile.__proto__ = Tile;
+  VectorImageTile.prototype = Object.create(Tile && Tile.prototype);
+  VectorImageTile.prototype.constructor = VectorImageTile;
+  /**
+   * @inheritDoc
+   */
+
+  VectorImageTile.prototype.disposeInternal = function disposeInternal() {
+    this.state = _TileState.default.ABORT;
+    this.changed();
+
+    if (this.interimTile) {
+      this.interimTile.dispose();
+    }
+
+    for (var i = 0, ii = this.tileKeys.length; i < ii; ++i) {
+      var sourceTileKey = this.tileKeys[i];
+      var sourceTile = this.getTile(sourceTileKey);
+      sourceTile.consumers--;
+
+      if (sourceTile.consumers == 0) {
+        delete this.sourceTiles_[sourceTileKey];
+        sourceTile.dispose();
+      }
+    }
+
+    this.tileKeys.length = 0;
+    this.sourceTiles_ = null;
+    this.loadListenerKeys_.forEach(_events.unlistenByKey);
+    this.loadListenerKeys_.length = 0;
+    this.sourceTileListenerKeys_.forEach(_events.unlistenByKey);
+    this.sourceTileListenerKeys_.length = 0;
+    Tile.prototype.disposeInternal.call(this);
+  };
+  /**
+   * @param {import("./layer/Layer.js").default} layer Layer.
+   * @return {CanvasRenderingContext2D} The rendering context.
+   */
+
+
+  VectorImageTile.prototype.getContext = function getContext(layer) {
+    var key = (0, _util.getUid)(layer);
+
+    if (!(key in this.context_)) {
+      this.context_[key] = (0, _dom.createCanvasContext2D)();
+    }
+
+    return this.context_[key];
+  };
+  /**
+   * Get the Canvas for this tile.
+   * @param {import("./layer/Layer.js").default} layer Layer.
+   * @return {HTMLCanvasElement} Canvas.
+   */
+
+
+  VectorImageTile.prototype.getImage = function getImage(layer) {
+    return this.getReplayState(layer).renderedTileRevision == -1 ? null : this.getContext(layer).canvas;
+  };
+  /**
+   * @param {import("./layer/Layer.js").default} layer Layer.
+   * @return {ReplayState} The replay state.
+   */
+
+
+  VectorImageTile.prototype.getReplayState = function getReplayState(layer) {
+    var key = (0, _util.getUid)(layer);
+
+    if (!(key in this.replayState_)) {
+      this.replayState_[key] = {
+        dirty: false,
+        renderedRenderOrder: null,
+        renderedRevision: -1,
+        renderedTileRevision: -1
+      };
+    }
+
+    return this.replayState_[key];
+  };
+  /**
+   * @inheritDoc
+   */
+
+
+  VectorImageTile.prototype.getKey = function getKey() {
+    return this.tileKeys.join('/') + '-' + this.sourceRevision_;
+  };
+  /**
+   * @param {string} tileKey Key (tileCoord) of the source tile.
+   * @return {import("./VectorTile.js").default} Source tile.
+   */
+
+
+  VectorImageTile.prototype.getTile = function getTile(tileKey) {
+    return this.sourceTiles_[tileKey];
+  };
+  /**
+   * @inheritDoc
+   */
+
+
+  VectorImageTile.prototype.load = function load() {
+    // Source tiles with LOADED state - we just count them because once they are
+    // loaded, we're no longer listening to state changes.
+    var leftToLoad = 0; // Source tiles with ERROR state - we track them because they can still have
+    // an ERROR state after another load attempt.
+
+    var errorSourceTiles = {};
+
+    if (this.state == _TileState.default.IDLE) {
+      this.setState(_TileState.default.LOADING);
+    }
+
+    if (this.state == _TileState.default.LOADING) {
+      this.tileKeys.forEach(function (sourceTileKey) {
+        var sourceTile = this.getTile(sourceTileKey);
+
+        if (sourceTile.state == _TileState.default.IDLE) {
+          sourceTile.setLoader(this.loader_);
+          sourceTile.load();
+        }
+
+        if (sourceTile.state == _TileState.default.LOADING) {
+          var key = (0, _events.listen)(sourceTile, _EventType.default.CHANGE, function (e) {
+            var state = sourceTile.getState();
+
+            if (state == _TileState.default.LOADED || state == _TileState.default.ERROR) {
+              var uid = (0, _util.getUid)(sourceTile);
+
+              if (state == _TileState.default.ERROR) {
+                errorSourceTiles[uid] = true;
+              } else {
+                --leftToLoad;
+                delete errorSourceTiles[uid];
+              }
+
+              if (leftToLoad - Object.keys(errorSourceTiles).length == 0) {
+                this.finishLoading_();
+              }
+            }
+          }.bind(this));
+          this.loadListenerKeys_.push(key);
+          ++leftToLoad;
+        }
+      }.bind(this));
+    }
+
+    if (leftToLoad - Object.keys(errorSourceTiles).length == 0) {
+      setTimeout(this.finishLoading_.bind(this), 0);
+    }
+  };
+  /**
+   * @private
+   */
+
+
+  VectorImageTile.prototype.finishLoading_ = function finishLoading_() {
+    var loaded = this.tileKeys.length;
+    var empty = 0;
+
+    for (var i = loaded - 1; i >= 0; --i) {
+      var state = this.getTile(this.tileKeys[i]).getState();
+
+      if (state != _TileState.default.LOADED) {
+        --loaded;
+      }
+
+      if (state == _TileState.default.EMPTY) {
+        ++empty;
+      }
+    }
+
+    if (loaded == this.tileKeys.length) {
+      this.loadListenerKeys_.forEach(_events.unlistenByKey);
+      this.loadListenerKeys_.length = 0;
+      this.setState(_TileState.default.LOADED);
+    } else {
+      this.setState(empty == this.tileKeys.length ? _TileState.default.EMPTY : _TileState.default.ERROR);
+    }
+  };
+
+  return VectorImageTile;
+}(_Tile.default);
+
+var _default = VectorImageTile;
+/**
+ * Sets the loader for a tile.
+ * @param {import("./VectorTile.js").default} tile Vector tile.
+ * @param {string} url URL.
+ */
+
+exports.default = _default;
+
+function defaultLoadFunction(tile, url) {
+  var loader = (0, _featureloader.loadFeaturesXhr)(url, tile.getFormat(), tile.onLoad.bind(tile), tile.onError.bind(tile));
+  tile.setLoader(loader);
+}
+},{"./util.js":"node_modules/ol/util.js","./Tile.js":"node_modules/ol/Tile.js","./TileState.js":"node_modules/ol/TileState.js","./dom.js":"node_modules/ol/dom.js","./events.js":"node_modules/ol/events.js","./extent.js":"node_modules/ol/extent.js","./events/EventType.js":"node_modules/ol/events/EventType.js","./featureloader.js":"node_modules/ol/featureloader.js","./functions.js":"node_modules/ol/functions.js"}],"node_modules/ol/VectorTile.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _util = require("./util.js");
+
+var _Tile = _interopRequireDefault(require("./Tile.js"));
+
+var _TileState = _interopRequireDefault(require("./TileState.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/VectorTile
+ */
+
+/**
+ * @const
+ * @type {import("./extent.js").Extent}
+ */
+var DEFAULT_EXTENT = [0, 0, 4096, 4096];
+
+var VectorTile =
+/*@__PURE__*/
+function (Tile) {
+  function VectorTile(tileCoord, state, src, format, tileLoadFunction, opt_options) {
+    Tile.call(this, tileCoord, state, opt_options);
+    /**
+     * @type {number}
+     */
+
+    this.consumers = 0;
+    /**
+     * @private
+     * @type {import("./extent.js").Extent}
+     */
+
+    this.extent_ = null;
+    /**
+     * @private
+     * @type {import("./format/Feature.js").default}
+     */
+
+    this.format_ = format;
+    /**
+     * @private
+     * @type {Array<import("./Feature.js").default>}
+     */
+
+    this.features_ = null;
+    /**
+     * @private
+     * @type {import("./featureloader.js").FeatureLoader}
+     */
+
+    this.loader_;
+    /**
+     * Data projection
+     * @private
+     * @type {import("./proj/Projection.js").default}
+     */
+
+    this.projection_ = null;
+    /**
+     * @private
+     * @type {Object<string, import("./render/ReplayGroup.js").default>}
+     */
+
+    this.replayGroups_ = {};
+    /**
+     * @private
+     * @type {import("./Tile.js").LoadFunction}
+     */
+
+    this.tileLoadFunction_ = tileLoadFunction;
+    /**
+     * @private
+     * @type {string}
+     */
+
+    this.url_ = src;
+  }
+
+  if (Tile) VectorTile.__proto__ = Tile;
+  VectorTile.prototype = Object.create(Tile && Tile.prototype);
+  VectorTile.prototype.constructor = VectorTile;
+  /**
+   * @inheritDoc
+   */
+
+  VectorTile.prototype.disposeInternal = function disposeInternal() {
+    this.features_ = null;
+    this.replayGroups_ = {};
+    this.state = _TileState.default.ABORT;
+    this.changed();
+    Tile.prototype.disposeInternal.call(this);
+  };
+  /**
+   * Gets the extent of the vector tile.
+   * @return {import("./extent.js").Extent} The extent.
+   * @api
+   */
+
+
+  VectorTile.prototype.getExtent = function getExtent() {
+    return this.extent_ || DEFAULT_EXTENT;
+  };
+  /**
+   * Get the feature format assigned for reading this tile's features.
+   * @return {import("./format/Feature.js").default} Feature format.
+   * @api
+   */
+
+
+  VectorTile.prototype.getFormat = function getFormat() {
+    return this.format_;
+  };
+  /**
+   * Get the features for this tile. Geometries will be in the projection returned
+   * by {@link module:ol/VectorTile~VectorTile#getProjection}.
+   * @return {Array<import("./Feature.js").FeatureLike>} Features.
+   * @api
+   */
+
+
+  VectorTile.prototype.getFeatures = function getFeatures() {
+    return this.features_;
+  };
+  /**
+   * @inheritDoc
+   */
+
+
+  VectorTile.prototype.getKey = function getKey() {
+    return this.url_;
+  };
+  /**
+   * Get the feature projection of features returned by
+   * {@link module:ol/VectorTile~VectorTile#getFeatures}.
+   * @return {import("./proj/Projection.js").default} Feature projection.
+   * @api
+   */
+
+
+  VectorTile.prototype.getProjection = function getProjection() {
+    return this.projection_;
+  };
+  /**
+   * @param {import("./layer/Layer.js").default} layer Layer.
+   * @param {string} key Key.
+   * @return {import("./render/ReplayGroup.js").default} Replay group.
+   */
+
+
+  VectorTile.prototype.getReplayGroup = function getReplayGroup(layer, key) {
+    return this.replayGroups_[(0, _util.getUid)(layer) + ',' + key];
+  };
+  /**
+   * @inheritDoc
+   */
+
+
+  VectorTile.prototype.load = function load() {
+    if (this.state == _TileState.default.IDLE) {
+      this.setState(_TileState.default.LOADING);
+      this.tileLoadFunction_(this, this.url_);
+      this.loader_(null, NaN, null);
+    }
+  };
+  /**
+   * Handler for successful tile load.
+   * @param {Array<import("./Feature.js").default>} features The loaded features.
+   * @param {import("./proj/Projection.js").default} dataProjection Data projection.
+   * @param {import("./extent.js").Extent} extent Extent.
+   */
+
+
+  VectorTile.prototype.onLoad = function onLoad(features, dataProjection, extent) {
+    this.setProjection(dataProjection);
+    this.setFeatures(features);
+    this.setExtent(extent);
+  };
+  /**
+   * Handler for tile load errors.
+   */
+
+
+  VectorTile.prototype.onError = function onError() {
+    this.setState(_TileState.default.ERROR);
+  };
+  /**
+   * Function for use in an {@link module:ol/source/VectorTile~VectorTile}'s
+   * `tileLoadFunction`. Sets the extent of the vector tile. This is only required
+   * for tiles in projections with `tile-pixels` as units. The extent should be
+   * set to `[0, 0, tilePixelSize, tilePixelSize]`, where `tilePixelSize` is
+   * calculated by multiplying the tile size with the tile pixel ratio. For
+   * sources using {@link module:ol/format/MVT~MVT} as feature format, the
+   * {@link module:ol/format/MVT~MVT#getLastExtent} method will return the correct
+   * extent. The default is `[0, 0, 4096, 4096]`.
+   * @param {import("./extent.js").Extent} extent The extent.
+   * @api
+   */
+
+
+  VectorTile.prototype.setExtent = function setExtent(extent) {
+    this.extent_ = extent;
+  };
+  /**
+   * Function for use in an {@link module:ol/source/VectorTile~VectorTile}'s `tileLoadFunction`.
+   * Sets the features for the tile.
+   * @param {Array<import("./Feature.js").default>} features Features.
+   * @api
+   */
+
+
+  VectorTile.prototype.setFeatures = function setFeatures(features) {
+    this.features_ = features;
+    this.setState(_TileState.default.LOADED);
+  };
+  /**
+   * Function for use in an {@link module:ol/source/VectorTile~VectorTile}'s `tileLoadFunction`.
+   * Sets the projection of the features that were added with
+   * {@link module:ol/VectorTile~VectorTile#setFeatures}.
+   * @param {import("./proj/Projection.js").default} projection Feature projection.
+   * @api
+   */
+
+
+  VectorTile.prototype.setProjection = function setProjection(projection) {
+    this.projection_ = projection;
+  };
+  /**
+   * @param {import("./layer/Layer.js").default} layer Layer.
+   * @param {string} key Key.
+   * @param {import("./render/ReplayGroup.js").default} replayGroup Replay group.
+   */
+
+
+  VectorTile.prototype.setReplayGroup = function setReplayGroup(layer, key, replayGroup) {
+    this.replayGroups_[(0, _util.getUid)(layer) + ',' + key] = replayGroup;
+  };
+  /**
+   * Set the feature loader for reading this tile's features.
+   * @param {import("./featureloader.js").FeatureLoader} loader Feature loader.
+   * @api
+   */
+
+
+  VectorTile.prototype.setLoader = function setLoader(loader) {
+    this.loader_ = loader;
+  };
+
+  return VectorTile;
+}(_Tile.default);
+
+var _default = VectorTile;
+exports.default = _default;
+},{"./util.js":"node_modules/ol/util.js","./Tile.js":"node_modules/ol/Tile.js","./TileState.js":"node_modules/ol/TileState.js"}],"node_modules/ol/control/FullScreen.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _Control = _interopRequireDefault(require("./Control.js"));
+
+var _css = require("../css.js");
+
+var _dom = require("../dom.js");
+
+var _events = require("../events.js");
+
+var _EventType = _interopRequireDefault(require("../events/EventType.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/control/FullScreen
+ */
+
+/**
+ * @return {string} Change type.
+ */
+var getChangeType = function () {
+  var changeType;
+  return function () {
+    if (!changeType) {
+      var body = document.body;
+
+      if (body.webkitRequestFullscreen) {
+        changeType = 'webkitfullscreenchange';
+      } else if (body.mozRequestFullScreen) {
+        changeType = 'mozfullscreenchange';
+      } else if (body.msRequestFullscreen) {
+        changeType = 'MSFullscreenChange';
+      } else if (body.requestFullscreen) {
+        changeType = 'fullscreenchange';
+      }
+    }
+
+    return changeType;
+  };
+}();
+/**
+ * @typedef {Object} Options
+ * @property {string} [className='ol-full-screen'] CSS class name.
+ * @property {string|Text} [label='\u2922'] Text label to use for the button.
+ * Instead of text, also an element (e.g. a `span` element) can be used.
+ * @property {string|Text} [labelActive='\u00d7'] Text label to use for the
+ * button when full-screen is active.
+ * Instead of text, also an element (e.g. a `span` element) can be used.
+ * @property {string} [tipLabel='Toggle full-screen'] Text label to use for the button tip.
+ * @property {boolean} [keys=false] Full keyboard access.
+ * @property {HTMLElement|string} [target] Specify a target if you want the
+ * control to be rendered outside of the map's viewport.
+ * @property {HTMLElement|string} [source] The element to be displayed
+ * fullscreen. When not provided, the element containing the map viewport will
+ * be displayed fullscreen.
+ */
+
+/**
+ * @classdesc
+ * Provides a button that when clicked fills up the full screen with the map.
+ * The full screen source element is by default the element containing the map viewport unless
+ * overridden by providing the `source` option. In which case, the dom
+ * element introduced using this parameter will be displayed in full screen.
+ *
+ * When in full screen mode, a close button is shown to exit full screen mode.
+ * The [Fullscreen API](http://www.w3.org/TR/fullscreen/) is used to
+ * toggle the map in full screen mode.
+ *
+ * @api
+ */
+
+
+var FullScreen =
+/*@__PURE__*/
+function (Control) {
+  function FullScreen(opt_options) {
+    var options = opt_options ? opt_options : {};
+    Control.call(this, {
+      element: document.createElement('div'),
+      target: options.target
+    });
+    /**
+     * @private
+     * @type {string}
+     */
+
+    this.cssClassName_ = options.className !== undefined ? options.className : 'ol-full-screen';
+    var label = options.label !== undefined ? options.label : '\u2922';
+    /**
+     * @private
+     * @type {Text}
+     */
+
+    this.labelNode_ = typeof label === 'string' ? document.createTextNode(label) : label;
+    var labelActive = options.labelActive !== undefined ? options.labelActive : '\u00d7';
+    /**
+     * @private
+     * @type {Text}
+     */
+
+    this.labelActiveNode_ = typeof labelActive === 'string' ? document.createTextNode(labelActive) : labelActive;
+    /**
+     * @private
+     * @type {HTMLElement}
+     */
+
+    this.button_ = document.createElement('button');
+    var tipLabel = options.tipLabel ? options.tipLabel : 'Toggle full-screen';
+    this.setClassName_(this.button_, isFullScreen());
+    this.button_.setAttribute('type', 'button');
+    this.button_.title = tipLabel;
+    this.button_.appendChild(this.labelNode_);
+    (0, _events.listen)(this.button_, _EventType.default.CLICK, this.handleClick_, this);
+    var cssClasses = this.cssClassName_ + ' ' + _css.CLASS_UNSELECTABLE + ' ' + _css.CLASS_CONTROL + ' ' + (!isFullScreenSupported() ? _css.CLASS_UNSUPPORTED : '');
+    var element = this.element;
+    element.className = cssClasses;
+    element.appendChild(this.button_);
+    /**
+     * @private
+     * @type {boolean}
+     */
+
+    this.keys_ = options.keys !== undefined ? options.keys : false;
+    /**
+     * @private
+     * @type {HTMLElement|string|undefined}
+     */
+
+    this.source_ = options.source;
+  }
+
+  if (Control) FullScreen.__proto__ = Control;
+  FullScreen.prototype = Object.create(Control && Control.prototype);
+  FullScreen.prototype.constructor = FullScreen;
+  /**
+   * @param {MouseEvent} event The event to handle
+   * @private
+   */
+
+  FullScreen.prototype.handleClick_ = function handleClick_(event) {
+    event.preventDefault();
+    this.handleFullScreen_();
+  };
+  /**
+   * @private
+   */
+
+
+  FullScreen.prototype.handleFullScreen_ = function handleFullScreen_() {
+    if (!isFullScreenSupported()) {
+      return;
+    }
+
+    var map = this.getMap();
+
+    if (!map) {
+      return;
+    }
+
+    if (isFullScreen()) {
+      exitFullScreen();
+    } else {
+      var element;
+
+      if (this.source_) {
+        element = typeof this.source_ === 'string' ? document.getElementById(this.source_) : this.source_;
+      } else {
+        element = map.getTargetElement();
+      }
+
+      if (this.keys_) {
+        requestFullScreenWithKeys(element);
+      } else {
+        requestFullScreen(element);
+      }
+    }
+  };
+  /**
+   * @private
+   */
+
+
+  FullScreen.prototype.handleFullScreenChange_ = function handleFullScreenChange_() {
+    var map = this.getMap();
+
+    if (isFullScreen()) {
+      this.setClassName_(this.button_, true);
+      (0, _dom.replaceNode)(this.labelActiveNode_, this.labelNode_);
+    } else {
+      this.setClassName_(this.button_, false);
+      (0, _dom.replaceNode)(this.labelNode_, this.labelActiveNode_);
+    }
+
+    if (map) {
+      map.updateSize();
+    }
+  };
+  /**
+   * @param {HTMLElement} element Target element
+   * @param {boolean} fullscreen True if fullscreen class name should be active
+   * @private
+   */
+
+
+  FullScreen.prototype.setClassName_ = function setClassName_(element, fullscreen) {
+    var activeClassName = this.cssClassName_ + '-true';
+    var inactiveClassName = this.cssClassName_ + '-false';
+    var nextClassName = fullscreen ? activeClassName : inactiveClassName;
+    element.classList.remove(activeClassName);
+    element.classList.remove(inactiveClassName);
+    element.classList.add(nextClassName);
+  };
+  /**
+   * @inheritDoc
+   * @api
+   */
+
+
+  FullScreen.prototype.setMap = function setMap(map) {
+    Control.prototype.setMap.call(this, map);
+
+    if (map) {
+      this.listenerKeys.push((0, _events.listen)(document, getChangeType(), this.handleFullScreenChange_, this));
+    }
+  };
+
+  return FullScreen;
+}(_Control.default);
+/**
+ * @return {boolean} Fullscreen is supported by the current platform.
+ */
+
+
+function isFullScreenSupported() {
+  var body = document.body;
+  return !!(body.webkitRequestFullscreen || body.mozRequestFullScreen && document.mozFullScreenEnabled || body.msRequestFullscreen && document.msFullscreenEnabled || body.requestFullscreen && document.fullscreenEnabled);
+}
+/**
+ * @return {boolean} Element is currently in fullscreen.
+ */
+
+
+function isFullScreen() {
+  return !!(document.webkitIsFullScreen || document.mozFullScreen || document.msFullscreenElement || document.fullscreenElement);
+}
+/**
+ * Request to fullscreen an element.
+ * @param {HTMLElement} element Element to request fullscreen
+ */
+
+
+function requestFullScreen(element) {
+  if (element.requestFullscreen) {
+    element.requestFullscreen();
+  } else if (element.msRequestFullscreen) {
+    element.msRequestFullscreen();
+  } else if (element.mozRequestFullScreen) {
+    element.mozRequestFullScreen();
+  } else if (element.webkitRequestFullscreen) {
+    element.webkitRequestFullscreen();
+  }
+}
+/**
+ * Request to fullscreen an element with keyboard input.
+ * @param {HTMLElement} element Element to request fullscreen
+ */
+
+
+function requestFullScreenWithKeys(element) {
+  if (element.mozRequestFullScreenWithKeys) {
+    element.mozRequestFullScreenWithKeys();
+  } else if (element.webkitRequestFullscreen) {
+    element.webkitRequestFullscreen();
+  } else {
+    requestFullScreen(element);
+  }
+}
+/**
+ * Exit fullscreen.
+ */
+
+
+function exitFullScreen() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.msExitFullscreen) {
+    document.msExitFullscreen();
+  } else if (document.mozCancelFullScreen) {
+    document.mozCancelFullScreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  }
+}
+
+var _default = FullScreen;
+exports.default = _default;
+},{"./Control.js":"node_modules/ol/control/Control.js","../css.js":"node_modules/ol/css.js","../dom.js":"node_modules/ol/dom.js","../events.js":"node_modules/ol/events.js","../events/EventType.js":"node_modules/ol/events/EventType.js"}],"node_modules/ol/control/MousePosition.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.render = render;
+exports.default = void 0;
+
+var _events = require("../events.js");
+
+var _EventType = _interopRequireDefault(require("../events/EventType.js"));
+
+var _Object = require("../Object.js");
+
+var _Control = _interopRequireDefault(require("./Control.js"));
+
+var _proj = require("../proj.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/control/MousePosition
+ */
+
+/**
+ * @type {string}
+ */
+var PROJECTION = 'projection';
+/**
+ * @type {string}
+ */
+
+var COORDINATE_FORMAT = 'coordinateFormat';
+/**
+ * @typedef {Object} Options
+ * @property {string} [className='ol-mouse-position'] CSS class name.
+ * @property {import("../coordinate.js").CoordinateFormat} [coordinateFormat] Coordinate format.
+ * @property {import("../proj.js").ProjectionLike} [projection] Projection. Default is the view projection.
+ * @property {function(import("../MapEvent.js").default)} [render] Function called when the
+ * control should be re-rendered. This is called in a `requestAnimationFrame`
+ * callback.
+ * @property {HTMLElement|string} [target] Specify a target if you want the
+ * control to be rendered outside of the map's viewport.
+ * @property {string} [undefinedHTML='&#160;'] Markup to show when coordinates are not
+ * available (e.g. when the pointer leaves the map viewport).  By default, the last position
+ * will be replaced with `'&#160;'` (`&nbsp;`) when the pointer leaves the viewport.  To
+ * retain the last rendered position, set this option to something falsey (like an empty
+ * string `''`).
+ */
+
+/**
+ * @classdesc
+ * A control to show the 2D coordinates of the mouse cursor. By default, these
+ * are in the view projection, but can be in any supported projection.
+ * By default the control is shown in the top right corner of the map, but this
+ * can be changed by using the css selector `.ol-mouse-position`.
+ *
+ * On touch devices, which usually do not have a mouse cursor, the coordinates
+ * of the currently touched position are shown.
+ *
+ * @api
+ */
+
+var MousePosition =
+/*@__PURE__*/
+function (Control) {
+  function MousePosition(opt_options) {
+    var options = opt_options ? opt_options : {};
+    var element = document.createElement('div');
+    element.className = options.className !== undefined ? options.className : 'ol-mouse-position';
+    Control.call(this, {
+      element: element,
+      render: options.render || render,
+      target: options.target
+    });
+    (0, _events.listen)(this, (0, _Object.getChangeEventType)(PROJECTION), this.handleProjectionChanged_, this);
+
+    if (options.coordinateFormat) {
+      this.setCoordinateFormat(options.coordinateFormat);
+    }
+
+    if (options.projection) {
+      this.setProjection(options.projection);
+    }
+    /**
+     * @private
+     * @type {string}
+     */
+
+
+    this.undefinedHTML_ = options.undefinedHTML !== undefined ? options.undefinedHTML : '&#160;';
+    /**
+     * @private
+     * @type {boolean}
+     */
+
+    this.renderOnMouseOut_ = !!this.undefinedHTML_;
+    /**
+     * @private
+     * @type {string}
+     */
+
+    this.renderedHTML_ = element.innerHTML;
+    /**
+     * @private
+     * @type {import("../proj/Projection.js").default}
+     */
+
+    this.mapProjection_ = null;
+    /**
+     * @private
+     * @type {?import("../proj.js").TransformFunction}
+     */
+
+    this.transform_ = null;
+    /**
+     * @private
+     * @type {import("../pixel.js").Pixel}
+     */
+
+    this.lastMouseMovePixel_ = null;
+  }
+
+  if (Control) MousePosition.__proto__ = Control;
+  MousePosition.prototype = Object.create(Control && Control.prototype);
+  MousePosition.prototype.constructor = MousePosition;
+  /**
+   * @private
+   */
+
+  MousePosition.prototype.handleProjectionChanged_ = function handleProjectionChanged_() {
+    this.transform_ = null;
+  };
+  /**
+   * Return the coordinate format type used to render the current position or
+   * undefined.
+   * @return {import("../coordinate.js").CoordinateFormat|undefined} The format to render the current
+   *     position in.
+   * @observable
+   * @api
+   */
+
+
+  MousePosition.prototype.getCoordinateFormat = function getCoordinateFormat() {
+    return (
+      /** @type {import("../coordinate.js").CoordinateFormat|undefined} */
+      this.get(COORDINATE_FORMAT)
+    );
+  };
+  /**
+   * Return the projection that is used to report the mouse position.
+   * @return {import("../proj/Projection.js").default|undefined} The projection to report mouse
+   *     position in.
+   * @observable
+   * @api
+   */
+
+
+  MousePosition.prototype.getProjection = function getProjection() {
+    return (
+      /** @type {import("../proj/Projection.js").default|undefined} */
+      this.get(PROJECTION)
+    );
+  };
+  /**
+   * @param {Event} event Browser event.
+   * @protected
+   */
+
+
+  MousePosition.prototype.handleMouseMove = function handleMouseMove(event) {
+    var map = this.getMap();
+    this.lastMouseMovePixel_ = map.getEventPixel(event);
+    this.updateHTML_(this.lastMouseMovePixel_);
+  };
+  /**
+   * @param {Event} event Browser event.
+   * @protected
+   */
+
+
+  MousePosition.prototype.handleMouseOut = function handleMouseOut(event) {
+    this.updateHTML_(null);
+    this.lastMouseMovePixel_ = null;
+  };
+  /**
+   * @inheritDoc
+   * @api
+   */
+
+
+  MousePosition.prototype.setMap = function setMap(map) {
+    Control.prototype.setMap.call(this, map);
+
+    if (map) {
+      var viewport = map.getViewport();
+      this.listenerKeys.push((0, _events.listen)(viewport, _EventType.default.MOUSEMOVE, this.handleMouseMove, this), (0, _events.listen)(viewport, _EventType.default.TOUCHSTART, this.handleMouseMove, this));
+
+      if (this.renderOnMouseOut_) {
+        this.listenerKeys.push((0, _events.listen)(viewport, _EventType.default.MOUSEOUT, this.handleMouseOut, this), (0, _events.listen)(viewport, _EventType.default.TOUCHEND, this.handleMouseOut, this));
+      }
+    }
+  };
+  /**
+   * Set the coordinate format type used to render the current position.
+   * @param {import("../coordinate.js").CoordinateFormat} format The format to render the current
+   *     position in.
+   * @observable
+   * @api
+   */
+
+
+  MousePosition.prototype.setCoordinateFormat = function setCoordinateFormat(format) {
+    this.set(COORDINATE_FORMAT, format);
+  };
+  /**
+   * Set the projection that is used to report the mouse position.
+   * @param {import("../proj.js").ProjectionLike} projection The projection to report mouse
+   *     position in.
+   * @observable
+   * @api
+   */
+
+
+  MousePosition.prototype.setProjection = function setProjection(projection) {
+    this.set(PROJECTION, (0, _proj.get)(projection));
+  };
+  /**
+   * @param {?import("../pixel.js").Pixel} pixel Pixel.
+   * @private
+   */
+
+
+  MousePosition.prototype.updateHTML_ = function updateHTML_(pixel) {
+    var html = this.undefinedHTML_;
+
+    if (pixel && this.mapProjection_) {
+      if (!this.transform_) {
+        var projection = this.getProjection();
+
+        if (projection) {
+          this.transform_ = (0, _proj.getTransformFromProjections)(this.mapProjection_, projection);
+        } else {
+          this.transform_ = _proj.identityTransform;
+        }
+      }
+
+      var map = this.getMap();
+      var coordinate = map.getCoordinateFromPixel(pixel);
+
+      if (coordinate) {
+        this.transform_(coordinate, coordinate);
+        var coordinateFormat = this.getCoordinateFormat();
+
+        if (coordinateFormat) {
+          html = coordinateFormat(coordinate);
+        } else {
+          html = coordinate.toString();
+        }
+      }
+    }
+
+    if (!this.renderedHTML_ || html !== this.renderedHTML_) {
+      this.element.innerHTML = html;
+      this.renderedHTML_ = html;
+    }
+  };
+
+  return MousePosition;
+}(_Control.default);
+/**
+ * Update the projection. Rendering of the coordinates is done in
+ * `handleMouseMove` and `handleMouseUp`.
+ * @param {import("../MapEvent.js").default} mapEvent Map event.
+ * @this {MousePosition}
+ * @api
+ */
+
+
+function render(mapEvent) {
+  var frameState = mapEvent.frameState;
+
+  if (!frameState) {
+    this.mapProjection_ = null;
+  } else {
+    if (this.mapProjection_ != frameState.viewState.projection) {
+      this.mapProjection_ = frameState.viewState.projection;
+      this.transform_ = null;
+    }
+  }
+}
+
+var _default = MousePosition;
+exports.default = _default;
+},{"../events.js":"node_modules/ol/events.js","../events/EventType.js":"node_modules/ol/events/EventType.js","../Object.js":"node_modules/ol/Object.js","./Control.js":"node_modules/ol/control/Control.js","../proj.js":"node_modules/ol/proj.js"}],"node_modules/ol/control/OverviewMap.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -45788,3419 +49200,7 @@ var _ZoomToExtent = _interopRequireDefault(require("./control/ZoomToExtent.js"))
 var _util = require("./control/util.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./control/Attribution.js":"node_modules/ol/control/Attribution.js","./control/Control.js":"node_modules/ol/control/Control.js","./control/FullScreen.js":"node_modules/ol/control/FullScreen.js","./control/MousePosition.js":"node_modules/ol/control/MousePosition.js","./control/OverviewMap.js":"node_modules/ol/control/OverviewMap.js","./control/Rotate.js":"node_modules/ol/control/Rotate.js","./control/ScaleLine.js":"node_modules/ol/control/ScaleLine.js","./control/Zoom.js":"node_modules/ol/control/Zoom.js","./control/ZoomSlider.js":"node_modules/ol/control/ZoomSlider.js","./control/ZoomToExtent.js":"node_modules/ol/control/ZoomToExtent.js","./control/util.js":"node_modules/ol/control/util.js"}],"node_modules/ol/Geolocation.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _Object = _interopRequireWildcard(require("./Object.js"));
-
-var _events = require("./events.js");
-
-var _Event = _interopRequireDefault(require("./events/Event.js"));
-
-var _EventType = _interopRequireDefault(require("./events/EventType.js"));
-
-var _Polygon = require("./geom/Polygon.js");
-
-var _has = require("./has.js");
-
-var _math = require("./math.js");
-
-var _proj = require("./proj.js");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
-
-/**
- * @module ol/Geolocation
- */
-
-/**
- * @enum {string}
- */
-var Property = {
-  ACCURACY: 'accuracy',
-  ACCURACY_GEOMETRY: 'accuracyGeometry',
-  ALTITUDE: 'altitude',
-  ALTITUDE_ACCURACY: 'altitudeAccuracy',
-  HEADING: 'heading',
-  POSITION: 'position',
-  PROJECTION: 'projection',
-  SPEED: 'speed',
-  TRACKING: 'tracking',
-  TRACKING_OPTIONS: 'trackingOptions'
-};
-/**
- * @classdesc
- * Events emitted on Geolocation error.
- */
-
-var GeolocationError =
-/*@__PURE__*/
-function (Event) {
-  function GeolocationError(error) {
-    Event.call(this, _EventType.default.ERROR);
-    /**
-     * @type {number}
-     */
-
-    this.code = error.code;
-    /**
-     * @type {string}
-     */
-
-    this.message = error.message;
-  }
-
-  if (Event) GeolocationError.__proto__ = Event;
-  GeolocationError.prototype = Object.create(Event && Event.prototype);
-  GeolocationError.prototype.constructor = GeolocationError;
-  return GeolocationError;
-}(_Event.default);
-/**
- * @typedef {Object} Options
- * @property {boolean} [tracking=false] Start Tracking right after
- * instantiation.
- * @property {PositionOptions} [trackingOptions] Tracking options.
- * See http://www.w3.org/TR/geolocation-API/#position_options_interface.
- * @property {import("./proj.js").ProjectionLike} [projection] The projection the position
- * is reported in.
- */
-
-/**
- * @classdesc
- * Helper class for providing HTML5 Geolocation capabilities.
- * The [Geolocation API](http://www.w3.org/TR/geolocation-API/)
- * is used to locate a user's position.
- *
- * To get notified of position changes, register a listener for the generic
- * `change` event on your instance of {@link module:ol/Geolocation~Geolocation}.
- *
- * Example:
- *
- *     var geolocation = new Geolocation({
- *       // take the projection to use from the map's view
- *       projection: view.getProjection()
- *     });
- *     // listen to changes in position
- *     geolocation.on('change', function(evt) {
- *       window.console.log(geolocation.getPosition());
- *     });
- *
- * @fires error
- * @api
- */
-
-
-var Geolocation =
-/*@__PURE__*/
-function (BaseObject) {
-  function Geolocation(opt_options) {
-    BaseObject.call(this);
-    var options = opt_options || {};
-    /**
-     * The unprojected (EPSG:4326) device position.
-     * @private
-     * @type {import("./coordinate.js").Coordinate}
-     */
-
-    this.position_ = null;
-    /**
-     * @private
-     * @type {import("./proj.js").TransformFunction}
-     */
-
-    this.transform_ = _proj.identityTransform;
-    /**
-     * @private
-     * @type {number|undefined}
-     */
-
-    this.watchId_ = undefined;
-    (0, _events.listen)(this, (0, _Object.getChangeEventType)(Property.PROJECTION), this.handleProjectionChanged_, this);
-    (0, _events.listen)(this, (0, _Object.getChangeEventType)(Property.TRACKING), this.handleTrackingChanged_, this);
-
-    if (options.projection !== undefined) {
-      this.setProjection(options.projection);
-    }
-
-    if (options.trackingOptions !== undefined) {
-      this.setTrackingOptions(options.trackingOptions);
-    }
-
-    this.setTracking(options.tracking !== undefined ? options.tracking : false);
-  }
-
-  if (BaseObject) Geolocation.__proto__ = BaseObject;
-  Geolocation.prototype = Object.create(BaseObject && BaseObject.prototype);
-  Geolocation.prototype.constructor = Geolocation;
-  /**
-   * @inheritDoc
-   */
-
-  Geolocation.prototype.disposeInternal = function disposeInternal() {
-    this.setTracking(false);
-    BaseObject.prototype.disposeInternal.call(this);
-  };
-  /**
-   * @private
-   */
-
-
-  Geolocation.prototype.handleProjectionChanged_ = function handleProjectionChanged_() {
-    var projection = this.getProjection();
-
-    if (projection) {
-      this.transform_ = (0, _proj.getTransformFromProjections)((0, _proj.get)('EPSG:4326'), projection);
-
-      if (this.position_) {
-        this.set(Property.POSITION, this.transform_(this.position_));
-      }
-    }
-  };
-  /**
-   * @private
-   */
-
-
-  Geolocation.prototype.handleTrackingChanged_ = function handleTrackingChanged_() {
-    if (_has.GEOLOCATION) {
-      var tracking = this.getTracking();
-
-      if (tracking && this.watchId_ === undefined) {
-        this.watchId_ = navigator.geolocation.watchPosition(this.positionChange_.bind(this), this.positionError_.bind(this), this.getTrackingOptions());
-      } else if (!tracking && this.watchId_ !== undefined) {
-        navigator.geolocation.clearWatch(this.watchId_);
-        this.watchId_ = undefined;
-      }
-    }
-  };
-  /**
-   * @private
-   * @param {Position} position position event.
-   */
-
-
-  Geolocation.prototype.positionChange_ = function positionChange_(position) {
-    var coords = position.coords;
-    this.set(Property.ACCURACY, coords.accuracy);
-    this.set(Property.ALTITUDE, coords.altitude === null ? undefined : coords.altitude);
-    this.set(Property.ALTITUDE_ACCURACY, coords.altitudeAccuracy === null ? undefined : coords.altitudeAccuracy);
-    this.set(Property.HEADING, coords.heading === null ? undefined : (0, _math.toRadians)(coords.heading));
-
-    if (!this.position_) {
-      this.position_ = [coords.longitude, coords.latitude];
-    } else {
-      this.position_[0] = coords.longitude;
-      this.position_[1] = coords.latitude;
-    }
-
-    var projectedPosition = this.transform_(this.position_);
-    this.set(Property.POSITION, projectedPosition);
-    this.set(Property.SPEED, coords.speed === null ? undefined : coords.speed);
-    var geometry = (0, _Polygon.circular)(this.position_, coords.accuracy);
-    geometry.applyTransform(this.transform_);
-    this.set(Property.ACCURACY_GEOMETRY, geometry);
-    this.changed();
-  };
-  /**
-   * Triggered when the Geolocation returns an error.
-   * @event error
-   * @api
-   */
-
-  /**
-   * @private
-   * @param {PositionError} error error object.
-   */
-
-
-  Geolocation.prototype.positionError_ = function positionError_(error) {
-    this.setTracking(false);
-    this.dispatchEvent(new GeolocationError(error));
-  };
-  /**
-   * Get the accuracy of the position in meters.
-   * @return {number|undefined} The accuracy of the position measurement in
-   *     meters.
-   * @observable
-   * @api
-   */
-
-
-  Geolocation.prototype.getAccuracy = function getAccuracy() {
-    return (
-      /** @type {number|undefined} */
-      this.get(Property.ACCURACY)
-    );
-  };
-  /**
-   * Get a geometry of the position accuracy.
-   * @return {?import("./geom/Polygon.js").default} A geometry of the position accuracy.
-   * @observable
-   * @api
-   */
-
-
-  Geolocation.prototype.getAccuracyGeometry = function getAccuracyGeometry() {
-    return (
-      /** @type {?import("./geom/Polygon.js").default} */
-      this.get(Property.ACCURACY_GEOMETRY) || null
-    );
-  };
-  /**
-   * Get the altitude associated with the position.
-   * @return {number|undefined} The altitude of the position in meters above mean
-   *     sea level.
-   * @observable
-   * @api
-   */
-
-
-  Geolocation.prototype.getAltitude = function getAltitude() {
-    return (
-      /** @type {number|undefined} */
-      this.get(Property.ALTITUDE)
-    );
-  };
-  /**
-   * Get the altitude accuracy of the position.
-   * @return {number|undefined} The accuracy of the altitude measurement in
-   *     meters.
-   * @observable
-   * @api
-   */
-
-
-  Geolocation.prototype.getAltitudeAccuracy = function getAltitudeAccuracy() {
-    return (
-      /** @type {number|undefined} */
-      this.get(Property.ALTITUDE_ACCURACY)
-    );
-  };
-  /**
-   * Get the heading as radians clockwise from North.
-   * Note: depending on the browser, the heading is only defined if the `enableHighAccuracy`
-   * is set to `true` in the tracking options.
-   * @return {number|undefined} The heading of the device in radians from north.
-   * @observable
-   * @api
-   */
-
-
-  Geolocation.prototype.getHeading = function getHeading() {
-    return (
-      /** @type {number|undefined} */
-      this.get(Property.HEADING)
-    );
-  };
-  /**
-   * Get the position of the device.
-   * @return {import("./coordinate.js").Coordinate|undefined} The current position of the device reported
-   *     in the current projection.
-   * @observable
-   * @api
-   */
-
-
-  Geolocation.prototype.getPosition = function getPosition() {
-    return (
-      /** @type {import("./coordinate.js").Coordinate|undefined} */
-      this.get(Property.POSITION)
-    );
-  };
-  /**
-   * Get the projection associated with the position.
-   * @return {import("./proj/Projection.js").default|undefined} The projection the position is
-   *     reported in.
-   * @observable
-   * @api
-   */
-
-
-  Geolocation.prototype.getProjection = function getProjection() {
-    return (
-      /** @type {import("./proj/Projection.js").default|undefined} */
-      this.get(Property.PROJECTION)
-    );
-  };
-  /**
-   * Get the speed in meters per second.
-   * @return {number|undefined} The instantaneous speed of the device in meters
-   *     per second.
-   * @observable
-   * @api
-   */
-
-
-  Geolocation.prototype.getSpeed = function getSpeed() {
-    return (
-      /** @type {number|undefined} */
-      this.get(Property.SPEED)
-    );
-  };
-  /**
-   * Determine if the device location is being tracked.
-   * @return {boolean} The device location is being tracked.
-   * @observable
-   * @api
-   */
-
-
-  Geolocation.prototype.getTracking = function getTracking() {
-    return (
-      /** @type {boolean} */
-      this.get(Property.TRACKING)
-    );
-  };
-  /**
-   * Get the tracking options.
-   * See http://www.w3.org/TR/geolocation-API/#position-options.
-   * @return {PositionOptions|undefined} PositionOptions as defined by
-   *     the [HTML5 Geolocation spec
-   *     ](http://www.w3.org/TR/geolocation-API/#position_options_interface).
-   * @observable
-   * @api
-   */
-
-
-  Geolocation.prototype.getTrackingOptions = function getTrackingOptions() {
-    return (
-      /** @type {PositionOptions|undefined} */
-      this.get(Property.TRACKING_OPTIONS)
-    );
-  };
-  /**
-   * Set the projection to use for transforming the coordinates.
-   * @param {import("./proj.js").ProjectionLike} projection The projection the position is
-   *     reported in.
-   * @observable
-   * @api
-   */
-
-
-  Geolocation.prototype.setProjection = function setProjection(projection) {
-    this.set(Property.PROJECTION, (0, _proj.get)(projection));
-  };
-  /**
-   * Enable or disable tracking.
-   * @param {boolean} tracking Enable tracking.
-   * @observable
-   * @api
-   */
-
-
-  Geolocation.prototype.setTracking = function setTracking(tracking) {
-    this.set(Property.TRACKING, tracking);
-  };
-  /**
-   * Set the tracking options.
-   * See http://www.w3.org/TR/geolocation-API/#position-options.
-   * @param {PositionOptions} options PositionOptions as defined by the
-   *     [HTML5 Geolocation spec
-   *     ](http://www.w3.org/TR/geolocation-API/#position_options_interface).
-   * @observable
-   * @api
-   */
-
-
-  Geolocation.prototype.setTrackingOptions = function setTrackingOptions(options) {
-    this.set(Property.TRACKING_OPTIONS, options);
-  };
-
-  return Geolocation;
-}(_Object.default);
-
-var _default = Geolocation;
-exports.default = _default;
-},{"./Object.js":"node_modules/ol/Object.js","./events.js":"node_modules/ol/events.js","./events/Event.js":"node_modules/ol/events/Event.js","./events/EventType.js":"node_modules/ol/events/EventType.js","./geom/Polygon.js":"node_modules/ol/geom/Polygon.js","./has.js":"node_modules/ol/has.js","./math.js":"node_modules/ol/math.js","./proj.js":"node_modules/ol/proj.js"}],"node_modules/ol/geom/flat/geodesic.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.greatCircleArc = greatCircleArc;
-exports.meridian = meridian;
-exports.parallel = parallel;
-
-var _math = require("../../math.js");
-
-var _proj = require("../../proj.js");
-
-/**
- * @module ol/geom/flat/geodesic
- */
-
-/**
- * @param {function(number): import("../../coordinate.js").Coordinate} interpolate Interpolate function.
- * @param {import("../../proj.js").TransformFunction} transform Transform from longitude/latitude to
- *     projected coordinates.
- * @param {number} squaredTolerance Squared tolerance.
- * @return {Array<number>} Flat coordinates.
- */
-function line(interpolate, transform, squaredTolerance) {
-  // FIXME reduce garbage generation
-  // FIXME optimize stack operations
-
-  /** @type {Array<number>} */
-  var flatCoordinates = [];
-  var geoA = interpolate(0);
-  var geoB = interpolate(1);
-  var a = transform(geoA);
-  var b = transform(geoB);
-  /** @type {Array<import("../../coordinate.js").Coordinate>} */
-
-  var geoStack = [geoB, geoA];
-  /** @type {Array<import("../../coordinate.js").Coordinate>} */
-
-  var stack = [b, a];
-  /** @type {Array<number>} */
-
-  var fractionStack = [1, 0];
-  /** @type {!Object<string, boolean>} */
-
-  var fractions = {};
-  var maxIterations = 1e5;
-  var geoM, m, fracA, fracB, fracM, key;
-
-  while (--maxIterations > 0 && fractionStack.length > 0) {
-    // Pop the a coordinate off the stack
-    fracA = fractionStack.pop();
-    geoA = geoStack.pop();
-    a = stack.pop(); // Add the a coordinate if it has not been added yet
-
-    key = fracA.toString();
-
-    if (!(key in fractions)) {
-      flatCoordinates.push(a[0], a[1]);
-      fractions[key] = true;
-    } // Pop the b coordinate off the stack
-
-
-    fracB = fractionStack.pop();
-    geoB = geoStack.pop();
-    b = stack.pop(); // Find the m point between the a and b coordinates
-
-    fracM = (fracA + fracB) / 2;
-    geoM = interpolate(fracM);
-    m = transform(geoM);
-
-    if ((0, _math.squaredSegmentDistance)(m[0], m[1], a[0], a[1], b[0], b[1]) < squaredTolerance) {
-      // If the m point is sufficiently close to the straight line, then we
-      // discard it.  Just use the b coordinate and move on to the next line
-      // segment.
-      flatCoordinates.push(b[0], b[1]);
-      key = fracB.toString();
-      fractions[key] = true;
-    } else {
-      // Otherwise, we need to subdivide the current line segment.  Split it
-      // into two and push the two line segments onto the stack.
-      fractionStack.push(fracB, fracM, fracM, fracA);
-      stack.push(b, m, m, a);
-      geoStack.push(geoB, geoM, geoM, geoA);
-    }
-  }
-
-  return flatCoordinates;
-}
-/**
- * Generate a great-circle arcs between two lat/lon points.
- * @param {number} lon1 Longitude 1 in degrees.
- * @param {number} lat1 Latitude 1 in degrees.
- * @param {number} lon2 Longitude 2 in degrees.
- * @param {number} lat2 Latitude 2 in degrees.
- * @param {import("../../proj/Projection.js").default} projection Projection.
- * @param {number} squaredTolerance Squared tolerance.
- * @return {Array<number>} Flat coordinates.
- */
-
-
-function greatCircleArc(lon1, lat1, lon2, lat2, projection, squaredTolerance) {
-  var geoProjection = (0, _proj.get)('EPSG:4326');
-  var cosLat1 = Math.cos((0, _math.toRadians)(lat1));
-  var sinLat1 = Math.sin((0, _math.toRadians)(lat1));
-  var cosLat2 = Math.cos((0, _math.toRadians)(lat2));
-  var sinLat2 = Math.sin((0, _math.toRadians)(lat2));
-  var cosDeltaLon = Math.cos((0, _math.toRadians)(lon2 - lon1));
-  var sinDeltaLon = Math.sin((0, _math.toRadians)(lon2 - lon1));
-  var d = sinLat1 * sinLat2 + cosLat1 * cosLat2 * cosDeltaLon;
-  return line(
-  /**
-   * @param {number} frac Fraction.
-   * @return {import("../../coordinate.js").Coordinate} Coordinate.
-   */
-  function (frac) {
-    if (1 <= d) {
-      return [lon2, lat2];
-    }
-
-    var D = frac * Math.acos(d);
-    var cosD = Math.cos(D);
-    var sinD = Math.sin(D);
-    var y = sinDeltaLon * cosLat2;
-    var x = cosLat1 * sinLat2 - sinLat1 * cosLat2 * cosDeltaLon;
-    var theta = Math.atan2(y, x);
-    var lat = Math.asin(sinLat1 * cosD + cosLat1 * sinD * Math.cos(theta));
-    var lon = (0, _math.toRadians)(lon1) + Math.atan2(Math.sin(theta) * sinD * cosLat1, cosD - sinLat1 * Math.sin(lat));
-    return [(0, _math.toDegrees)(lon), (0, _math.toDegrees)(lat)];
-  }, (0, _proj.getTransform)(geoProjection, projection), squaredTolerance);
-}
-/**
- * Generate a meridian (line at constant longitude).
- * @param {number} lon Longitude.
- * @param {number} lat1 Latitude 1.
- * @param {number} lat2 Latitude 2.
- * @param {import("../../proj/Projection.js").default} projection Projection.
- * @param {number} squaredTolerance Squared tolerance.
- * @return {Array<number>} Flat coordinates.
- */
-
-
-function meridian(lon, lat1, lat2, projection, squaredTolerance) {
-  var epsg4326Projection = (0, _proj.get)('EPSG:4326');
-  return line(
-  /**
-   * @param {number} frac Fraction.
-   * @return {import("../../coordinate.js").Coordinate} Coordinate.
-   */
-  function (frac) {
-    return [lon, lat1 + (lat2 - lat1) * frac];
-  }, (0, _proj.getTransform)(epsg4326Projection, projection), squaredTolerance);
-}
-/**
- * Generate a parallel (line at constant latitude).
- * @param {number} lat Latitude.
- * @param {number} lon1 Longitude 1.
- * @param {number} lon2 Longitude 2.
- * @param {import("../../proj/Projection.js").default} projection Projection.
- * @param {number} squaredTolerance Squared tolerance.
- * @return {Array<number>} Flat coordinates.
- */
-
-
-function parallel(lat, lon1, lon2, projection, squaredTolerance) {
-  var epsg4326Projection = (0, _proj.get)('EPSG:4326');
-  return line(
-  /**
-   * @param {number} frac Fraction.
-   * @return {import("../../coordinate.js").Coordinate} Coordinate.
-   */
-  function (frac) {
-    return [lon1 + (lon2 - lon1) * frac, lat];
-  }, (0, _proj.getTransform)(epsg4326Projection, projection), squaredTolerance);
-}
-},{"../../math.js":"node_modules/ol/math.js","../../proj.js":"node_modules/ol/proj.js"}],"node_modules/ol/style/Text.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _Fill = _interopRequireDefault(require("./Fill.js"));
-
-var _TextPlacement = _interopRequireDefault(require("./TextPlacement.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/style/Text
- */
-
-/**
- * The default fill color to use if no fill was set at construction time; a
- * blackish `#333`.
- *
- * @const {string}
- */
-var DEFAULT_FILL_COLOR = '#333';
-/**
- * @typedef {Object} Options
- * @property {string} [font] Font style as CSS 'font' value, see:
- * https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/font. Default is '10px sans-serif'
- * @property {number} [maxAngle] When `placement` is set to `'line'`, allow a maximum angle between adjacent characters.
- * The expected value is in radians, and the default is 45° (`Math.PI / 4`).
- * @property {number} [offsetX=0] Horizontal text offset in pixels. A positive will shift the text right.
- * @property {number} [offsetY=0] Vertical text offset in pixels. A positive will shift the text down.
- * @property {boolean} [overflow=false] For polygon labels or when `placement` is set to `'line'`, allow text to exceed
- * the width of the polygon at the label position or the length of the path that it follows.
- * @property {import("./TextPlacement.js").default|string} [placement] Text placement.
- * @property {number} [scale] Scale.
- * @property {boolean} [rotateWithView=false] Whether to rotate the text with the view.
- * @property {number} [rotation=0] Rotation in radians (positive rotation clockwise).
- * @property {string} [text] Text content.
- * @property {string} [textAlign] Text alignment. Possible values: 'left', 'right', 'center', 'end' or 'start'.
- * Default is 'center' for `placement: 'point'`. For `placement: 'line'`, the default is to let the renderer choose a
- * placement where `maxAngle` is not exceeded.
- * @property {string} [textBaseline='middle'] Text base line. Possible values: 'bottom', 'top', 'middle', 'alphabetic',
- * 'hanging', 'ideographic'.
- * @property {import("./Fill.js").default} [fill] Fill style. If none is provided, we'll use a dark fill-style (#333).
- * @property {import("./Stroke.js").default} [stroke] Stroke style.
- * @property {import("./Fill.js").default} [backgroundFill] Fill style for the text background when `placement` is
- * `'point'`. Default is no fill.
- * @property {import("./Stroke.js").default} [backgroundStroke] Stroke style for the text background  when `placement`
- * is `'point'`. Default is no stroke.
- * @property {Array<number>} [padding=[0, 0, 0, 0]] Padding in pixels around the text for decluttering and background. The order of
- * values in the array is `[top, right, bottom, left]`.
- */
-
-/**
- * @classdesc
- * Set text style for vector features.
- * @api
- */
-
-var Text = function Text(opt_options) {
-  var options = opt_options || {};
-  /**
-  * @private
-  * @type {string|undefined}
-  */
-
-  this.font_ = options.font;
-  /**
-  * @private
-  * @type {number|undefined}
-  */
-
-  this.rotation_ = options.rotation;
-  /**
-  * @private
-  * @type {boolean|undefined}
-  */
-
-  this.rotateWithView_ = options.rotateWithView;
-  /**
-  * @private
-  * @type {number|undefined}
-  */
-
-  this.scale_ = options.scale;
-  /**
-  * @private
-  * @type {string|undefined}
-  */
-
-  this.text_ = options.text;
-  /**
-  * @private
-  * @type {string|undefined}
-  */
-
-  this.textAlign_ = options.textAlign;
-  /**
-  * @private
-  * @type {string|undefined}
-  */
-
-  this.textBaseline_ = options.textBaseline;
-  /**
-  * @private
-  * @type {import("./Fill.js").default}
-  */
-
-  this.fill_ = options.fill !== undefined ? options.fill : new _Fill.default({
-    color: DEFAULT_FILL_COLOR
-  });
-  /**
-  * @private
-  * @type {number}
-  */
-
-  this.maxAngle_ = options.maxAngle !== undefined ? options.maxAngle : Math.PI / 4;
-  /**
-  * @private
-  * @type {import("./TextPlacement.js").default|string}
-  */
-
-  this.placement_ = options.placement !== undefined ? options.placement : _TextPlacement.default.POINT;
-  /**
-  * @private
-  * @type {boolean}
-  */
-
-  this.overflow_ = !!options.overflow;
-  /**
-  * @private
-  * @type {import("./Stroke.js").default}
-  */
-
-  this.stroke_ = options.stroke !== undefined ? options.stroke : null;
-  /**
-  * @private
-  * @type {number}
-  */
-
-  this.offsetX_ = options.offsetX !== undefined ? options.offsetX : 0;
-  /**
-  * @private
-  * @type {number}
-  */
-
-  this.offsetY_ = options.offsetY !== undefined ? options.offsetY : 0;
-  /**
-  * @private
-  * @type {import("./Fill.js").default}
-  */
-
-  this.backgroundFill_ = options.backgroundFill ? options.backgroundFill : null;
-  /**
-  * @private
-  * @type {import("./Stroke.js").default}
-  */
-
-  this.backgroundStroke_ = options.backgroundStroke ? options.backgroundStroke : null;
-  /**
-  * @private
-  * @type {Array<number>}
-  */
-
-  this.padding_ = options.padding === undefined ? null : options.padding;
-};
-/**
-* Clones the style.
-* @return {Text} The cloned style.
-* @api
-*/
-
-
-Text.prototype.clone = function clone() {
-  return new Text({
-    font: this.getFont(),
-    placement: this.getPlacement(),
-    maxAngle: this.getMaxAngle(),
-    overflow: this.getOverflow(),
-    rotation: this.getRotation(),
-    rotateWithView: this.getRotateWithView(),
-    scale: this.getScale(),
-    text: this.getText(),
-    textAlign: this.getTextAlign(),
-    textBaseline: this.getTextBaseline(),
-    fill: this.getFill() ? this.getFill().clone() : undefined,
-    stroke: this.getStroke() ? this.getStroke().clone() : undefined,
-    offsetX: this.getOffsetX(),
-    offsetY: this.getOffsetY(),
-    backgroundFill: this.getBackgroundFill() ? this.getBackgroundFill().clone() : undefined,
-    backgroundStroke: this.getBackgroundStroke() ? this.getBackgroundStroke().clone() : undefined
-  });
-};
-/**
-* Get the `overflow` configuration.
-* @return {boolean} Let text overflow the length of the path they follow.
-* @api
-*/
-
-
-Text.prototype.getOverflow = function getOverflow() {
-  return this.overflow_;
-};
-/**
-* Get the font name.
-* @return {string|undefined} Font.
-* @api
-*/
-
-
-Text.prototype.getFont = function getFont() {
-  return this.font_;
-};
-/**
-* Get the maximum angle between adjacent characters.
-* @return {number} Angle in radians.
-* @api
-*/
-
-
-Text.prototype.getMaxAngle = function getMaxAngle() {
-  return this.maxAngle_;
-};
-/**
-* Get the label placement.
-* @return {import("./TextPlacement.js").default|string} Text placement.
-* @api
-*/
-
-
-Text.prototype.getPlacement = function getPlacement() {
-  return this.placement_;
-};
-/**
-* Get the x-offset for the text.
-* @return {number} Horizontal text offset.
-* @api
-*/
-
-
-Text.prototype.getOffsetX = function getOffsetX() {
-  return this.offsetX_;
-};
-/**
-* Get the y-offset for the text.
-* @return {number} Vertical text offset.
-* @api
-*/
-
-
-Text.prototype.getOffsetY = function getOffsetY() {
-  return this.offsetY_;
-};
-/**
-* Get the fill style for the text.
-* @return {import("./Fill.js").default} Fill style.
-* @api
-*/
-
-
-Text.prototype.getFill = function getFill() {
-  return this.fill_;
-};
-/**
-* Determine whether the text rotates with the map.
-* @return {boolean|undefined} Rotate with map.
-* @api
-*/
-
-
-Text.prototype.getRotateWithView = function getRotateWithView() {
-  return this.rotateWithView_;
-};
-/**
-* Get the text rotation.
-* @return {number|undefined} Rotation.
-* @api
-*/
-
-
-Text.prototype.getRotation = function getRotation() {
-  return this.rotation_;
-};
-/**
-* Get the text scale.
-* @return {number|undefined} Scale.
-* @api
-*/
-
-
-Text.prototype.getScale = function getScale() {
-  return this.scale_;
-};
-/**
-* Get the stroke style for the text.
-* @return {import("./Stroke.js").default} Stroke style.
-* @api
-*/
-
-
-Text.prototype.getStroke = function getStroke() {
-  return this.stroke_;
-};
-/**
-* Get the text to be rendered.
-* @return {string|undefined} Text.
-* @api
-*/
-
-
-Text.prototype.getText = function getText() {
-  return this.text_;
-};
-/**
-* Get the text alignment.
-* @return {string|undefined} Text align.
-* @api
-*/
-
-
-Text.prototype.getTextAlign = function getTextAlign() {
-  return this.textAlign_;
-};
-/**
-* Get the text baseline.
-* @return {string|undefined} Text baseline.
-* @api
-*/
-
-
-Text.prototype.getTextBaseline = function getTextBaseline() {
-  return this.textBaseline_;
-};
-/**
-* Get the background fill style for the text.
-* @return {import("./Fill.js").default} Fill style.
-* @api
-*/
-
-
-Text.prototype.getBackgroundFill = function getBackgroundFill() {
-  return this.backgroundFill_;
-};
-/**
-* Get the background stroke style for the text.
-* @return {import("./Stroke.js").default} Stroke style.
-* @api
-*/
-
-
-Text.prototype.getBackgroundStroke = function getBackgroundStroke() {
-  return this.backgroundStroke_;
-};
-/**
-* Get the padding for the text.
-* @return {Array<number>} Padding.
-* @api
-*/
-
-
-Text.prototype.getPadding = function getPadding() {
-  return this.padding_;
-};
-/**
-* Set the `overflow` property.
-*
-* @param {boolean} overflow Let text overflow the path that it follows.
-* @api
-*/
-
-
-Text.prototype.setOverflow = function setOverflow(overflow) {
-  this.overflow_ = overflow;
-};
-/**
-* Set the font.
-*
-* @param {string|undefined} font Font.
-* @api
-*/
-
-
-Text.prototype.setFont = function setFont(font) {
-  this.font_ = font;
-};
-/**
-* Set the maximum angle between adjacent characters.
-*
-* @param {number} maxAngle Angle in radians.
-* @api
-*/
-
-
-Text.prototype.setMaxAngle = function setMaxAngle(maxAngle) {
-  this.maxAngle_ = maxAngle;
-};
-/**
-* Set the x offset.
-*
-* @param {number} offsetX Horizontal text offset.
-* @api
-*/
-
-
-Text.prototype.setOffsetX = function setOffsetX(offsetX) {
-  this.offsetX_ = offsetX;
-};
-/**
-* Set the y offset.
-*
-* @param {number} offsetY Vertical text offset.
-* @api
-*/
-
-
-Text.prototype.setOffsetY = function setOffsetY(offsetY) {
-  this.offsetY_ = offsetY;
-};
-/**
-* Set the text placement.
-*
-* @param {import("./TextPlacement.js").default|string} placement Placement.
-* @api
-*/
-
-
-Text.prototype.setPlacement = function setPlacement(placement) {
-  this.placement_ = placement;
-};
-/**
-* Set the fill.
-*
-* @param {import("./Fill.js").default} fill Fill style.
-* @api
-*/
-
-
-Text.prototype.setFill = function setFill(fill) {
-  this.fill_ = fill;
-};
-/**
-* Set the rotation.
-*
-* @param {number|undefined} rotation Rotation.
-* @api
-*/
-
-
-Text.prototype.setRotation = function setRotation(rotation) {
-  this.rotation_ = rotation;
-};
-/**
-* Set the scale.
-*
-* @param {number|undefined} scale Scale.
-* @api
-*/
-
-
-Text.prototype.setScale = function setScale(scale) {
-  this.scale_ = scale;
-};
-/**
-* Set the stroke.
-*
-* @param {import("./Stroke.js").default} stroke Stroke style.
-* @api
-*/
-
-
-Text.prototype.setStroke = function setStroke(stroke) {
-  this.stroke_ = stroke;
-};
-/**
-* Set the text.
-*
-* @param {string|undefined} text Text.
-* @api
-*/
-
-
-Text.prototype.setText = function setText(text) {
-  this.text_ = text;
-};
-/**
-* Set the text alignment.
-*
-* @param {string|undefined} textAlign Text align.
-* @api
-*/
-
-
-Text.prototype.setTextAlign = function setTextAlign(textAlign) {
-  this.textAlign_ = textAlign;
-};
-/**
-* Set the text baseline.
-*
-* @param {string|undefined} textBaseline Text baseline.
-* @api
-*/
-
-
-Text.prototype.setTextBaseline = function setTextBaseline(textBaseline) {
-  this.textBaseline_ = textBaseline;
-};
-/**
-* Set the background fill.
-*
-* @param {import("./Fill.js").default} fill Fill style.
-* @api
-*/
-
-
-Text.prototype.setBackgroundFill = function setBackgroundFill(fill) {
-  this.backgroundFill_ = fill;
-};
-/**
-* Set the background stroke.
-*
-* @param {import("./Stroke.js").default} stroke Stroke style.
-* @api
-*/
-
-
-Text.prototype.setBackgroundStroke = function setBackgroundStroke(stroke) {
-  this.backgroundStroke_ = stroke;
-};
-/**
-* Set the padding (`[top, right, bottom, left]`).
-*
-* @param {!Array<number>} padding Padding.
-* @api
-*/
-
-
-Text.prototype.setPadding = function setPadding(padding) {
-  this.padding_ = padding;
-};
-
-var _default = Text;
-exports.default = _default;
-},{"./Fill.js":"node_modules/ol/style/Fill.js","./TextPlacement.js":"node_modules/ol/style/TextPlacement.js"}],"node_modules/ol/Graticule.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _coordinate = require("./coordinate.js");
-
-var _events = require("./events.js");
-
-var _extent = require("./extent.js");
-
-var _GeometryLayout = _interopRequireDefault(require("./geom/GeometryLayout.js"));
-
-var _LineString = _interopRequireDefault(require("./geom/LineString.js"));
-
-var _Point = _interopRequireDefault(require("./geom/Point.js"));
-
-var _geodesic = require("./geom/flat/geodesic.js");
-
-var _math = require("./math.js");
-
-var _proj = require("./proj.js");
-
-var _EventType = _interopRequireDefault(require("./render/EventType.js"));
-
-var _Fill = _interopRequireDefault(require("./style/Fill.js"));
-
-var _Stroke = _interopRequireDefault(require("./style/Stroke.js"));
-
-var _Text = _interopRequireDefault(require("./style/Text.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/Graticule
- */
-
-/**
- * @type {Stroke}
- * @private
- * @const
- */
-var DEFAULT_STROKE_STYLE = new _Stroke.default({
-  color: 'rgba(0,0,0,0.2)'
-});
-/**
- * @type {Array<number>}
- * @private
- */
-
-var INTERVALS = [90, 45, 30, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1, 0.05, 0.01, 0.005, 0.002, 0.001];
-/**
- * @typedef {Object} GraticuleLabelDataType
- * @property {Point} geom
- * @property {string} text
- */
-
-/**
- * @typedef {Object} Options
- * @property {import("./PluggableMap.js").default} [map] Reference to an
- * {@link module:ol/Map~Map} object.
- * @property {number} [maxLines=100] The maximum number of meridians and
- * parallels from the center of the map. The default value of 100 means that at
- * most 200 meridians and 200 parallels will be displayed. The default value is
- * appropriate for conformal projections like Spherical Mercator. If you
- * increase the value, more lines will be drawn and the drawing performance will
- * decrease.
- * @property {Stroke} [strokeStyle='rgba(0,0,0,0.2)'] The
- * stroke style to use for drawing the graticule. If not provided, a not fully
- * opaque black will be used.
- * @property {number} [targetSize=100] The target size of the graticule cells,
- * in pixels.
- * @property {boolean} [showLabels=false] Render a label with the respective
- * latitude/longitude for each graticule line.
- * @property {function(number):string} [lonLabelFormatter] Label formatter for
- * longitudes. This function is called with the longitude as argument, and
- * should return a formatted string representing the longitude. By default,
- * labels are formatted as degrees, minutes, seconds and hemisphere.
- * @property {function(number):string} [latLabelFormatter] Label formatter for
- * latitudes. This function is called with the latitude as argument, and
- * should return a formatted string representing the latitude. By default,
- * labels are formatted as degrees, minutes, seconds and hemisphere.
- * @property {number} [lonLabelPosition=0] Longitude label position in fractions
- * (0..1) of view extent. 0 means at the bottom of the viewport, 1 means at the
- * top.
- * @property {number} [latLabelPosition=1] Latitude label position in fractions
- * (0..1) of view extent. 0 means at the left of the viewport, 1 means at the
- * right.
- * @property {Text} [lonLabelStyle] Longitude label text
- * style. If not provided, the following style will be used:
- * ```js
- * new Text({
- *   font: '12px Calibri,sans-serif',
- *   textBaseline: 'bottom',
- *   fill: new Fill({
- *     color: 'rgba(0,0,0,1)'
- *   }),
- *   stroke: new Stroke({
- *     color: 'rgba(255,255,255,1)',
- *     width: 3
- *   })
- * });
- * ```
- * Note that the default's `textBaseline` configuration will not work well for
- * `lonLabelPosition` configurations that position labels close to the top of
- * the viewport.
- * @property {Text} [latLabelStyle] Latitude label text style.
- * If not provided, the following style will be used:
- * ```js
- * new Text({
- *   font: '12px Calibri,sans-serif',
- *   textAlign: 'end',
- *   fill: new Fill({
- *     color: 'rgba(0,0,0,1)'
- *   }),
- *   stroke: Stroke({
- *     color: 'rgba(255,255,255,1)',
- *     width: 3
- *   })
- * });
- * ```
- * Note that the default's `textAlign` configuration will not work well for
- * `latLabelPosition` configurations that position labels close to the left of
- * the viewport.
- * @property {Array<number>} [intervals=[90, 45, 30, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1, 0.05, 0.01, 0.005, 0.002, 0.001]]
- * Intervals (in degrees) for the graticule. Example to limit graticules to 30 and 10 degrees intervals:
- * ```js
- * [30, 10]
- * ```
- */
-
-/**
- * Render a grid for a coordinate system on a map.
- * @api
- */
-
-var Graticule = function Graticule(opt_options) {
-  var options = opt_options || {};
-  /**
-   * @type {import("./PluggableMap.js").default}
-   * @private
-   */
-
-  this.map_ = null;
-  /**
-   * @type {?import("./events.js").EventsKey}
-   * @private
-   */
-
-  this.postcomposeListenerKey_ = null;
-  /**
-   * @type {import("./proj/Projection.js").default}
-   */
-
-  this.projection_ = null;
-  /**
-   * @type {number}
-   * @private
-   */
-
-  this.maxLat_ = Infinity;
-  /**
-   * @type {number}
-   * @private
-   */
-
-  this.maxLon_ = Infinity;
-  /**
-   * @type {number}
-   * @private
-   */
-
-  this.minLat_ = -Infinity;
-  /**
-   * @type {number}
-   * @private
-   */
-
-  this.minLon_ = -Infinity;
-  /**
-   * @type {number}
-   * @private
-   */
-
-  this.maxLatP_ = Infinity;
-  /**
-   * @type {number}
-   * @private
-   */
-
-  this.maxLonP_ = Infinity;
-  /**
-   * @type {number}
-   * @private
-   */
-
-  this.minLatP_ = -Infinity;
-  /**
-   * @type {number}
-   * @private
-   */
-
-  this.minLonP_ = -Infinity;
-  /**
-   * @type {number}
-   * @private
-   */
-
-  this.targetSize_ = options.targetSize !== undefined ? options.targetSize : 100;
-  /**
-   * @type {number}
-   * @private
-   */
-
-  this.maxLines_ = options.maxLines !== undefined ? options.maxLines : 100;
-  /**
-   * @type {Array<LineString>}
-   * @private
-   */
-
-  this.meridians_ = [];
-  /**
-   * @type {Array<LineString>}
-   * @private
-   */
-
-  this.parallels_ = [];
-  /**
-   * @type {Stroke}
-   * @private
-   */
-
-  this.strokeStyle_ = options.strokeStyle !== undefined ? options.strokeStyle : DEFAULT_STROKE_STYLE;
-  /**
-   * @type {import("./proj.js").TransformFunction|undefined}
-   * @private
-   */
-
-  this.fromLonLatTransform_ = undefined;
-  /**
-   * @type {import("./proj.js").TransformFunction|undefined}
-   * @private
-   */
-
-  this.toLonLatTransform_ = undefined;
-  /**
-   * @type {import("./coordinate.js").Coordinate}
-   * @private
-   */
-
-  this.projectionCenterLonLat_ = null;
-  /**
-   * @type {Array<GraticuleLabelDataType>}
-   * @private
-   */
-
-  this.meridiansLabels_ = null;
-  /**
-   * @type {Array<GraticuleLabelDataType>}
-   * @private
-   */
-
-  this.parallelsLabels_ = null;
-
-  if (options.showLabels == true) {
-    /**
-     * @type {null|function(number):string}
-     * @private
-     */
-    this.lonLabelFormatter_ = options.lonLabelFormatter == undefined ? _coordinate.degreesToStringHDMS.bind(this, 'EW') : options.lonLabelFormatter;
-    /**
-     * @type {function(number):string}
-     * @private
-     */
-
-    this.latLabelFormatter_ = options.latLabelFormatter == undefined ? _coordinate.degreesToStringHDMS.bind(this, 'NS') : options.latLabelFormatter;
-    /**
-     * Longitude label position in fractions (0..1) of view extent. 0 means
-     * bottom, 1 means top.
-     * @type {number}
-     * @private
-     */
-
-    this.lonLabelPosition_ = options.lonLabelPosition == undefined ? 0 : options.lonLabelPosition;
-    /**
-     * Latitude Label position in fractions (0..1) of view extent. 0 means left, 1
-     * means right.
-     * @type {number}
-     * @private
-     */
-
-    this.latLabelPosition_ = options.latLabelPosition == undefined ? 1 : options.latLabelPosition;
-    /**
-     * @type {Text}
-     * @private
-     */
-
-    this.lonLabelStyle_ = options.lonLabelStyle !== undefined ? options.lonLabelStyle : new _Text.default({
-      font: '12px Calibri,sans-serif',
-      textBaseline: 'bottom',
-      fill: new _Fill.default({
-        color: 'rgba(0,0,0,1)'
-      }),
-      stroke: new _Stroke.default({
-        color: 'rgba(255,255,255,1)',
-        width: 3
-      })
-    });
-    /**
-     * @type {Text}
-     * @private
-     */
-
-    this.latLabelStyle_ = options.latLabelStyle !== undefined ? options.latLabelStyle : new _Text.default({
-      font: '12px Calibri,sans-serif',
-      textAlign: 'end',
-      fill: new _Fill.default({
-        color: 'rgba(0,0,0,1)'
-      }),
-      stroke: new _Stroke.default({
-        color: 'rgba(255,255,255,1)',
-        width: 3
-      })
-    });
-    this.meridiansLabels_ = [];
-    this.parallelsLabels_ = [];
-  }
-  /**
-   * @type {Array<number>}
-   * @private
-   */
-
-
-  this.intervals_ = options.intervals !== undefined ? options.intervals : INTERVALS;
-  this.setMap(options.map !== undefined ? options.map : null);
-};
-/**
- * @param {number} lon Longitude.
- * @param {number} minLat Minimal latitude.
- * @param {number} maxLat Maximal latitude.
- * @param {number} squaredTolerance Squared tolerance.
- * @param {import("./extent.js").Extent} extent Extent.
- * @param {number} index Index.
- * @return {number} Index.
- * @private
- */
-
-
-Graticule.prototype.addMeridian_ = function addMeridian_(lon, minLat, maxLat, squaredTolerance, extent, index) {
-  var lineString = this.getMeridian_(lon, minLat, maxLat, squaredTolerance, index);
-
-  if ((0, _extent.intersects)(lineString.getExtent(), extent)) {
-    if (this.meridiansLabels_) {
-      var textPoint = this.getMeridianPoint_(lineString, extent, index);
-      this.meridiansLabels_[index] = {
-        geom: textPoint,
-        text: this.lonLabelFormatter_(lon)
-      };
-    }
-
-    this.meridians_[index++] = lineString;
-  }
-
-  return index;
-};
-/**
- * @param {LineString} lineString Meridian
- * @param {import("./extent.js").Extent} extent Extent.
- * @param {number} index Index.
- * @return {Point} Meridian point.
- * @private
- */
-
-
-Graticule.prototype.getMeridianPoint_ = function getMeridianPoint_(lineString, extent, index) {
-  var flatCoordinates = lineString.getFlatCoordinates();
-  var clampedBottom = Math.max(extent[1], flatCoordinates[1]);
-  var clampedTop = Math.min(extent[3], flatCoordinates[flatCoordinates.length - 1]);
-  var lat = (0, _math.clamp)(extent[1] + Math.abs(extent[1] - extent[3]) * this.lonLabelPosition_, clampedBottom, clampedTop);
-  var coordinate = [flatCoordinates[0], lat];
-  var point;
-
-  if (index in this.meridiansLabels_) {
-    point = this.meridiansLabels_[index].geom;
-    point.setCoordinates(coordinate);
-  } else {
-    point = new _Point.default(coordinate);
-  }
-
-  return point;
-};
-/**
- * @param {number} lat Latitude.
- * @param {number} minLon Minimal longitude.
- * @param {number} maxLon Maximal longitude.
- * @param {number} squaredTolerance Squared tolerance.
- * @param {import("./extent.js").Extent} extent Extent.
- * @param {number} index Index.
- * @return {number} Index.
- * @private
- */
-
-
-Graticule.prototype.addParallel_ = function addParallel_(lat, minLon, maxLon, squaredTolerance, extent, index) {
-  var lineString = this.getParallel_(lat, minLon, maxLon, squaredTolerance, index);
-
-  if ((0, _extent.intersects)(lineString.getExtent(), extent)) {
-    if (this.parallelsLabels_) {
-      var textPoint = this.getParallelPoint_(lineString, extent, index);
-      this.parallelsLabels_[index] = {
-        geom: textPoint,
-        text: this.latLabelFormatter_(lat)
-      };
-    }
-
-    this.parallels_[index++] = lineString;
-  }
-
-  return index;
-};
-/**
- * @param {LineString} lineString Parallels.
- * @param {import("./extent.js").Extent} extent Extent.
- * @param {number} index Index.
- * @return {Point} Parallel point.
- * @private
- */
-
-
-Graticule.prototype.getParallelPoint_ = function getParallelPoint_(lineString, extent, index) {
-  var flatCoordinates = lineString.getFlatCoordinates();
-  var clampedLeft = Math.max(extent[0], flatCoordinates[0]);
-  var clampedRight = Math.min(extent[2], flatCoordinates[flatCoordinates.length - 2]);
-  var lon = (0, _math.clamp)(extent[0] + Math.abs(extent[0] - extent[2]) * this.latLabelPosition_, clampedLeft, clampedRight);
-  var coordinate = [lon, flatCoordinates[1]];
-  var point;
-
-  if (index in this.parallelsLabels_) {
-    point = this.parallelsLabels_[index].geom;
-    point.setCoordinates(coordinate);
-  } else {
-    point = new _Point.default(coordinate);
-  }
-
-  return point;
-};
-/**
- * @param {import("./extent.js").Extent} extent Extent.
- * @param {import("./coordinate.js").Coordinate} center Center.
- * @param {number} resolution Resolution.
- * @param {number} squaredTolerance Squared tolerance.
- * @private
- */
-
-
-Graticule.prototype.createGraticule_ = function createGraticule_(extent, center, resolution, squaredTolerance) {
-  var interval = this.getInterval_(resolution);
-
-  if (interval == -1) {
-    this.meridians_.length = this.parallels_.length = 0;
-
-    if (this.meridiansLabels_) {
-      this.meridiansLabels_.length = 0;
-    }
-
-    if (this.parallelsLabels_) {
-      this.parallelsLabels_.length = 0;
-    }
-
-    return;
-  }
-
-  var centerLonLat = this.toLonLatTransform_(center);
-  var centerLon = centerLonLat[0];
-  var centerLat = centerLonLat[1];
-  var maxLines = this.maxLines_;
-  var cnt, idx, lat, lon;
-  var validExtent = [Math.max(extent[0], this.minLonP_), Math.max(extent[1], this.minLatP_), Math.min(extent[2], this.maxLonP_), Math.min(extent[3], this.maxLatP_)];
-  validExtent = (0, _proj.transformExtent)(validExtent, this.projection_, 'EPSG:4326');
-  var maxLat = validExtent[3];
-  var maxLon = validExtent[2];
-  var minLat = validExtent[1];
-  var minLon = validExtent[0]; // Create meridians
-
-  centerLon = Math.floor(centerLon / interval) * interval;
-  lon = (0, _math.clamp)(centerLon, this.minLon_, this.maxLon_);
-  idx = this.addMeridian_(lon, minLat, maxLat, squaredTolerance, extent, 0);
-  cnt = 0;
-
-  while (lon != this.minLon_ && cnt++ < maxLines) {
-    lon = Math.max(lon - interval, this.minLon_);
-    idx = this.addMeridian_(lon, minLat, maxLat, squaredTolerance, extent, idx);
-  }
-
-  lon = (0, _math.clamp)(centerLon, this.minLon_, this.maxLon_);
-  cnt = 0;
-
-  while (lon != this.maxLon_ && cnt++ < maxLines) {
-    lon = Math.min(lon + interval, this.maxLon_);
-    idx = this.addMeridian_(lon, minLat, maxLat, squaredTolerance, extent, idx);
-  }
-
-  this.meridians_.length = idx;
-
-  if (this.meridiansLabels_) {
-    this.meridiansLabels_.length = idx;
-  } // Create parallels
-
-
-  centerLat = Math.floor(centerLat / interval) * interval;
-  lat = (0, _math.clamp)(centerLat, this.minLat_, this.maxLat_);
-  idx = this.addParallel_(lat, minLon, maxLon, squaredTolerance, extent, 0);
-  cnt = 0;
-
-  while (lat != this.minLat_ && cnt++ < maxLines) {
-    lat = Math.max(lat - interval, this.minLat_);
-    idx = this.addParallel_(lat, minLon, maxLon, squaredTolerance, extent, idx);
-  }
-
-  lat = (0, _math.clamp)(centerLat, this.minLat_, this.maxLat_);
-  cnt = 0;
-
-  while (lat != this.maxLat_ && cnt++ < maxLines) {
-    lat = Math.min(lat + interval, this.maxLat_);
-    idx = this.addParallel_(lat, minLon, maxLon, squaredTolerance, extent, idx);
-  }
-
-  this.parallels_.length = idx;
-
-  if (this.parallelsLabels_) {
-    this.parallelsLabels_.length = idx;
-  }
-};
-/**
- * @param {number} resolution Resolution.
- * @return {number} The interval in degrees.
- * @private
- */
-
-
-Graticule.prototype.getInterval_ = function getInterval_(resolution) {
-  var centerLon = this.projectionCenterLonLat_[0];
-  var centerLat = this.projectionCenterLonLat_[1];
-  var interval = -1;
-  var target = Math.pow(this.targetSize_ * resolution, 2);
-  /** @type {Array<number>} **/
-
-  var p1 = [];
-  /** @type {Array<number>} **/
-
-  var p2 = [];
-
-  for (var i = 0, ii = this.intervals_.length; i < ii; ++i) {
-    var delta = this.intervals_[i] / 2;
-    p1[0] = centerLon - delta;
-    p1[1] = centerLat - delta;
-    p2[0] = centerLon + delta;
-    p2[1] = centerLat + delta;
-    this.fromLonLatTransform_(p1, p1);
-    this.fromLonLatTransform_(p2, p2);
-    var dist = Math.pow(p2[0] - p1[0], 2) + Math.pow(p2[1] - p1[1], 2);
-
-    if (dist <= target) {
-      break;
-    }
-
-    interval = this.intervals_[i];
-  }
-
-  return interval;
-};
-/**
- * Get the map associated with this graticule.
- * @return {import("./PluggableMap.js").default} The map.
- * @api
- */
-
-
-Graticule.prototype.getMap = function getMap() {
-  return this.map_;
-};
-/**
- * @param {number} lon Longitude.
- * @param {number} minLat Minimal latitude.
- * @param {number} maxLat Maximal latitude.
- * @param {number} squaredTolerance Squared tolerance.
- * @return {LineString} The meridian line string.
- * @param {number} index Index.
- * @private
- */
-
-
-Graticule.prototype.getMeridian_ = function getMeridian_(lon, minLat, maxLat, squaredTolerance, index) {
-  var flatCoordinates = (0, _geodesic.meridian)(lon, minLat, maxLat, this.projection_, squaredTolerance);
-  var lineString = this.meridians_[index];
-
-  if (!lineString) {
-    lineString = this.meridians_[index] = new _LineString.default(flatCoordinates, _GeometryLayout.default.XY);
-  } else {
-    lineString.setFlatCoordinates(_GeometryLayout.default.XY, flatCoordinates);
-    lineString.changed();
-  }
-
-  return lineString;
-};
-/**
- * Get the list of meridians.Meridians are lines of equal longitude.
- * @return {Array<LineString>} The meridians.
- * @api
- */
-
-
-Graticule.prototype.getMeridians = function getMeridians() {
-  return this.meridians_;
-};
-/**
- * @param {number} lat Latitude.
- * @param {number} minLon Minimal longitude.
- * @param {number} maxLon Maximal longitude.
- * @param {number} squaredTolerance Squared tolerance.
- * @return {LineString} The parallel line string.
- * @param {number} index Index.
- * @private
- */
-
-
-Graticule.prototype.getParallel_ = function getParallel_(lat, minLon, maxLon, squaredTolerance, index) {
-  var flatCoordinates = (0, _geodesic.parallel)(lat, minLon, maxLon, this.projection_, squaredTolerance);
-  var lineString = this.parallels_[index];
-
-  if (!lineString) {
-    lineString = new _LineString.default(flatCoordinates, _GeometryLayout.default.XY);
-  } else {
-    lineString.setFlatCoordinates(_GeometryLayout.default.XY, flatCoordinates);
-    lineString.changed();
-  }
-
-  return lineString;
-};
-/**
- * Get the list of parallels.Parallels are lines of equal latitude.
- * @return {Array<LineString>} The parallels.
- * @api
- */
-
-
-Graticule.prototype.getParallels = function getParallels() {
-  return this.parallels_;
-};
-/**
- * @param {import("./render/Event.js").default} e Event.
- * @private
- */
-
-
-Graticule.prototype.handlePostCompose_ = function handlePostCompose_(e) {
-  var vectorContext = e.vectorContext;
-  var frameState = e.frameState;
-  var extent = frameState.extent;
-  var viewState = frameState.viewState;
-  var center = viewState.center;
-  var projection = viewState.projection;
-  var resolution = viewState.resolution;
-  var pixelRatio = frameState.pixelRatio;
-  var squaredTolerance = resolution * resolution / (4 * pixelRatio * pixelRatio);
-  var updateProjectionInfo = !this.projection_ || !(0, _proj.equivalent)(this.projection_, projection);
-
-  if (updateProjectionInfo) {
-    this.updateProjectionInfo_(projection);
-  }
-
-  this.createGraticule_(extent, center, resolution, squaredTolerance); // Draw the lines
-
-  vectorContext.setFillStrokeStyle(null, this.strokeStyle_);
-  var i, l, line;
-
-  for (i = 0, l = this.meridians_.length; i < l; ++i) {
-    line = this.meridians_[i];
-    vectorContext.drawGeometry(line);
-  }
-
-  for (i = 0, l = this.parallels_.length; i < l; ++i) {
-    line = this.parallels_[i];
-    vectorContext.drawGeometry(line);
-  }
-
-  var labelData;
-
-  if (this.meridiansLabels_) {
-    for (i = 0, l = this.meridiansLabels_.length; i < l; ++i) {
-      labelData = this.meridiansLabels_[i];
-      this.lonLabelStyle_.setText(labelData.text);
-      vectorContext.setTextStyle(this.lonLabelStyle_);
-      vectorContext.drawGeometry(labelData.geom);
-    }
-  }
-
-  if (this.parallelsLabels_) {
-    for (i = 0, l = this.parallelsLabels_.length; i < l; ++i) {
-      labelData = this.parallelsLabels_[i];
-      this.latLabelStyle_.setText(labelData.text);
-      vectorContext.setTextStyle(this.latLabelStyle_);
-      vectorContext.drawGeometry(labelData.geom);
-    }
-  }
-};
-/**
- * @param {import("./proj/Projection.js").default} projection Projection.
- * @private
- */
-
-
-Graticule.prototype.updateProjectionInfo_ = function updateProjectionInfo_(projection) {
-  var epsg4326Projection = (0, _proj.get)('EPSG:4326');
-  var worldExtent = projection.getWorldExtent();
-  var worldExtentP = (0, _proj.transformExtent)(worldExtent, epsg4326Projection, projection);
-  this.maxLat_ = worldExtent[3];
-  this.maxLon_ = worldExtent[2];
-  this.minLat_ = worldExtent[1];
-  this.minLon_ = worldExtent[0];
-  this.maxLatP_ = worldExtentP[3];
-  this.maxLonP_ = worldExtentP[2];
-  this.minLatP_ = worldExtentP[1];
-  this.minLonP_ = worldExtentP[0];
-  this.fromLonLatTransform_ = (0, _proj.getTransform)(epsg4326Projection, projection);
-  this.toLonLatTransform_ = (0, _proj.getTransform)(projection, epsg4326Projection);
-  this.projectionCenterLonLat_ = this.toLonLatTransform_((0, _extent.getCenter)(projection.getExtent()));
-  this.projection_ = projection;
-};
-/**
- * Set the map for this graticule.The graticule will be rendered on the
- * provided map.
- * @param {import("./PluggableMap.js").default} map Map.
- * @api
- */
-
-
-Graticule.prototype.setMap = function setMap(map) {
-  if (this.map_) {
-    (0, _events.unlistenByKey)(this.postcomposeListenerKey_);
-    this.postcomposeListenerKey_ = null;
-    this.map_.render();
-  }
-
-  if (map) {
-    this.postcomposeListenerKey_ = (0, _events.listen)(map, _EventType.default.POSTCOMPOSE, this.handlePostCompose_, this);
-    map.render();
-  }
-
-  this.map_ = map;
-};
-
-var _default = Graticule;
-exports.default = _default;
-},{"./coordinate.js":"node_modules/ol/coordinate.js","./events.js":"node_modules/ol/events.js","./extent.js":"node_modules/ol/extent.js","./geom/GeometryLayout.js":"node_modules/ol/geom/GeometryLayout.js","./geom/LineString.js":"node_modules/ol/geom/LineString.js","./geom/Point.js":"node_modules/ol/geom/Point.js","./geom/flat/geodesic.js":"node_modules/ol/geom/flat/geodesic.js","./math.js":"node_modules/ol/math.js","./proj.js":"node_modules/ol/proj.js","./render/EventType.js":"node_modules/ol/render/EventType.js","./style/Fill.js":"node_modules/ol/style/Fill.js","./style/Stroke.js":"node_modules/ol/style/Stroke.js","./style/Text.js":"node_modules/ol/style/Text.js"}],"node_modules/ol/Image.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _ImageBase = _interopRequireDefault(require("./ImageBase.js"));
-
-var _ImageState = _interopRequireDefault(require("./ImageState.js"));
-
-var _events = require("./events.js");
-
-var _EventType = _interopRequireDefault(require("./events/EventType.js"));
-
-var _extent = require("./extent.js");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/Image
- */
-
-/**
- * A function that takes an {@link module:ol/Image~Image} for the image and a
- * `{string}` for the src as arguments. It is supposed to make it so the
- * underlying image {@link module:ol/Image~Image#getImage} is assigned the
- * content specified by the src. If not specified, the default is
- *
- *     function(image, src) {
- *       image.getImage().src = src;
- *     }
- *
- * Providing a custom `imageLoadFunction` can be useful to load images with
- * post requests or - in general - through XHR requests, where the src of the
- * image element would be set to a data URI when the content is loaded.
- *
- * @typedef {function(ImageWrapper, string)} LoadFunction
- * @api
- */
-var ImageWrapper =
-/*@__PURE__*/
-function (ImageBase) {
-  function ImageWrapper(extent, resolution, pixelRatio, src, crossOrigin, imageLoadFunction) {
-    ImageBase.call(this, extent, resolution, pixelRatio, _ImageState.default.IDLE);
-    /**
-     * @private
-     * @type {string}
-     */
-
-    this.src_ = src;
-    /**
-     * @private
-     * @type {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement}
-     */
-
-    this.image_ = new Image();
-
-    if (crossOrigin !== null) {
-      this.image_.crossOrigin = crossOrigin;
-    }
-    /**
-     * @private
-     * @type {Array<import("./events.js").EventsKey>}
-     */
-
-
-    this.imageListenerKeys_ = null;
-    /**
-     * @protected
-     * @type {ImageState}
-     */
-
-    this.state = _ImageState.default.IDLE;
-    /**
-     * @private
-     * @type {LoadFunction}
-     */
-
-    this.imageLoadFunction_ = imageLoadFunction;
-  }
-
-  if (ImageBase) ImageWrapper.__proto__ = ImageBase;
-  ImageWrapper.prototype = Object.create(ImageBase && ImageBase.prototype);
-  ImageWrapper.prototype.constructor = ImageWrapper;
-  /**
-   * @inheritDoc
-   * @api
-   */
-
-  ImageWrapper.prototype.getImage = function getImage() {
-    return this.image_;
-  };
-  /**
-   * Tracks loading or read errors.
-   *
-   * @private
-   */
-
-
-  ImageWrapper.prototype.handleImageError_ = function handleImageError_() {
-    this.state = _ImageState.default.ERROR;
-    this.unlistenImage_();
-    this.changed();
-  };
-  /**
-   * Tracks successful image load.
-   *
-   * @private
-   */
-
-
-  ImageWrapper.prototype.handleImageLoad_ = function handleImageLoad_() {
-    if (this.resolution === undefined) {
-      this.resolution = (0, _extent.getHeight)(this.extent) / this.image_.height;
-    }
-
-    this.state = _ImageState.default.LOADED;
-    this.unlistenImage_();
-    this.changed();
-  };
-  /**
-   * Load the image or retry if loading previously failed.
-   * Loading is taken care of by the tile queue, and calling this method is
-   * only needed for preloading or for reloading in case of an error.
-   * @override
-   * @api
-   */
-
-
-  ImageWrapper.prototype.load = function load() {
-    if (this.state == _ImageState.default.IDLE || this.state == _ImageState.default.ERROR) {
-      this.state = _ImageState.default.LOADING;
-      this.changed();
-      this.imageListenerKeys_ = [(0, _events.listenOnce)(this.image_, _EventType.default.ERROR, this.handleImageError_, this), (0, _events.listenOnce)(this.image_, _EventType.default.LOAD, this.handleImageLoad_, this)];
-      this.imageLoadFunction_(this, this.src_);
-    }
-  };
-  /**
-   * @param {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} image Image.
-   */
-
-
-  ImageWrapper.prototype.setImage = function setImage(image) {
-    this.image_ = image;
-  };
-  /**
-   * Discards event handlers which listen for load completion or errors.
-   *
-   * @private
-   */
-
-
-  ImageWrapper.prototype.unlistenImage_ = function unlistenImage_() {
-    this.imageListenerKeys_.forEach(_events.unlistenByKey);
-    this.imageListenerKeys_ = null;
-  };
-
-  return ImageWrapper;
-}(_ImageBase.default);
-
-var _default = ImageWrapper;
-exports.default = _default;
-},{"./ImageBase.js":"node_modules/ol/ImageBase.js","./ImageState.js":"node_modules/ol/ImageState.js","./events.js":"node_modules/ol/events.js","./events/EventType.js":"node_modules/ol/events/EventType.js","./extent.js":"node_modules/ol/extent.js"}],"node_modules/ol/Tile.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _TileState = _interopRequireDefault(require("./TileState.js"));
-
-var _easing = require("./easing.js");
-
-var _Target = _interopRequireDefault(require("./events/Target.js"));
-
-var _EventType = _interopRequireDefault(require("./events/EventType.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/Tile
- */
-
-/**
- * A function that takes an {@link module:ol/Tile} for the tile and a
- * `{string}` for the url as arguments. The default is
- * ```js
- * source.setTileLoadFunction(function(tile, src) {
- *   tile.getImage().src = src;
- * });
- * ```
- * For more fine grained control, the load function can use fetch or XMLHttpRequest and involve
- * error handling:
- *
- * ```js
- * import TileState from 'ol/TileState';
- *
- * source.setTileLoadFunction(function(tile, src) {
- *   var xhr = new XMLHttpRequest();
- *   xhr.responseType = 'blob';
- *   xhr.addEventListener('loadend', function (evt) {
- *     var data = this.response;
- *     if (data !== undefined) {
- *       tile.getImage().src = URL.createObjectURL(data);
- *     } else {
- *       tile.setState(TileState.ERROR);
- *     }
- *   });
- *   xhr.addEventListener('error', function () {
- *     tile.setState(TileState.ERROR);
- *   });
- *   xhr.open('GET', src);
- *   xhr.send();
- * });
- * ```
- *
- * @typedef {function(Tile, string)} LoadFunction
- * @api
- */
-
-/**
- * {@link module:ol/source/Tile~Tile} sources use a function of this type to get
- * the url that provides a tile for a given tile coordinate.
- *
- * This function takes an {@link module:ol/tilecoord~TileCoord} for the tile
- * coordinate, a `{number}` representing the pixel ratio and a
- * {@link module:ol/proj/Projection} for the projection  as arguments
- * and returns a `{string}` representing the tile URL, or undefined if no tile
- * should be requested for the passed tile coordinate.
- *
- * @typedef {function(import("./tilecoord.js").TileCoord, number,
- *           import("./proj/Projection.js").default): (string|undefined)} UrlFunction
- * @api
- */
-
-/**
- * @typedef {Object} Options
- * @property {number} [transition=250] A duration for tile opacity
- * transitions in milliseconds. A duration of 0 disables the opacity transition.
- * @api
- */
-
-/**
- * @classdesc
- * Base class for tiles.
- *
- * @abstract
- */
-var Tile =
-/*@__PURE__*/
-function (EventTarget) {
-  function Tile(tileCoord, state, opt_options) {
-    EventTarget.call(this);
-    var options = opt_options ? opt_options : {};
-    /**
-     * @type {import("./tilecoord.js").TileCoord}
-     */
-
-    this.tileCoord = tileCoord;
-    /**
-     * @protected
-     * @type {TileState}
-     */
-
-    this.state = state;
-    /**
-     * An "interim" tile for this tile. The interim tile may be used while this
-     * one is loading, for "smooth" transitions when changing params/dimensions
-     * on the source.
-     * @type {Tile}
-     */
-
-    this.interimTile = null;
-    /**
-     * A key assigned to the tile. This is used by the tile source to determine
-     * if this tile can effectively be used, or if a new tile should be created
-     * and this one be used as an interim tile for this new tile.
-     * @type {string}
-     */
-
-    this.key = '';
-    /**
-     * The duration for the opacity transition.
-     * @type {number}
-     */
-
-    this.transition_ = options.transition === undefined ? 250 : options.transition;
-    /**
-     * Lookup of start times for rendering transitions.  If the start time is
-     * equal to -1, the transition is complete.
-     * @type {Object<string, number>}
-     */
-
-    this.transitionStarts_ = {};
-  }
-
-  if (EventTarget) Tile.__proto__ = EventTarget;
-  Tile.prototype = Object.create(EventTarget && EventTarget.prototype);
-  Tile.prototype.constructor = Tile;
-  /**
-   * @protected
-   */
-
-  Tile.prototype.changed = function changed() {
-    this.dispatchEvent(_EventType.default.CHANGE);
-  };
-  /**
-   * @return {string} Key.
-   */
-
-
-  Tile.prototype.getKey = function getKey() {
-    return this.key + '/' + this.tileCoord;
-  };
-  /**
-   * Get the interim tile most suitable for rendering using the chain of interim
-   * tiles. This corresponds to the  most recent tile that has been loaded, if no
-   * such tile exists, the original tile is returned.
-   * @return {!Tile} Best tile for rendering.
-   */
-
-
-  Tile.prototype.getInterimTile = function getInterimTile() {
-    if (!this.interimTile) {
-      //empty chain
-      return this;
-    }
-
-    var tile = this.interimTile; // find the first loaded tile and return it. Since the chain is sorted in
-    // decreasing order of creation time, there is no need to search the remainder
-    // of the list (all those tiles correspond to older requests and will be
-    // cleaned up by refreshInterimChain)
-
-    do {
-      if (tile.getState() == _TileState.default.LOADED) {
-        return tile;
-      }
-
-      tile = tile.interimTile;
-    } while (tile); // we can not find a better tile
-
-
-    return this;
-  };
-  /**
-   * Goes through the chain of interim tiles and discards sections of the chain
-   * that are no longer relevant.
-   */
-
-
-  Tile.prototype.refreshInterimChain = function refreshInterimChain() {
-    if (!this.interimTile) {
-      return;
-    }
-
-    var tile = this.interimTile;
-    var prev =
-    /** @type {Tile} */
-    this;
-
-    do {
-      if (tile.getState() == _TileState.default.LOADED) {
-        //we have a loaded tile, we can discard the rest of the list
-        //we would could abort any LOADING tile request
-        //older than this tile (i.e. any LOADING tile following this entry in the chain)
-        tile.interimTile = null;
-        break;
-      } else if (tile.getState() == _TileState.default.LOADING) {
-        //keep this LOADING tile any loaded tiles later in the chain are
-        //older than this tile, so we're still interested in the request
-        prev = tile;
-      } else if (tile.getState() == _TileState.default.IDLE) {
-        //the head of the list is the most current tile, we don't need
-        //to start any other requests for this chain
-        prev.interimTile = tile.interimTile;
-      } else {
-        prev = tile;
-      }
-
-      tile = prev.interimTile;
-    } while (tile);
-  };
-  /**
-   * Get the tile coordinate for this tile.
-   * @return {import("./tilecoord.js").TileCoord} The tile coordinate.
-   * @api
-   */
-
-
-  Tile.prototype.getTileCoord = function getTileCoord() {
-    return this.tileCoord;
-  };
-  /**
-   * @return {TileState} State.
-   */
-
-
-  Tile.prototype.getState = function getState() {
-    return this.state;
-  };
-  /**
-   * Sets the state of this tile. If you write your own {@link module:ol/Tile~LoadFunction tileLoadFunction} ,
-   * it is important to set the state correctly to {@link module:ol/TileState~ERROR}
-   * when the tile cannot be loaded. Otherwise the tile cannot be removed from
-   * the tile queue and will block other requests.
-   * @param {TileState} state State.
-   * @api
-   */
-
-
-  Tile.prototype.setState = function setState(state) {
-    this.state = state;
-    this.changed();
-  };
-  /**
-   * Load the image or retry if loading previously failed.
-   * Loading is taken care of by the tile queue, and calling this method is
-   * only needed for preloading or for reloading in case of an error.
-   * @abstract
-   * @api
-   */
-
-
-  Tile.prototype.load = function load() {};
-  /**
-   * Get the alpha value for rendering.
-   * @param {string} id An id for the renderer.
-   * @param {number} time The render frame time.
-   * @return {number} A number between 0 and 1.
-   */
-
-
-  Tile.prototype.getAlpha = function getAlpha(id, time) {
-    if (!this.transition_) {
-      return 1;
-    }
-
-    var start = this.transitionStarts_[id];
-
-    if (!start) {
-      start = time;
-      this.transitionStarts_[id] = start;
-    } else if (start === -1) {
-      return 1;
-    }
-
-    var delta = time - start + 1000 / 60; // avoid rendering at 0
-
-    if (delta >= this.transition_) {
-      return 1;
-    }
-
-    return (0, _easing.easeIn)(delta / this.transition_);
-  };
-  /**
-   * Determine if a tile is in an alpha transition.  A tile is considered in
-   * transition if tile.getAlpha() has not yet been called or has been called
-   * and returned 1.
-   * @param {string} id An id for the renderer.
-   * @return {boolean} The tile is in transition.
-   */
-
-
-  Tile.prototype.inTransition = function inTransition(id) {
-    if (!this.transition_) {
-      return false;
-    }
-
-    return this.transitionStarts_[id] !== -1;
-  };
-  /**
-   * Mark a transition as complete.
-   * @param {string} id An id for the renderer.
-   */
-
-
-  Tile.prototype.endTransition = function endTransition(id) {
-    if (this.transition_) {
-      this.transitionStarts_[id] = -1;
-    }
-  };
-
-  return Tile;
-}(_Target.default);
-
-var _default = Tile;
-exports.default = _default;
-},{"./TileState.js":"node_modules/ol/TileState.js","./easing.js":"node_modules/ol/easing.js","./events/Target.js":"node_modules/ol/events/Target.js","./events/EventType.js":"node_modules/ol/events/EventType.js"}],"node_modules/ol/ImageTile.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _Tile = _interopRequireDefault(require("./Tile.js"));
-
-var _TileState = _interopRequireDefault(require("./TileState.js"));
-
-var _dom = require("./dom.js");
-
-var _events = require("./events.js");
-
-var _EventType = _interopRequireDefault(require("./events/EventType.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/ImageTile
- */
-var ImageTile =
-/*@__PURE__*/
-function (Tile) {
-  function ImageTile(tileCoord, state, src, crossOrigin, tileLoadFunction, opt_options) {
-    Tile.call(this, tileCoord, state, opt_options);
-    /**
-     * @private
-     * @type {?string}
-     */
-
-    this.crossOrigin_ = crossOrigin;
-    /**
-     * Image URI
-     *
-     * @private
-     * @type {string}
-     */
-
-    this.src_ = src;
-    /**
-     * @private
-     * @type {HTMLImageElement|HTMLCanvasElement}
-     */
-
-    this.image_ = new Image();
-
-    if (crossOrigin !== null) {
-      this.image_.crossOrigin = crossOrigin;
-    }
-    /**
-     * @private
-     * @type {Array<import("./events.js").EventsKey>}
-     */
-
-
-    this.imageListenerKeys_ = null;
-    /**
-     * @private
-     * @type {import("./Tile.js").LoadFunction}
-     */
-
-    this.tileLoadFunction_ = tileLoadFunction;
-  }
-
-  if (Tile) ImageTile.__proto__ = Tile;
-  ImageTile.prototype = Object.create(Tile && Tile.prototype);
-  ImageTile.prototype.constructor = ImageTile;
-  /**
-   * @inheritDoc
-   */
-
-  ImageTile.prototype.disposeInternal = function disposeInternal() {
-    if (this.state == _TileState.default.LOADING) {
-      this.unlistenImage_();
-      this.image_ = getBlankImage();
-    }
-
-    if (this.interimTile) {
-      this.interimTile.dispose();
-    }
-
-    this.state = _TileState.default.ABORT;
-    this.changed();
-    Tile.prototype.disposeInternal.call(this);
-  };
-  /**
-   * Get the HTML image element for this tile (may be a Canvas, Image, or Video).
-   * @return {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} Image.
-   * @api
-   */
-
-
-  ImageTile.prototype.getImage = function getImage() {
-    return this.image_;
-  };
-  /**
-   * @inheritDoc
-   */
-
-
-  ImageTile.prototype.getKey = function getKey() {
-    return this.src_;
-  };
-  /**
-   * Tracks loading or read errors.
-   *
-   * @private
-   */
-
-
-  ImageTile.prototype.handleImageError_ = function handleImageError_() {
-    this.state = _TileState.default.ERROR;
-    this.unlistenImage_();
-    this.image_ = getBlankImage();
-    this.changed();
-  };
-  /**
-   * Tracks successful image load.
-   *
-   * @private
-   */
-
-
-  ImageTile.prototype.handleImageLoad_ = function handleImageLoad_() {
-    var image =
-    /** @type {HTMLImageElement} */
-    this.image_;
-
-    if (image.naturalWidth && image.naturalHeight) {
-      this.state = _TileState.default.LOADED;
-    } else {
-      this.state = _TileState.default.EMPTY;
-    }
-
-    this.unlistenImage_();
-    this.changed();
-  };
-  /**
-   * @inheritDoc
-   * @api
-   */
-
-
-  ImageTile.prototype.load = function load() {
-    if (this.state == _TileState.default.ERROR) {
-      this.state = _TileState.default.IDLE;
-      this.image_ = new Image();
-
-      if (this.crossOrigin_ !== null) {
-        this.image_.crossOrigin = this.crossOrigin_;
-      }
-    }
-
-    if (this.state == _TileState.default.IDLE) {
-      this.state = _TileState.default.LOADING;
-      this.changed();
-      this.imageListenerKeys_ = [(0, _events.listenOnce)(this.image_, _EventType.default.ERROR, this.handleImageError_, this), (0, _events.listenOnce)(this.image_, _EventType.default.LOAD, this.handleImageLoad_, this)];
-      this.tileLoadFunction_(this, this.src_);
-    }
-  };
-  /**
-   * Discards event handlers which listen for load completion or errors.
-   *
-   * @private
-   */
-
-
-  ImageTile.prototype.unlistenImage_ = function unlistenImage_() {
-    this.imageListenerKeys_.forEach(_events.unlistenByKey);
-    this.imageListenerKeys_ = null;
-  };
-
-  return ImageTile;
-}(_Tile.default);
-/**
- * Get a 1-pixel blank image.
- * @return {HTMLCanvasElement} Blank image.
- */
-
-
-function getBlankImage() {
-  var ctx = (0, _dom.createCanvasContext2D)(1, 1);
-  ctx.fillStyle = 'rgba(0,0,0,0)';
-  ctx.fillRect(0, 0, 1, 1);
-  return ctx.canvas;
-}
-
-var _default = ImageTile;
-exports.default = _default;
-},{"./Tile.js":"node_modules/ol/Tile.js","./TileState.js":"node_modules/ol/TileState.js","./dom.js":"node_modules/ol/dom.js","./events.js":"node_modules/ol/events.js","./events/EventType.js":"node_modules/ol/events/EventType.js"}],"node_modules/ol/tilecoord.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createOrUpdate = createOrUpdate;
-exports.getKeyZXY = getKeyZXY;
-exports.getKey = getKey;
-exports.fromKey = fromKey;
-exports.hash = hash;
-exports.quadKey = quadKey;
-exports.withinExtentAndZ = withinExtentAndZ;
-
-/**
- * @module ol/tilecoord
- */
-
-/**
- * An array of three numbers representing the location of a tile in a tile
- * grid. The order is `z`, `x`, and `y`. `z` is the zoom level.
- * @typedef {Array<number>} TileCoord
- * @api
- */
-
-/**
- * @param {number} z Z.
- * @param {number} x X.
- * @param {number} y Y.
- * @param {TileCoord=} opt_tileCoord Tile coordinate.
- * @return {TileCoord} Tile coordinate.
- */
-function createOrUpdate(z, x, y, opt_tileCoord) {
-  if (opt_tileCoord !== undefined) {
-    opt_tileCoord[0] = z;
-    opt_tileCoord[1] = x;
-    opt_tileCoord[2] = y;
-    return opt_tileCoord;
-  } else {
-    return [z, x, y];
-  }
-}
-/**
- * @param {number} z Z.
- * @param {number} x X.
- * @param {number} y Y.
- * @return {string} Key.
- */
-
-
-function getKeyZXY(z, x, y) {
-  return z + '/' + x + '/' + y;
-}
-/**
- * Get the key for a tile coord.
- * @param {TileCoord} tileCoord The tile coord.
- * @return {string} Key.
- */
-
-
-function getKey(tileCoord) {
-  return getKeyZXY(tileCoord[0], tileCoord[1], tileCoord[2]);
-}
-/**
- * Get a tile coord given a key.
- * @param {string} key The tile coord key.
- * @return {TileCoord} The tile coord.
- */
-
-
-function fromKey(key) {
-  return key.split('/').map(Number);
-}
-/**
- * @param {TileCoord} tileCoord Tile coord.
- * @return {number} Hash.
- */
-
-
-function hash(tileCoord) {
-  return (tileCoord[1] << tileCoord[0]) + tileCoord[2];
-}
-/**
- * @param {TileCoord} tileCoord Tile coord.
- * @return {string} Quad key.
- */
-
-
-function quadKey(tileCoord) {
-  var z = tileCoord[0];
-  var digits = new Array(z);
-  var mask = 1 << z - 1;
-  var i, charCode;
-
-  for (i = 0; i < z; ++i) {
-    // 48 is charCode for 0 - '0'.charCodeAt(0)
-    charCode = 48;
-
-    if (tileCoord[1] & mask) {
-      charCode += 1;
-    }
-
-    if (tileCoord[2] & mask) {
-      charCode += 2;
-    }
-
-    digits[i] = String.fromCharCode(charCode);
-    mask >>= 1;
-  }
-
-  return digits.join('');
-}
-/**
- * @param {TileCoord} tileCoord Tile coordinate.
- * @param {!import("./tilegrid/TileGrid.js").default} tileGrid Tile grid.
- * @return {boolean} Tile coordinate is within extent and zoom level range.
- */
-
-
-function withinExtentAndZ(tileCoord, tileGrid) {
-  var z = tileCoord[0];
-  var x = tileCoord[1];
-  var y = tileCoord[2];
-
-  if (tileGrid.getMinZoom() > z || z > tileGrid.getMaxZoom()) {
-    return false;
-  }
-
-  var extent = tileGrid.getExtent();
-  var tileRange;
-
-  if (!extent) {
-    tileRange = tileGrid.getFullTileRange(z);
-  } else {
-    tileRange = tileGrid.getTileRangeForExtentAndZ(extent, z);
-  }
-
-  if (!tileRange) {
-    return true;
-  } else {
-    return tileRange.containsXY(x, y);
-  }
-}
-},{}],"node_modules/ol/TileCache.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _LRUCache = _interopRequireDefault(require("./structs/LRUCache.js"));
-
-var _tilecoord = require("./tilecoord.js");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/TileCache
- */
-var TileCache =
-/*@__PURE__*/
-function (LRUCache) {
-  function TileCache(opt_highWaterMark) {
-    LRUCache.call(this, opt_highWaterMark);
-  }
-
-  if (LRUCache) TileCache.__proto__ = LRUCache;
-  TileCache.prototype = Object.create(LRUCache && LRUCache.prototype);
-  TileCache.prototype.constructor = TileCache;
-  /**
-   * @param {!Object<string, import("./TileRange.js").default>} usedTiles Used tiles.
-   */
-
-  TileCache.prototype.expireCache = function expireCache(usedTiles) {
-    while (this.canExpireCache()) {
-      var tile = this.peekLast();
-      var zKey = tile.tileCoord[0].toString();
-
-      if (zKey in usedTiles && usedTiles[zKey].contains(tile.tileCoord)) {
-        break;
-      } else {
-        this.pop().dispose();
-      }
-    }
-  };
-  /**
-   * Prune all tiles from the cache that don't have the same z as the newest tile.
-   */
-
-
-  TileCache.prototype.pruneExceptNewestZ = function pruneExceptNewestZ() {
-    if (this.getCount() === 0) {
-      return;
-    }
-
-    var key = this.peekFirstKey();
-    var tileCoord = (0, _tilecoord.fromKey)(key);
-    var z = tileCoord[0];
-    this.forEach(function (tile) {
-      if (tile.tileCoord[0] !== z) {
-        this.remove((0, _tilecoord.getKey)(tile.tileCoord));
-        tile.dispose();
-      }
-    }, this);
-  };
-
-  return TileCache;
-}(_LRUCache.default);
-
-var _default = TileCache;
-exports.default = _default;
-},{"./structs/LRUCache.js":"node_modules/ol/structs/LRUCache.js","./tilecoord.js":"node_modules/ol/tilecoord.js"}],"node_modules/ol/VectorImageTile.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.defaultLoadFunction = defaultLoadFunction;
-exports.default = void 0;
-
-var _util = require("./util.js");
-
-var _Tile = _interopRequireDefault(require("./Tile.js"));
-
-var _TileState = _interopRequireDefault(require("./TileState.js"));
-
-var _dom = require("./dom.js");
-
-var _events = require("./events.js");
-
-var _extent = require("./extent.js");
-
-var _EventType = _interopRequireDefault(require("./events/EventType.js"));
-
-var _featureloader = require("./featureloader.js");
-
-var _functions = require("./functions.js");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/VectorImageTile
- */
-
-/**
- * @typedef {Object} ReplayState
- * @property {boolean} dirty
- * @property {null|import("./render.js").OrderFunction} renderedRenderOrder
- * @property {number} renderedTileRevision
- * @property {number} renderedRevision
- */
-var VectorImageTile =
-/*@__PURE__*/
-function (Tile) {
-  function VectorImageTile(tileCoord, state, sourceRevision, format, tileLoadFunction, urlTileCoord, tileUrlFunction, sourceTileGrid, tileGrid, sourceTiles, pixelRatio, projection, tileClass, handleTileChange, zoom) {
-    Tile.call(this, tileCoord, state, {
-      transition: 0
-    });
-    /**
-     * @private
-     * @type {!Object<string, CanvasRenderingContext2D>}
-     */
-
-    this.context_ = {};
-    /**
-     * @private
-     * @type {import("./featureloader.js").FeatureLoader}
-     */
-
-    this.loader_;
-    /**
-     * @private
-     * @type {!Object<string, ReplayState>}
-     */
-
-    this.replayState_ = {};
-    /**
-     * @private
-     * @type {Object<string, import("./VectorTile.js").default>}
-     */
-
-    this.sourceTiles_ = sourceTiles;
-    /**
-     * Keys of source tiles used by this tile. Use with {@link #getTile}.
-     * @type {Array<string>}
-     */
-
-    this.tileKeys = [];
-    /**
-     * @type {import("./extent.js").Extent}
-     */
-
-    this.extent = null;
-    /**
-     * @type {number}
-     */
-
-    this.sourceRevision_ = sourceRevision;
-    /**
-     * @type {import("./tilecoord.js").TileCoord}
-     */
-
-    this.wrappedTileCoord = urlTileCoord;
-    /**
-     * @type {Array<import("./events.js").EventsKey>}
-     */
-
-    this.loadListenerKeys_ = [];
-    /**
-     * @type {Array<import("./events.js").EventsKey>}
-     */
-
-    this.sourceTileListenerKeys_ = [];
-
-    if (urlTileCoord) {
-      var extent = this.extent = tileGrid.getTileCoordExtent(urlTileCoord);
-      var resolution = tileGrid.getResolution(zoom);
-      var sourceZ = sourceTileGrid.getZForResolution(resolution);
-      var useLoadedOnly = zoom != tileCoord[0];
-      var loadCount = 0;
-      sourceTileGrid.forEachTileCoord(extent, sourceZ, function (sourceTileCoord) {
-        var sharedExtent = (0, _extent.getIntersection)(extent, sourceTileGrid.getTileCoordExtent(sourceTileCoord));
-        var sourceExtent = sourceTileGrid.getExtent();
-
-        if (sourceExtent) {
-          sharedExtent = (0, _extent.getIntersection)(sharedExtent, sourceExtent, sharedExtent);
-        }
-
-        if ((0, _extent.getWidth)(sharedExtent) / resolution >= 0.5 && (0, _extent.getHeight)(sharedExtent) / resolution >= 0.5) {
-          // only include source tile if overlap is at least 1 pixel
-          ++loadCount;
-          var sourceTileKey = sourceTileCoord.toString();
-          var sourceTile = sourceTiles[sourceTileKey];
-
-          if (!sourceTile && !useLoadedOnly) {
-            var tileUrl = tileUrlFunction(sourceTileCoord, pixelRatio, projection);
-            sourceTile = sourceTiles[sourceTileKey] = new tileClass(sourceTileCoord, tileUrl == undefined ? _TileState.default.EMPTY : _TileState.default.IDLE, tileUrl == undefined ? '' : tileUrl, format, tileLoadFunction);
-            this.sourceTileListenerKeys_.push((0, _events.listen)(sourceTile, _EventType.default.CHANGE, handleTileChange));
-          }
-
-          if (sourceTile && (!useLoadedOnly || sourceTile.getState() == _TileState.default.LOADED)) {
-            sourceTile.consumers++;
-            this.tileKeys.push(sourceTileKey);
-          }
-        }
-      }.bind(this));
-
-      if (useLoadedOnly && loadCount == this.tileKeys.length) {
-        this.finishLoading_();
-      }
-
-      if (zoom <= tileCoord[0] && this.state != _TileState.default.LOADED) {
-        while (zoom > tileGrid.getMinZoom()) {
-          var tile = new VectorImageTile(tileCoord, state, sourceRevision, format, tileLoadFunction, urlTileCoord, tileUrlFunction, sourceTileGrid, tileGrid, sourceTiles, pixelRatio, projection, tileClass, _functions.VOID, --zoom);
-
-          if (tile.state == _TileState.default.LOADED) {
-            this.interimTile = tile;
-            break;
-          }
-        }
-      }
-    }
-  }
-
-  if (Tile) VectorImageTile.__proto__ = Tile;
-  VectorImageTile.prototype = Object.create(Tile && Tile.prototype);
-  VectorImageTile.prototype.constructor = VectorImageTile;
-  /**
-   * @inheritDoc
-   */
-
-  VectorImageTile.prototype.disposeInternal = function disposeInternal() {
-    this.state = _TileState.default.ABORT;
-    this.changed();
-
-    if (this.interimTile) {
-      this.interimTile.dispose();
-    }
-
-    for (var i = 0, ii = this.tileKeys.length; i < ii; ++i) {
-      var sourceTileKey = this.tileKeys[i];
-      var sourceTile = this.getTile(sourceTileKey);
-      sourceTile.consumers--;
-
-      if (sourceTile.consumers == 0) {
-        delete this.sourceTiles_[sourceTileKey];
-        sourceTile.dispose();
-      }
-    }
-
-    this.tileKeys.length = 0;
-    this.sourceTiles_ = null;
-    this.loadListenerKeys_.forEach(_events.unlistenByKey);
-    this.loadListenerKeys_.length = 0;
-    this.sourceTileListenerKeys_.forEach(_events.unlistenByKey);
-    this.sourceTileListenerKeys_.length = 0;
-    Tile.prototype.disposeInternal.call(this);
-  };
-  /**
-   * @param {import("./layer/Layer.js").default} layer Layer.
-   * @return {CanvasRenderingContext2D} The rendering context.
-   */
-
-
-  VectorImageTile.prototype.getContext = function getContext(layer) {
-    var key = (0, _util.getUid)(layer);
-
-    if (!(key in this.context_)) {
-      this.context_[key] = (0, _dom.createCanvasContext2D)();
-    }
-
-    return this.context_[key];
-  };
-  /**
-   * Get the Canvas for this tile.
-   * @param {import("./layer/Layer.js").default} layer Layer.
-   * @return {HTMLCanvasElement} Canvas.
-   */
-
-
-  VectorImageTile.prototype.getImage = function getImage(layer) {
-    return this.getReplayState(layer).renderedTileRevision == -1 ? null : this.getContext(layer).canvas;
-  };
-  /**
-   * @param {import("./layer/Layer.js").default} layer Layer.
-   * @return {ReplayState} The replay state.
-   */
-
-
-  VectorImageTile.prototype.getReplayState = function getReplayState(layer) {
-    var key = (0, _util.getUid)(layer);
-
-    if (!(key in this.replayState_)) {
-      this.replayState_[key] = {
-        dirty: false,
-        renderedRenderOrder: null,
-        renderedRevision: -1,
-        renderedTileRevision: -1
-      };
-    }
-
-    return this.replayState_[key];
-  };
-  /**
-   * @inheritDoc
-   */
-
-
-  VectorImageTile.prototype.getKey = function getKey() {
-    return this.tileKeys.join('/') + '-' + this.sourceRevision_;
-  };
-  /**
-   * @param {string} tileKey Key (tileCoord) of the source tile.
-   * @return {import("./VectorTile.js").default} Source tile.
-   */
-
-
-  VectorImageTile.prototype.getTile = function getTile(tileKey) {
-    return this.sourceTiles_[tileKey];
-  };
-  /**
-   * @inheritDoc
-   */
-
-
-  VectorImageTile.prototype.load = function load() {
-    // Source tiles with LOADED state - we just count them because once they are
-    // loaded, we're no longer listening to state changes.
-    var leftToLoad = 0; // Source tiles with ERROR state - we track them because they can still have
-    // an ERROR state after another load attempt.
-
-    var errorSourceTiles = {};
-
-    if (this.state == _TileState.default.IDLE) {
-      this.setState(_TileState.default.LOADING);
-    }
-
-    if (this.state == _TileState.default.LOADING) {
-      this.tileKeys.forEach(function (sourceTileKey) {
-        var sourceTile = this.getTile(sourceTileKey);
-
-        if (sourceTile.state == _TileState.default.IDLE) {
-          sourceTile.setLoader(this.loader_);
-          sourceTile.load();
-        }
-
-        if (sourceTile.state == _TileState.default.LOADING) {
-          var key = (0, _events.listen)(sourceTile, _EventType.default.CHANGE, function (e) {
-            var state = sourceTile.getState();
-
-            if (state == _TileState.default.LOADED || state == _TileState.default.ERROR) {
-              var uid = (0, _util.getUid)(sourceTile);
-
-              if (state == _TileState.default.ERROR) {
-                errorSourceTiles[uid] = true;
-              } else {
-                --leftToLoad;
-                delete errorSourceTiles[uid];
-              }
-
-              if (leftToLoad - Object.keys(errorSourceTiles).length == 0) {
-                this.finishLoading_();
-              }
-            }
-          }.bind(this));
-          this.loadListenerKeys_.push(key);
-          ++leftToLoad;
-        }
-      }.bind(this));
-    }
-
-    if (leftToLoad - Object.keys(errorSourceTiles).length == 0) {
-      setTimeout(this.finishLoading_.bind(this), 0);
-    }
-  };
-  /**
-   * @private
-   */
-
-
-  VectorImageTile.prototype.finishLoading_ = function finishLoading_() {
-    var loaded = this.tileKeys.length;
-    var empty = 0;
-
-    for (var i = loaded - 1; i >= 0; --i) {
-      var state = this.getTile(this.tileKeys[i]).getState();
-
-      if (state != _TileState.default.LOADED) {
-        --loaded;
-      }
-
-      if (state == _TileState.default.EMPTY) {
-        ++empty;
-      }
-    }
-
-    if (loaded == this.tileKeys.length) {
-      this.loadListenerKeys_.forEach(_events.unlistenByKey);
-      this.loadListenerKeys_.length = 0;
-      this.setState(_TileState.default.LOADED);
-    } else {
-      this.setState(empty == this.tileKeys.length ? _TileState.default.EMPTY : _TileState.default.ERROR);
-    }
-  };
-
-  return VectorImageTile;
-}(_Tile.default);
-
-var _default = VectorImageTile;
-/**
- * Sets the loader for a tile.
- * @param {import("./VectorTile.js").default} tile Vector tile.
- * @param {string} url URL.
- */
-
-exports.default = _default;
-
-function defaultLoadFunction(tile, url) {
-  var loader = (0, _featureloader.loadFeaturesXhr)(url, tile.getFormat(), tile.onLoad.bind(tile), tile.onError.bind(tile));
-  tile.setLoader(loader);
-}
-},{"./util.js":"node_modules/ol/util.js","./Tile.js":"node_modules/ol/Tile.js","./TileState.js":"node_modules/ol/TileState.js","./dom.js":"node_modules/ol/dom.js","./events.js":"node_modules/ol/events.js","./extent.js":"node_modules/ol/extent.js","./events/EventType.js":"node_modules/ol/events/EventType.js","./featureloader.js":"node_modules/ol/featureloader.js","./functions.js":"node_modules/ol/functions.js"}],"node_modules/ol/VectorTile.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _util = require("./util.js");
-
-var _Tile = _interopRequireDefault(require("./Tile.js"));
-
-var _TileState = _interopRequireDefault(require("./TileState.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/VectorTile
- */
-
-/**
- * @const
- * @type {import("./extent.js").Extent}
- */
-var DEFAULT_EXTENT = [0, 0, 4096, 4096];
-
-var VectorTile =
-/*@__PURE__*/
-function (Tile) {
-  function VectorTile(tileCoord, state, src, format, tileLoadFunction, opt_options) {
-    Tile.call(this, tileCoord, state, opt_options);
-    /**
-     * @type {number}
-     */
-
-    this.consumers = 0;
-    /**
-     * @private
-     * @type {import("./extent.js").Extent}
-     */
-
-    this.extent_ = null;
-    /**
-     * @private
-     * @type {import("./format/Feature.js").default}
-     */
-
-    this.format_ = format;
-    /**
-     * @private
-     * @type {Array<import("./Feature.js").default>}
-     */
-
-    this.features_ = null;
-    /**
-     * @private
-     * @type {import("./featureloader.js").FeatureLoader}
-     */
-
-    this.loader_;
-    /**
-     * Data projection
-     * @private
-     * @type {import("./proj/Projection.js").default}
-     */
-
-    this.projection_ = null;
-    /**
-     * @private
-     * @type {Object<string, import("./render/ReplayGroup.js").default>}
-     */
-
-    this.replayGroups_ = {};
-    /**
-     * @private
-     * @type {import("./Tile.js").LoadFunction}
-     */
-
-    this.tileLoadFunction_ = tileLoadFunction;
-    /**
-     * @private
-     * @type {string}
-     */
-
-    this.url_ = src;
-  }
-
-  if (Tile) VectorTile.__proto__ = Tile;
-  VectorTile.prototype = Object.create(Tile && Tile.prototype);
-  VectorTile.prototype.constructor = VectorTile;
-  /**
-   * @inheritDoc
-   */
-
-  VectorTile.prototype.disposeInternal = function disposeInternal() {
-    this.features_ = null;
-    this.replayGroups_ = {};
-    this.state = _TileState.default.ABORT;
-    this.changed();
-    Tile.prototype.disposeInternal.call(this);
-  };
-  /**
-   * Gets the extent of the vector tile.
-   * @return {import("./extent.js").Extent} The extent.
-   * @api
-   */
-
-
-  VectorTile.prototype.getExtent = function getExtent() {
-    return this.extent_ || DEFAULT_EXTENT;
-  };
-  /**
-   * Get the feature format assigned for reading this tile's features.
-   * @return {import("./format/Feature.js").default} Feature format.
-   * @api
-   */
-
-
-  VectorTile.prototype.getFormat = function getFormat() {
-    return this.format_;
-  };
-  /**
-   * Get the features for this tile. Geometries will be in the projection returned
-   * by {@link module:ol/VectorTile~VectorTile#getProjection}.
-   * @return {Array<import("./Feature.js").FeatureLike>} Features.
-   * @api
-   */
-
-
-  VectorTile.prototype.getFeatures = function getFeatures() {
-    return this.features_;
-  };
-  /**
-   * @inheritDoc
-   */
-
-
-  VectorTile.prototype.getKey = function getKey() {
-    return this.url_;
-  };
-  /**
-   * Get the feature projection of features returned by
-   * {@link module:ol/VectorTile~VectorTile#getFeatures}.
-   * @return {import("./proj/Projection.js").default} Feature projection.
-   * @api
-   */
-
-
-  VectorTile.prototype.getProjection = function getProjection() {
-    return this.projection_;
-  };
-  /**
-   * @param {import("./layer/Layer.js").default} layer Layer.
-   * @param {string} key Key.
-   * @return {import("./render/ReplayGroup.js").default} Replay group.
-   */
-
-
-  VectorTile.prototype.getReplayGroup = function getReplayGroup(layer, key) {
-    return this.replayGroups_[(0, _util.getUid)(layer) + ',' + key];
-  };
-  /**
-   * @inheritDoc
-   */
-
-
-  VectorTile.prototype.load = function load() {
-    if (this.state == _TileState.default.IDLE) {
-      this.setState(_TileState.default.LOADING);
-      this.tileLoadFunction_(this, this.url_);
-      this.loader_(null, NaN, null);
-    }
-  };
-  /**
-   * Handler for successful tile load.
-   * @param {Array<import("./Feature.js").default>} features The loaded features.
-   * @param {import("./proj/Projection.js").default} dataProjection Data projection.
-   * @param {import("./extent.js").Extent} extent Extent.
-   */
-
-
-  VectorTile.prototype.onLoad = function onLoad(features, dataProjection, extent) {
-    this.setProjection(dataProjection);
-    this.setFeatures(features);
-    this.setExtent(extent);
-  };
-  /**
-   * Handler for tile load errors.
-   */
-
-
-  VectorTile.prototype.onError = function onError() {
-    this.setState(_TileState.default.ERROR);
-  };
-  /**
-   * Function for use in an {@link module:ol/source/VectorTile~VectorTile}'s
-   * `tileLoadFunction`. Sets the extent of the vector tile. This is only required
-   * for tiles in projections with `tile-pixels` as units. The extent should be
-   * set to `[0, 0, tilePixelSize, tilePixelSize]`, where `tilePixelSize` is
-   * calculated by multiplying the tile size with the tile pixel ratio. For
-   * sources using {@link module:ol/format/MVT~MVT} as feature format, the
-   * {@link module:ol/format/MVT~MVT#getLastExtent} method will return the correct
-   * extent. The default is `[0, 0, 4096, 4096]`.
-   * @param {import("./extent.js").Extent} extent The extent.
-   * @api
-   */
-
-
-  VectorTile.prototype.setExtent = function setExtent(extent) {
-    this.extent_ = extent;
-  };
-  /**
-   * Function for use in an {@link module:ol/source/VectorTile~VectorTile}'s `tileLoadFunction`.
-   * Sets the features for the tile.
-   * @param {Array<import("./Feature.js").default>} features Features.
-   * @api
-   */
-
-
-  VectorTile.prototype.setFeatures = function setFeatures(features) {
-    this.features_ = features;
-    this.setState(_TileState.default.LOADED);
-  };
-  /**
-   * Function for use in an {@link module:ol/source/VectorTile~VectorTile}'s `tileLoadFunction`.
-   * Sets the projection of the features that were added with
-   * {@link module:ol/VectorTile~VectorTile#setFeatures}.
-   * @param {import("./proj/Projection.js").default} projection Feature projection.
-   * @api
-   */
-
-
-  VectorTile.prototype.setProjection = function setProjection(projection) {
-    this.projection_ = projection;
-  };
-  /**
-   * @param {import("./layer/Layer.js").default} layer Layer.
-   * @param {string} key Key.
-   * @param {import("./render/ReplayGroup.js").default} replayGroup Replay group.
-   */
-
-
-  VectorTile.prototype.setReplayGroup = function setReplayGroup(layer, key, replayGroup) {
-    this.replayGroups_[(0, _util.getUid)(layer) + ',' + key] = replayGroup;
-  };
-  /**
-   * Set the feature loader for reading this tile's features.
-   * @param {import("./featureloader.js").FeatureLoader} loader Feature loader.
-   * @api
-   */
-
-
-  VectorTile.prototype.setLoader = function setLoader(loader) {
-    this.loader_ = loader;
-  };
-
-  return VectorTile;
-}(_Tile.default);
-
-var _default = VectorTile;
-exports.default = _default;
-},{"./util.js":"node_modules/ol/util.js","./Tile.js":"node_modules/ol/Tile.js","./TileState.js":"node_modules/ol/TileState.js"}],"node_modules/ol/webgl/Shader.js":[function(require,module,exports) {
+},{"./control/Attribution.js":"node_modules/ol/control/Attribution.js","./control/Control.js":"node_modules/ol/control/Control.js","./control/FullScreen.js":"node_modules/ol/control/FullScreen.js","./control/MousePosition.js":"node_modules/ol/control/MousePosition.js","./control/OverviewMap.js":"node_modules/ol/control/OverviewMap.js","./control/Rotate.js":"node_modules/ol/control/Rotate.js","./control/ScaleLine.js":"node_modules/ol/control/ScaleLine.js","./control/Zoom.js":"node_modules/ol/control/Zoom.js","./control/ZoomSlider.js":"node_modules/ol/control/ZoomSlider.js","./control/ZoomToExtent.js":"node_modules/ol/control/ZoomToExtent.js","./control/util.js":"node_modules/ol/control/util.js"}],"node_modules/ol/webgl/Shader.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59309,169 +59309,7 @@ var _WebGLMap = _interopRequireDefault(require("./WebGLMap.js"));
 var _util = require("./util.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./AssertionError.js":"node_modules/ol/AssertionError.js","./Collection.js":"node_modules/ol/Collection.js","./Disposable.js":"node_modules/ol/Disposable.js","./Feature.js":"node_modules/ol/Feature.js","./Geolocation.js":"node_modules/ol/Geolocation.js","./Graticule.js":"node_modules/ol/Graticule.js","./Image.js":"node_modules/ol/Image.js","./ImageBase.js":"node_modules/ol/ImageBase.js","./ImageCanvas.js":"node_modules/ol/ImageCanvas.js","./ImageTile.js":"node_modules/ol/ImageTile.js","./Kinetic.js":"node_modules/ol/Kinetic.js","./Map.js":"node_modules/ol/Map.js","./MapBrowserEvent.js":"node_modules/ol/MapBrowserEvent.js","./MapBrowserEventHandler.js":"node_modules/ol/MapBrowserEventHandler.js","./MapBrowserPointerEvent.js":"node_modules/ol/MapBrowserPointerEvent.js","./MapEvent.js":"node_modules/ol/MapEvent.js","./Object.js":"node_modules/ol/Object.js","./Observable.js":"node_modules/ol/Observable.js","./Overlay.js":"node_modules/ol/Overlay.js","./PluggableMap.js":"node_modules/ol/PluggableMap.js","./Tile.js":"node_modules/ol/Tile.js","./TileCache.js":"node_modules/ol/TileCache.js","./TileQueue.js":"node_modules/ol/TileQueue.js","./TileRange.js":"node_modules/ol/TileRange.js","./VectorImageTile.js":"node_modules/ol/VectorImageTile.js","./VectorTile.js":"node_modules/ol/VectorTile.js","./View.js":"node_modules/ol/View.js","./WebGLMap.js":"node_modules/ol/WebGLMap.js","./util.js":"node_modules/ol/util.js"}],"node_modules/ol/layer/TileProperty.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/**
- * @module ol/layer/TileProperty
- */
-
-/**
- * @enum {string}
- */
-var _default = {
-  PRELOAD: 'preload',
-  USE_INTERIM_TILES_ON_ERROR: 'useInterimTilesOnError'
-};
-exports.default = _default;
-},{}],"node_modules/ol/layer/Tile.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _LayerType = _interopRequireDefault(require("../LayerType.js"));
-
-var _Layer = _interopRequireDefault(require("./Layer.js"));
-
-var _TileProperty = _interopRequireDefault(require("./TileProperty.js"));
-
-var _obj = require("../obj.js");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @module ol/layer/Tile
- */
-
-/**
- * @typedef {Object} Options
- * @property {number} [opacity=1] Opacity (0, 1).
- * @property {boolean} [visible=true] Visibility.
- * @property {import("../extent.js").Extent} [extent] The bounding extent for layer rendering.  The layer will not be
- * rendered outside of this extent.
- * @property {number} [zIndex] The z-index for layer rendering.  At rendering time, the layers
- * will be ordered, first by Z-index and then by position. When `undefined`, a `zIndex` of 0 is assumed
- * for layers that are added to the map's `layers` collection, or `Infinity` when the layer's `setMap()`
- * method was used.
- * @property {number} [minResolution] The minimum resolution (inclusive) at which this layer will be
- * visible.
- * @property {number} [maxResolution] The maximum resolution (exclusive) below which this layer will
- * be visible.
- * @property {number} [preload=0] Preload. Load low-resolution tiles up to `preload` levels. `0`
- * means no preloading.
- * @property {import("../source/Tile.js").default} [source] Source for this layer.
- * @property {import("../PluggableMap.js").default} [map] Sets the layer as overlay on a map. The map will not manage
- * this layer in its layers collection, and the layer will be rendered on top. This is useful for
- * temporary layers. The standard way to add a layer to a map and have it managed by the map is to
- * use {@link module:ol/Map#addLayer}.
- * @property {boolean} [useInterimTilesOnError=true] Use interim tiles on error.
- */
-
-/**
- * @classdesc
- * For layer sources that provide pre-rendered, tiled images in grids that are
- * organized by zoom levels for specific resolutions.
- * Note that any property set in the options is set as a {@link module:ol/Object~BaseObject}
- * property on the layer object; for example, setting `title: 'My Title'` in the
- * options means that `title` is observable, and has get/set accessors.
- *
- * @api
- */
-var TileLayer =
-/*@__PURE__*/
-function (Layer) {
-  function TileLayer(opt_options) {
-    var options = opt_options ? opt_options : {};
-    var baseOptions = (0, _obj.assign)({}, options);
-    delete baseOptions.preload;
-    delete baseOptions.useInterimTilesOnError;
-    Layer.call(this, baseOptions);
-    this.setPreload(options.preload !== undefined ? options.preload : 0);
-    this.setUseInterimTilesOnError(options.useInterimTilesOnError !== undefined ? options.useInterimTilesOnError : true);
-    /**
-    * The layer type.
-    * @protected
-    * @type {import("../LayerType.js").default}
-    */
-
-    this.type = _LayerType.default.TILE;
-  }
-
-  if (Layer) TileLayer.__proto__ = Layer;
-  TileLayer.prototype = Object.create(Layer && Layer.prototype);
-  TileLayer.prototype.constructor = TileLayer;
-  /**
-  * Return the level as number to which we will preload tiles up to.
-  * @return {number} The level to preload tiles up to.
-  * @observable
-  * @api
-  */
-
-  TileLayer.prototype.getPreload = function getPreload() {
-    return (
-      /** @type {number} */
-      this.get(_TileProperty.default.PRELOAD)
-    );
-  };
-  /**
-  * Set the level as number to which we will preload tiles up to.
-  * @param {number} preload The level to preload tiles up to.
-  * @observable
-  * @api
-  */
-
-
-  TileLayer.prototype.setPreload = function setPreload(preload) {
-    this.set(_TileProperty.default.PRELOAD, preload);
-  };
-  /**
-  * Whether we use interim tiles on error.
-  * @return {boolean} Use interim tiles on error.
-  * @observable
-  * @api
-  */
-
-
-  TileLayer.prototype.getUseInterimTilesOnError = function getUseInterimTilesOnError() {
-    return (
-      /** @type {boolean} */
-      this.get(_TileProperty.default.USE_INTERIM_TILES_ON_ERROR)
-    );
-  };
-  /**
-  * Set whether we use interim tiles on error.
-  * @param {boolean} useInterimTilesOnError Use interim tiles on error.
-  * @observable
-  * @api
-  */
-
-
-  TileLayer.prototype.setUseInterimTilesOnError = function setUseInterimTilesOnError(useInterimTilesOnError) {
-    this.set(_TileProperty.default.USE_INTERIM_TILES_ON_ERROR, useInterimTilesOnError);
-  };
-
-  return TileLayer;
-}(_Layer.default);
-/**
- * Return the associated {@link module:ol/source/Tile tilesource} of the layer.
- * @function
- * @return {import("../source/Tile.js").default} Source.
- * @api
- */
-
-
-TileLayer.prototype.getSource;
-var _default = TileLayer;
-exports.default = _default;
-},{"../LayerType.js":"node_modules/ol/LayerType.js","./Layer.js":"node_modules/ol/layer/Layer.js","./TileProperty.js":"node_modules/ol/layer/TileProperty.js","../obj.js":"node_modules/ol/obj.js"}],"node_modules/ol/reproj.js":[function(require,module,exports) {
+},{"./AssertionError.js":"node_modules/ol/AssertionError.js","./Collection.js":"node_modules/ol/Collection.js","./Disposable.js":"node_modules/ol/Disposable.js","./Feature.js":"node_modules/ol/Feature.js","./Geolocation.js":"node_modules/ol/Geolocation.js","./Graticule.js":"node_modules/ol/Graticule.js","./Image.js":"node_modules/ol/Image.js","./ImageBase.js":"node_modules/ol/ImageBase.js","./ImageCanvas.js":"node_modules/ol/ImageCanvas.js","./ImageTile.js":"node_modules/ol/ImageTile.js","./Kinetic.js":"node_modules/ol/Kinetic.js","./Map.js":"node_modules/ol/Map.js","./MapBrowserEvent.js":"node_modules/ol/MapBrowserEvent.js","./MapBrowserEventHandler.js":"node_modules/ol/MapBrowserEventHandler.js","./MapBrowserPointerEvent.js":"node_modules/ol/MapBrowserPointerEvent.js","./MapEvent.js":"node_modules/ol/MapEvent.js","./Object.js":"node_modules/ol/Object.js","./Observable.js":"node_modules/ol/Observable.js","./Overlay.js":"node_modules/ol/Overlay.js","./PluggableMap.js":"node_modules/ol/PluggableMap.js","./Tile.js":"node_modules/ol/Tile.js","./TileCache.js":"node_modules/ol/TileCache.js","./TileQueue.js":"node_modules/ol/TileQueue.js","./TileRange.js":"node_modules/ol/TileRange.js","./VectorImageTile.js":"node_modules/ol/VectorImageTile.js","./VectorTile.js":"node_modules/ol/VectorTile.js","./View.js":"node_modules/ol/View.js","./WebGLMap.js":"node_modules/ol/WebGLMap.js","./util.js":"node_modules/ol/util.js"}],"node_modules/ol/reproj.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -61328,52 +61166,284 @@ function (TileImage) {
 
 var _default = XYZ;
 exports.default = _default;
-},{"./TileImage.js":"node_modules/ol/source/TileImage.js","../tilegrid.js":"node_modules/ol/tilegrid.js"}],"index.js":[function(require,module,exports) {
+},{"./TileImage.js":"node_modules/ol/source/TileImage.js","../tilegrid.js":"node_modules/ol/tilegrid.js"}],"node_modules/ol/source/OSM.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = exports.ATTRIBUTION = void 0;
+
+var _XYZ = _interopRequireDefault(require("./XYZ.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/source/OSM
+ */
+
+/**
+ * The attribution containing a link to the OpenStreetMap Copyright and License
+ * page.
+ * @const
+ * @type {string}
+ * @api
+ */
+var ATTRIBUTION = '&#169; ' + '<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' + 'contributors.';
+/**
+ * @typedef {Object} Options
+ * @property {import("./Source.js").AttributionLike} [attributions] Attributions.
+ * @property {number} [cacheSize=2048] Cache size.
+ * @property {null|string} [crossOrigin] The `crossOrigin` attribute for loaded images.  Note that
+ * you must provide a `crossOrigin` value if you are using the WebGL renderer or if you want to
+ * access pixel data with the Canvas renderer.  See
+ * https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image for more detail.
+ * @property {number} [maxZoom=19] Max zoom.
+ * @property {boolean} [opaque=true] Whether the layer is opaque.
+ * @property {number} [reprojectionErrorThreshold=1.5] Maximum allowed reprojection error (in pixels).
+ * Higher values can increase reprojection performance, but decrease precision.
+ * @property {import("../Tile.js").LoadFunction} [tileLoadFunction] Optional function to load a tile given a URL. The default is
+ * ```js
+ * function(imageTile, src) {
+ *   imageTile.getImage().src = src;
+ * };
+ * ```
+ * @property {string} [url='https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'] URL template.
+ * Must include `{x}`, `{y}` or `{-y}`, and `{z}` placeholders.
+ * @property {boolean} [wrapX=true] Whether to wrap the world horizontally.
+ */
+
+/**
+ * @classdesc
+ * Layer source for the OpenStreetMap tile server.
+ * @api
+ */
+
+exports.ATTRIBUTION = ATTRIBUTION;
+
+var OSM =
+/*@__PURE__*/
+function (XYZ) {
+  function OSM(opt_options) {
+    var options = opt_options || {};
+    var attributions;
+
+    if (options.attributions !== undefined) {
+      attributions = options.attributions;
+    } else {
+      attributions = [ATTRIBUTION];
+    }
+
+    var crossOrigin = options.crossOrigin !== undefined ? options.crossOrigin : 'anonymous';
+    var url = options.url !== undefined ? options.url : 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    XYZ.call(this, {
+      attributions: attributions,
+      cacheSize: options.cacheSize,
+      crossOrigin: crossOrigin,
+      opaque: options.opaque !== undefined ? options.opaque : true,
+      maxZoom: options.maxZoom !== undefined ? options.maxZoom : 19,
+      reprojectionErrorThreshold: options.reprojectionErrorThreshold,
+      tileLoadFunction: options.tileLoadFunction,
+      url: url,
+      wrapX: options.wrapX,
+      attributionsCollapsible: false
+    });
+  }
+
+  if (XYZ) OSM.__proto__ = XYZ;
+  OSM.prototype = Object.create(XYZ && XYZ.prototype);
+  OSM.prototype.constructor = OSM;
+  return OSM;
+}(_XYZ.default);
+
+var _default = OSM;
+exports.default = _default;
+},{"./XYZ.js":"node_modules/ol/source/XYZ.js"}],"node_modules/ol/layer/TileProperty.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * @module ol/layer/TileProperty
+ */
+
+/**
+ * @enum {string}
+ */
+var _default = {
+  PRELOAD: 'preload',
+  USE_INTERIM_TILES_ON_ERROR: 'useInterimTilesOnError'
+};
+exports.default = _default;
+},{}],"node_modules/ol/layer/Tile.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _LayerType = _interopRequireDefault(require("../LayerType.js"));
+
+var _Layer = _interopRequireDefault(require("./Layer.js"));
+
+var _TileProperty = _interopRequireDefault(require("./TileProperty.js"));
+
+var _obj = require("../obj.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/layer/Tile
+ */
+
+/**
+ * @typedef {Object} Options
+ * @property {number} [opacity=1] Opacity (0, 1).
+ * @property {boolean} [visible=true] Visibility.
+ * @property {import("../extent.js").Extent} [extent] The bounding extent for layer rendering.  The layer will not be
+ * rendered outside of this extent.
+ * @property {number} [zIndex] The z-index for layer rendering.  At rendering time, the layers
+ * will be ordered, first by Z-index and then by position. When `undefined`, a `zIndex` of 0 is assumed
+ * for layers that are added to the map's `layers` collection, or `Infinity` when the layer's `setMap()`
+ * method was used.
+ * @property {number} [minResolution] The minimum resolution (inclusive) at which this layer will be
+ * visible.
+ * @property {number} [maxResolution] The maximum resolution (exclusive) below which this layer will
+ * be visible.
+ * @property {number} [preload=0] Preload. Load low-resolution tiles up to `preload` levels. `0`
+ * means no preloading.
+ * @property {import("../source/Tile.js").default} [source] Source for this layer.
+ * @property {import("../PluggableMap.js").default} [map] Sets the layer as overlay on a map. The map will not manage
+ * this layer in its layers collection, and the layer will be rendered on top. This is useful for
+ * temporary layers. The standard way to add a layer to a map and have it managed by the map is to
+ * use {@link module:ol/Map#addLayer}.
+ * @property {boolean} [useInterimTilesOnError=true] Use interim tiles on error.
+ */
+
+/**
+ * @classdesc
+ * For layer sources that provide pre-rendered, tiled images in grids that are
+ * organized by zoom levels for specific resolutions.
+ * Note that any property set in the options is set as a {@link module:ol/Object~BaseObject}
+ * property on the layer object; for example, setting `title: 'My Title'` in the
+ * options means that `title` is observable, and has get/set accessors.
+ *
+ * @api
+ */
+var TileLayer =
+/*@__PURE__*/
+function (Layer) {
+  function TileLayer(opt_options) {
+    var options = opt_options ? opt_options : {};
+    var baseOptions = (0, _obj.assign)({}, options);
+    delete baseOptions.preload;
+    delete baseOptions.useInterimTilesOnError;
+    Layer.call(this, baseOptions);
+    this.setPreload(options.preload !== undefined ? options.preload : 0);
+    this.setUseInterimTilesOnError(options.useInterimTilesOnError !== undefined ? options.useInterimTilesOnError : true);
+    /**
+    * The layer type.
+    * @protected
+    * @type {import("../LayerType.js").default}
+    */
+
+    this.type = _LayerType.default.TILE;
+  }
+
+  if (Layer) TileLayer.__proto__ = Layer;
+  TileLayer.prototype = Object.create(Layer && Layer.prototype);
+  TileLayer.prototype.constructor = TileLayer;
+  /**
+  * Return the level as number to which we will preload tiles up to.
+  * @return {number} The level to preload tiles up to.
+  * @observable
+  * @api
+  */
+
+  TileLayer.prototype.getPreload = function getPreload() {
+    return (
+      /** @type {number} */
+      this.get(_TileProperty.default.PRELOAD)
+    );
+  };
+  /**
+  * Set the level as number to which we will preload tiles up to.
+  * @param {number} preload The level to preload tiles up to.
+  * @observable
+  * @api
+  */
+
+
+  TileLayer.prototype.setPreload = function setPreload(preload) {
+    this.set(_TileProperty.default.PRELOAD, preload);
+  };
+  /**
+  * Whether we use interim tiles on error.
+  * @return {boolean} Use interim tiles on error.
+  * @observable
+  * @api
+  */
+
+
+  TileLayer.prototype.getUseInterimTilesOnError = function getUseInterimTilesOnError() {
+    return (
+      /** @type {boolean} */
+      this.get(_TileProperty.default.USE_INTERIM_TILES_ON_ERROR)
+    );
+  };
+  /**
+  * Set whether we use interim tiles on error.
+  * @param {boolean} useInterimTilesOnError Use interim tiles on error.
+  * @observable
+  * @api
+  */
+
+
+  TileLayer.prototype.setUseInterimTilesOnError = function setUseInterimTilesOnError(useInterimTilesOnError) {
+    this.set(_TileProperty.default.USE_INTERIM_TILES_ON_ERROR, useInterimTilesOnError);
+  };
+
+  return TileLayer;
+}(_Layer.default);
+/**
+ * Return the associated {@link module:ol/source/Tile tilesource} of the layer.
+ * @function
+ * @return {import("../source/Tile.js").default} Source.
+ * @api
+ */
+
+
+TileLayer.prototype.getSource;
+var _default = TileLayer;
+exports.default = _default;
+},{"../LayerType.js":"node_modules/ol/LayerType.js","./Layer.js":"node_modules/ol/layer/Layer.js","./TileProperty.js":"node_modules/ol/layer/TileProperty.js","../obj.js":"node_modules/ol/obj.js"}],"index.js":[function(require,module,exports) {
 "use strict";
 
 require("ol/ol.css");
 
-var _control = require("ol/control");
-
 var _ol2 = require("ol");
+
+var _OSM = _interopRequireDefault(require("ol/source/OSM"));
 
 var _Tile = _interopRequireDefault(require("ol/layer/Tile"));
 
-var _XYZ = _interopRequireDefault(require("ol/source/XYZ"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var u = new URL(window.location.href); // url
-
-var t = u.searchParams.get('url');
-var url = "".concat(t, "/{z}/{x}/{y}.jpg"); // ppt: pixel per tile, default 256
-
-var ppt = +u.searchParams.get('ppt') || 256; // mz, default 5
-
-var maxZoom = +u.searchParams.get('mz') || 4; // zoom to fit window
-
-var mapDiv = document.getElementById('map');
-var divWidth = mapDiv.clientWidth;
-var divHeight = mapDiv.clientHeight;
-var shortSize = Math.min(divWidth, divHeight);
-var fitZoom = Math.min(maxZoom, Math.floor(Math.log(shortSize / ppt) / Math.log(2)));
 var map = new _ol2.Map({
   target: 'map',
   layers: [new _Tile.default({
-    source: new _XYZ.default({
-      url: url,
-      wrapX: false
-    })
+    source: new _OSM.default()
   })],
-  controls: (0, _control.defaults)().extend([new _control.FullScreen(), new _control.OverviewMap()]),
   view: new _ol2.View({
     center: [0, 0],
-    zoom: fitZoom,
-    maxZoom: maxZoom
+    zoom: 0
   })
 });
-map.render();
-},{"ol/ol.css":"node_modules/ol/ol.css","ol/control":"node_modules/ol/control.js","ol":"node_modules/ol/index.js","ol/layer/Tile":"node_modules/ol/layer/Tile.js","ol/source/XYZ":"node_modules/ol/source/XYZ.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"ol/ol.css":"node_modules/ol/ol.css","ol":"node_modules/ol/index.js","ol/source/OSM":"node_modules/ol/source/OSM.js","ol/layer/Tile":"node_modules/ol/layer/Tile.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -61400,7 +61470,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57298" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50635" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
